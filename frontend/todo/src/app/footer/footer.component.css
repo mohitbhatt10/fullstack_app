@@ -1,0 +1,9 @@
+.footer {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #343a40; /* Dark brown background color, you can change this */
+    color: white; /* Text color, you can change this */
+    padding: 10px 0;
+  }

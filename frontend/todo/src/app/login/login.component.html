@@ -1,0 +1,26 @@
+<div class="container mt-5">
+  <h1>Login</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="alert alert-warning" *ngIf="invalidLogin">{{ errorMessage }}</div>
+
+      <form>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username:</label>
+          <input type="text" id="username" name="username" class="form-control" [(ngModel)]="username">
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input type="password" id="password" name="password" class="form-control" [(ngModel)]="password">
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="button" (click)="handleJWTAuthLogin()" class="btn btn-success">Login</button>
+          <button type="button" (click)="newUserRegistration()" class="btn btn-outline-primary">Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
