@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../service/data/user.service';
+import { BACKEND_CONNECTION_ERROR_MESSAGE } from '../app.constants';
 
 
 @Component({
@@ -37,10 +38,14 @@ export class UserRegistrationComponent {
         error => {
           console.error('Error during user registration:', error);
           this.isUserRegistrationSuccessful = false;
-          this.userRegistrationBackendError = error.error.errorMessage;
+          if(error.error.errorMessage){
+            this.userRegistrationBackendError = error.error.errorMessage;
+          } else{ 
+            this.userRegistrationBackendError =  BACKEND_CONNECTION_ERROR_MESSAGE;
+          }
           console.log(this.userRegistrationBackendError);
         }
       );
     }
   }
-}
+} 

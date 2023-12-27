@@ -1,6 +1,16 @@
 <h1> Todo </h1>
 
-<div class="alert alert-success" *ngIf='message'>{{message}}</div>
+<div class="alert alert-success" *ngIf="message">{{message}}</div>
+
+<!-- Dropdown for filter selection -->
+<div class="form-group mt-3">
+  <label for="filterSelect">Filter Todos based on completion status: </label>
+  <select class="form-control-sm" id="filterSelect" [(ngModel)]="filterType" (change)="applyFilter()">
+    <option value="All">All</option>
+    <option value="Completed">Completed</option>
+    <option value="Pending">Pending</option>
+  </select>
+</div>
 
 <div class="table-responsive">
   <table class="table table-bordered table-striped mb-0">
@@ -8,27 +18,26 @@
       <tr>
         <th>Description</th>
         <th>Target Date</th>
-        <th>is Completed?</th>
+        <th>Is Completed?</th>
         <th>Update</th>
         <th>Delete</th>
       </tr>
     </thead>
     <tbody>
-      <!--   for (Todo todo: todos) {  -->
-              <tr *ngFor="let todo of todos">
-                <td>{{todo.description}}</td>
-                <td>{{todo.targetDate | date | uppercase}}</td>
-                <td>{{todo.done}}</td>
-                <td><button (click)="updateTodo(todo.id)" class="btn btn-success">Update</button></td>
-                <td><button (click)="deleteTodo(todo.id)" class="btn btn-warning">Delete</button></td>
-              </tr>
-      <!-- } -->
+      <tr *ngFor="let todo of filteredTodos">
+        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.description}}</td>
+        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.targetDate | date | uppercase}}</td>
+        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.done}}</td>
+        <td>
+          <button (click)="updateTodo(todo.id)" class="btn btn-success" [disabled]="isActionsDisabled(todo)">Update</button>
+        </td>
+        <td>
+          <button (click)="deleteTodo(todo.id)" class="btn btn-warning" [disabled]="isActionsDisabled(todo)">Delete</button>
+        </td>
+      </tr>
     </tbody>
-
   </table>
-
   <div class="row">
-      <button (click)="addTodo()" class="btn btn-success">Add</button>
+    <button (click)="addTodo()" class="btn btn-success">Add</button>
   </div>
-
 </div>

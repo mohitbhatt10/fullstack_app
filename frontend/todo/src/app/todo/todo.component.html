@@ -8,19 +8,22 @@
   <form (ngSubmit)="!todoForm.invalid && saveTodo()" #todoForm="ngForm">
     <fieldset class="form-group">
       <label>Description</label>
-      <input type="text" #description="ngModel" 
-            [(ngModel)]="todo.description" class="form-control" 
-                name="description" required="required" minlength="5">
+      <input type="text" #description="ngModel" [(ngModel)]="todo.description" class="form-control" name="description" required minlength="5">
     </fieldset>
-
+  
     <fieldset class="form-group">
-        <label>Target Date</label>
-        <input type="date" #targetDate="ngModel"
-        [ngModel]="todo.targetDate | date:'yyyy-MM-dd' "
-        (ngModelChange)="todo.targetDate = $event"
-        class="form-control" name="targetDate" required="required" >
+      <label>Target Date</label>
+      <input type="date" #targetDate="ngModel" [ngModel]="todo.targetDate | date:'yyyy-MM-dd' "
+      (ngModelChange)="todo.targetDate = $event" class="form-control" name="targetDate" required>
     </fieldset>
-
+  
+    <fieldset class="form-group">
+      <label>Mark Completed</label>
+      <select [(ngModel)]="selectedStatus" (ngModelChange)="onStatusChange()" class="form-control" name="status">
+        <option *ngFor="let option of statusOptions" [ngValue]="option.value">{{option.label}}</option>
+      </select>
+    </fieldset>
+  
     <button type="submit" class="btn btn-success">Save</button>
   </form>  
 </div>

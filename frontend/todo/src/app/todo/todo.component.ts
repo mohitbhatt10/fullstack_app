@@ -14,6 +14,13 @@ export class TodoComponent implements OnInit {
   id: number = 0;
   todo: Todo = new Todo(this.id, '', false, new Date());
   username : string  = '' ; 
+  selectedStatus: boolean = false; // Introduce the selectedStatus variable
+
+  // Define the options for the 'Mark Completed' dropdown
+  statusOptions: { value: boolean; label: string }[] = [
+    { value: false, label: 'No' },
+    { value: true, label: 'Yes' }
+  ];
 
   constructor(
     private todoService: TodoDataService,
@@ -36,7 +43,10 @@ export class TodoComponent implements OnInit {
     if (this.id != -1) {
       this.todoService.retrieveTodo(this.username, this.id)
         .subscribe(
-          data => this.todo = data
+          data => {
+            this.todo = data;
+            this.selectedStatus = this.todo.done; // Set the initial value for the dropdown
+          }
         )
     }
   }
@@ -59,6 +69,11 @@ export class TodoComponent implements OnInit {
           }
         )
     }
+  }
+
+  // Function to handle the 'Mark Completed' dropdown change
+  onStatusChange() {
+    this.todo.done = this.selectedStatus;
   }
 
 }

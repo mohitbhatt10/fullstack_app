@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
           error => {
             console.log(error);
             if (error.name === 'HttpErrorResponse') {
-              if(error.status === 401){
+              if(error.status === 401 || error.error.message === 'Bad credentials'){
                 this.errorMessage = AUTHENTICATION_ERROR_MESSAGE;
               } else {
                 this.errorMessage = BACKEND_CONNECTION_ERROR_MESSAGE;
