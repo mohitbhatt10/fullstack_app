@@ -24,6 +24,9 @@ export class ListTodosComponent implements OnInit {
   username: string = '';
   message: string = '';
   filterType: string = 'All'; // Default filter type
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 5;
 
   constructor(
     private todoService: TodoDataService,
@@ -104,5 +107,10 @@ export class ListTodosComponent implements OnInit {
     } else {
       return '#E4ED13';
     }
+  }
+
+  // Pagination event handler
+  pageChanged(event: any): void {
+    this.currentPage = event;
   }
 }

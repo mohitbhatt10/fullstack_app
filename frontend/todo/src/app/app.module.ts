@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import ReactiveFormsModule
+import { NgxPaginationModule } from 'ngx-pagination';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -35,6 +36,7 @@ import { UserRegistrationComponent } from './user-registration/user-registration
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
+    NgxPaginationModule,
     ReactiveFormsModule // Add ReactiveFormsModule to the imports array
   ],
   providers: [
