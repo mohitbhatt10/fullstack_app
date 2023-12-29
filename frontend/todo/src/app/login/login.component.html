@@ -1,7 +1,11 @@
-<div class="container mt-5">
-  <h1>Login</h1>
-
-  <div class="card">
+<div class="h-100 d-flex align-items-center justify-content-center">
+  <div class="card" style="width: 18rem;">
+    <div class="card-header text-center bg-dark text-white">
+      <div class="d-flex align-items-center">
+           <h5 class="mx-auto w-100">Login</h5>
+           <i class="fa fa-question-circle ml-auto"></i>
+      </div>
+    </div>
     <div class="card-body">
       <div class="alert alert-warning" *ngIf="invalidLogin">{{ errorMessage }}</div>
 
