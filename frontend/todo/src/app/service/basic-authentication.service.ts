@@ -4,8 +4,9 @@ import { Injectable } from '@angular/core';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from './error-handler.service';
 
-export const TOKEN = 'token'
-export const AUTHENTICATED_USER = 'authenticaterUser'
+export const TOKEN = 'token';
+export const AUTHENTICATED_USER = 'authenticaterUser';
+export const ROLES = 'ROLES';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,7 @@ export class BasicAuthenticationService {
         data => {
           sessionStorage.setItem(AUTHENTICATED_USER, username);
           sessionStorage.setItem(TOKEN, `Bearer ${data.token}`);
+          sessionStorage.setItem(ROLES, JSON.parse(window.atob(data.token.split('.')[1])).scope);
           return data;
         },
         catchError((error) => {

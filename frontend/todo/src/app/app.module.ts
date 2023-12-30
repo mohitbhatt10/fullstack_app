@@ -17,6 +17,7 @@ import { FooterComponent } from './footer/footer.component';
 import { LogoutComponent } from './logout/logout.component';
 import { TodoComponent } from './todo/todo.component';
 import { UserRegistrationComponent } from './user-registration/user-registration.component';
+import { ListUsersComponent } from './list-users/list-users.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { UserRegistrationComponent } from './user-registration/user-registration
     FooterComponent,
     LogoutComponent,
     TodoComponent,
-    UserRegistrationComponent
+    UserRegistrationComponent,
+    ListUsersComponent
   ],
   imports: [
     BrowserModule,

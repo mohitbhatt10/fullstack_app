@@ -8,6 +8,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { ErrorComponent } from './error/error.component';
 import { UserRegistrationComponent } from './user-registration/user-registration.component';
+import { ListUsersComponent } from './list-users/list-users.component';
 
 // welcome 
 const routes: Routes = [
@@ -18,6 +19,7 @@ const routes: Routes = [
   { path: 'logout', component: LogoutComponent, canActivate:[RouteGuardService] },
   { path: 'todos/:id', component: TodoComponent, canActivate:[RouteGuardService] },
   { path: 'user/register', component: UserRegistrationComponent },
+  { path: 'users', component: ListUsersComponent, canActivate:[RouteGuardService] },
 
   { path: '**', component: ErrorComponent }
 ];
