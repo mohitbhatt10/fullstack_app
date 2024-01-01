@@ -1,6 +1,10 @@
 <h1>List of Users</h1>
 
-<div class="alert alert-warning" *ngIf="messageVisible" role="alert">{{message}}</div>
+<div class="alert alert-warning" *ngIf="messageVisible" role="alert">{{message}}
+  <app-progress-bar [progress]="0" [visible]="messageVisible"></app-progress-bar>
+</div>
+
+
 
 <div class="table-responsive">
   <table class="table table-bordered table-striped">

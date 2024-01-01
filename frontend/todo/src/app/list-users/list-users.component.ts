@@ -116,7 +116,7 @@ export class ListUsersComponent implements OnInit {
       if (index !== -1) {
         this.selectedUsers.splice(index, 1);
       }
-      this.loadUsers();
+      //this.loadUsers();
     }
     console.log(this.selectedUsers);
   }

@@ -5,6 +5,11 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import ReactiveFormsModule
 import { NgxPaginationModule } from 'ngx-pagination';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
+import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { LoadingBarModule } from '@ngx-loading-bar/core';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -18,6 +23,7 @@ import { LogoutComponent } from './logout/logout.component';
 import { TodoComponent } from './todo/todo.component';
 import { UserRegistrationComponent } from './user-registration/user-registration.component';
 import { ListUsersComponent } from './list-users/list-users.component';
+import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +37,8 @@ import { ListUsersComponent } from './list-users/list-users.component';
     LogoutComponent,
     TodoComponent,
     UserRegistrationComponent,
-    ListUsersComponent
+    ListUsersComponent,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,
@@ -39,7 +46,11 @@ import { ListUsersComponent } from './list-users/list-users.component';
     FormsModule,
     HttpClientModule,
     NgxPaginationModule,
-    ReactiveFormsModule // Add ReactiveFormsModule to the imports array
+    ReactiveFormsModule, // Add ReactiveFormsModule to the imports array
+    BrowserAnimationsModule,
+    LoadingBarModule,
+    LoadingBarHttpClientModule,
+    LoadingBarRouterModule
   ],
   providers: [
      {provide: HTTP_INTERCEPTORS, useClass: HttpIntercepterBasicAuthService, multi: true }
