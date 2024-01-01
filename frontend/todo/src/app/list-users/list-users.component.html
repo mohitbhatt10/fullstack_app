@@ -1,5 +1,7 @@
 <h1>List of Users</h1>
 
+<div class="alert alert-warning" *ngIf="messageVisible" role="alert">{{message}}</div>
+
 <div class="table-responsive">
   <table class="table table-bordered table-striped">
     <thead>
@@ -12,6 +14,7 @@
         <th>Phone Number</th>
         <th>Enabled</th>
         <th>Roles</th>
+        <th>Select</th>
       </tr>
     </thead>
     <tbody>
@@ -22,9 +25,35 @@
         <td>{{ user.username }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.phoneNumber }}</td>
-        <td>{{ user.enabled }}</td>
-        <td>{{ getRolesAsString(user.roles) }}</td>
+        <td>
+          <ng-container *ngIf="user.selected; else plainTextEnabled">
+            <!-- Multi-selection dropdown for roles -->
+            <select [(ngModel)]="user.enabled" class="form-control" >
+              <option [value]="true">true</option>
+              <option [value]="false">false</option>
+            </select>
+          </ng-container>
+          <ng-template #plainTextEnabled>
+              {{ user.enabled }}
+          </ng-template></td>
+        <td>
+            <ng-container *ngIf="user.selected; else plainText">
+              <!-- Multi-selection dropdown for roles -->
+              <select [(ngModel)]="user.roles" class="form-control" multiple>
+                <option [value]="1">ROLE_USER</option>
+                <option [value]="2">ROLE_ADMIN</option>
+                <option [value]="3">ROLE_MODERATOR</option>
+              </select>
+            </ng-container>
+            <ng-template #plainText>
+                {{ getRolesAsString(user.roles) }}
+            </ng-template>
+          </td>
+        <td>
+            <input type="checkbox" [(ngModel)]="user.selected" (change)="onUserSelect(user)">
+        </td>
       </tr>
     </tbody>
   </table>
+  <button class="btn btn-primary" (click)="updateSelectedUsers()">Update Selected Users</button>
 </div>

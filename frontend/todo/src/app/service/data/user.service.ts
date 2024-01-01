@@ -20,4 +20,9 @@ export class UserService {
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+
+  updateUser(userId: number, updatedUser: any): Observable<any> {
+    const updateUserUrl = `${this.apiUrl}/${userId}`;
+    return this.http.put(updateUserUrl, updatedUser);
+  }
 }

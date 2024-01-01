@@ -51,10 +51,15 @@ public class UserService {
 
     public User updateUser(Long userId, User updatedUser) {
         if (userRepository.existsById(userId)) {
+        	User originalUser = userRepository.findById(userId).get();
             updatedUser.setUserId(userId);
             // Encode the password before updating it in the database
-            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            //updatedUser.setRoles(new HashSet<>(roleRepository.findAllById(updatedUser.getRoles().stream().map(Role :: getRoleId).toList())));
+            if(updatedUser.getPassword() != null) {
+            	updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
+            else {
+            	updatedUser.setPassword(originalUser.getPassword());
+            }
             return userRepository.save(updatedUser);
         } else {
             // Handle the case where the user with the given ID is not found
