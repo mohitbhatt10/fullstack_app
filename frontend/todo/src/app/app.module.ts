@@ -24,6 +24,7 @@ import { TodoComponent } from './todo/todo.component';
 import { UserRegistrationComponent } from './user-registration/user-registration.component';
 import { ListUsersComponent } from './list-users/list-users.component';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
     TodoComponent,
     UserRegistrationComponent,
     ListUsersComponent,
-    ProgressBarComponent
+    ProgressBarComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,

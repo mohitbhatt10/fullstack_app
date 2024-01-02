@@ -4,7 +4,7 @@
 
         <ul class="navbar-nav">
             <li><a *ngIf="hardcodedAuthenticationService.isUserLoggedIn()" routerLink="" (click)="goToHomePage()" class="nav-link">Home</a></li>
-             <!-- New link for Users, only visible to users with ROLE_ADMIN -->
+            <li><a *ngIf="hardcodedAuthenticationService.isUserLoggedIn()" routerLink="" (click)="goToProfilePage()" class="nav-link">Profile</a></li>
             <li *ngIf="hardcodedAuthenticationService.hasRole('ROLE_ADMIN')"><a routerLink="/users" class="nav-link">Users</a></li>
             <li><a *ngIf="hardcodedAuthenticationService.isUserLoggedIn()" routerLink="/todos" class="nav-link">Todos</a></li>
         </ul>

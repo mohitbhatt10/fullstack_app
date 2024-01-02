@@ -45,7 +45,17 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
-
+    @GetMapping("/username/{username}")
+    public ResponseEntity<User> getUserByUserName(@PathVariable String username) {
+        Optional<User> user = userService.getUserByUsername(username);
+        if(user.isPresent()) {
+        	User originalUser = user.get();
+        	originalUser.setRoles(new HashSet<>(roleRepository.findAllById(originalUser.getRoles().stream().map(Role :: getRoleId).toList())));
+        	return ResponseEntity.ok(originalUser);
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
@@ -72,6 +82,12 @@ public class UserController {
     @PutMapping(value = "/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
         User user = userService.updateUser(userId, updatedUser);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
+    
+    @PutMapping(value = "username/{username}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<User> updateUserByUsername(@PathVariable String username, @RequestBody User updatedUser) {
+        User user = userService.updateUserByUsername(username, updatedUser);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 

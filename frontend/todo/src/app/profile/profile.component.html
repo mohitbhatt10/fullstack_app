@@ -1,0 +1,15 @@
+<h1>User Profile</h1>
+
+<form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+  <label for="firstName">First Name:</label>
+  <input type="text" formControlName="firstName">
+  <br>
+  <label for="lastName">Last Name:</label>
+  <input type="text" formControlName="lastName">
+  <br>
+  <label for="username">Username:</label>
+  <input type="text" formControlName="username">  
+  <!-- Add similar fields for Last Name, Password, Username, Phone Number, Roles, and Enabled -->
+
+  <button type="submit" class="btn btn-primary">Update Profile</button>
+</form>

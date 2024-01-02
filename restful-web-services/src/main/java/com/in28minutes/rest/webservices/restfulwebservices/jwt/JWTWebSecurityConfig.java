@@ -51,7 +51,7 @@ public class JWTWebSecurityConfig {
 		// https://docs.spring.io/spring-boot/docs/current/reference/html/data.html#data.sql.h2-web-console.spring-security
 		return httpSecurity
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/authenticate", "/hello-world", "/hello-world-bean","/api/users","/api/users/*").permitAll()
+						.requestMatchers("/authenticate", "/hello-world", "/hello-world-bean","/api/users","/api/users/*","/api/users/username/*").permitAll()
 						//.requestMatchers(PathRequest.toH2Console()).permitAll() // h2-console is a servlet and NOT recommended for a production
 						.requestMatchers(HttpMethod.OPTIONS,"/**")
 						.permitAll()

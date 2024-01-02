@@ -25,4 +25,16 @@ export class UserService {
     const updateUserUrl = `${this.apiUrl}/${userId}`;
     return this.http.put(updateUserUrl, updatedUser);
   }
+
+  //write method to get the user details based on userid
+  getUserDetails(username: string): Observable<any> {
+    const getUserDetailsUrl = `${this.apiUrl}/username/${username}`;
+    return this.http.get(getUserDetailsUrl);
+  }
+
+  updateUserProfile(updatedUser : any){
+    const username = updatedUser.username;
+    const updateUserProfileUrl = `${this.apiUrl}/username/${username}`;
+    return this.http.put(updateUserProfileUrl, updatedUser);
+  }
 }

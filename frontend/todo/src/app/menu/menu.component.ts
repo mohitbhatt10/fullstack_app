@@ -11,6 +11,7 @@ import { Component, OnInit } from '@angular/core';
 export class MenuComponent implements OnInit {
   //isUserLoggedIn: boolean = false;
   username: string | null = "";
+  
   constructor(public hardcodedAuthenticationService
     : HardcodedAuthenticationService, private router: Router) { }
 
@@ -23,5 +24,11 @@ export class MenuComponent implements OnInit {
   goToHomePage(){
     this.username = sessionStorage.getItem(AUTHENTICATED_USER);
     this.router.navigate(['welcome', this.username])
+  }
+
+  goToProfilePage(){
+    this.username = sessionStorage.getItem(AUTHENTICATED_USER);
+    this.router.navigate(['profile', this.username])
+  
   }
 }

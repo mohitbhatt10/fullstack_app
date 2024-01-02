@@ -66,6 +66,25 @@ public class UserService {
             return null;
         }
     }
+    
+    public User updateUserByUsername(String username, User updatedUser) {
+    	Optional<User> OptionalOriginalUser = userRepository.findByUsername(username);
+        if (OptionalOriginalUser.isPresent()) {
+        	User originalUser = OptionalOriginalUser.get();
+        	updatedUser.setUserId(originalUser.getUserId());
+            // Encode the password before updating it in the database
+            if(updatedUser.getPassword() != null) {
+            	updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
+            else {
+            	updatedUser.setPassword(originalUser.getPassword());
+            }
+            return userRepository.save(updatedUser);
+        } else {
+            // Handle the case where the user with the given ID is not found
+            return null;
+        }
+    }
 
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
