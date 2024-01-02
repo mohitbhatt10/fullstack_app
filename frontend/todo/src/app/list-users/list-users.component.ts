@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { UserService } from '../service/data/user.service';
 
 @Component({
@@ -27,6 +26,7 @@ export class ListUsersComponent implements OnInit {
       },
       (error) => {
         console.error('Error loading users:', error);
+        this.message = "Error loading users, error is " + error.message ;
       }
     );
   }
@@ -36,6 +36,19 @@ export class ListUsersComponent implements OnInit {
   }
 
   updateSelectedUsers(): void {
+
+    // Replace the roles of selected users with the updated roles from 'selectedUsers'
+    for (const selectedUser of this.selectedUsers) {
+      const index = this.users.findIndex(user => user.userId === selectedUser.userId);
+
+      if (index !== -1) {
+        // Replace the user in the 'users' array with the updated user from 'selectedUsers'
+        let updatedUser = this.users[index]; 
+        selectedUser.roles = updatedUser.selectedRoles;
+        selectedUser.enabled = updatedUser.selectedEnabled;      
+      }
+    }
+
     // Update the status and roles of selected users
     for (const user of this.selectedUsers) {
       const updatedUser = {
@@ -83,7 +96,13 @@ export class ListUsersComponent implements OnInit {
     console.log(user.selected);  
     // Update the selectedUsers array based on the selection state
     if (user.selected) {
-      this.selectedUsers.push(user);
+      // Create a deep copy of the user and add it to selectedUsers
+      const selectedUserCopy = { ...user, roles: [...user.roles] };
+      this.selectedUsers.push(selectedUserCopy);
+
+      // Preselect roles in the user's select dropdown
+      user.selectedRoles = [...user.roles];
+      user.selectedEnabled = user.enabled;
     } else {
       // Remove the user from selectedUsers if unchecked
       const index = this.selectedUsers.findIndex(selectedUser => selectedUser.userId === user.userId);
