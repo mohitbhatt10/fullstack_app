@@ -12,6 +12,7 @@ export class ListUsersComponent implements OnInit {
   selectedUsers: any[] = [];
   message : string = '';
   messageVisible: boolean = false;
+  isUpdateButtonDisabled: boolean = true;
 
   constructor(private userService: UserService) {}
 
@@ -31,35 +32,7 @@ export class ListUsersComponent implements OnInit {
   }
 
   getRolesAsString(roles: any[]): string {
-    // if(roles.every(element => typeof element === 'number' && Number.isInteger(element))){
-    //   //iterate over the roles array and convert each number to a string
-    //   return roles.map(role => {
-    //     if(role === 1){
-    //       return 'ROLE_USER';
-    //     }
-    //     else if(role === 2){
-    //       return 'ROLE_ADMIN';
-    //     }
-    //     else if( role === 3){
-    //       return 'ROLE_MODERATOR';
-    //     }
-    //     else{
-    //       return '';
-    //     }
-    //   }).join(', ');
-    // }
     return roles.map(role => role.roleName).join(', ');
-  }
-
-  updateUserDetails(user: any): void {
-    // Update the selectedUsers array based on user selection
-    const index = this.selectedUsers.findIndex((u) => u.userId === user.userId);
-
-    if (index !== -1) {
-      this.selectedUsers.splice(index, 1);
-    } else {
-      this.selectedUsers.push(user);
-    }
   }
 
   updateSelectedUsers(): void {
@@ -102,6 +75,7 @@ export class ListUsersComponent implements OnInit {
 
     // Clear the selectedUsers array after updating
     this.selectedUsers = [];
+    this.isUpdateButtonDisabled = true;
   }
 
   onUserSelect(user: any) {
@@ -112,12 +86,13 @@ export class ListUsersComponent implements OnInit {
       this.selectedUsers.push(user);
     } else {
       // Remove the user from selectedUsers if unchecked
-      const index = this.selectedUsers.findIndex(selectedUser => selectedUser.id === user.id);
+      const index = this.selectedUsers.findIndex(selectedUser => selectedUser.userId === user.userId);
       if (index !== -1) {
         this.selectedUsers.splice(index, 1);
       }
       //this.loadUsers();
     }
     console.log(this.selectedUsers);
+    this.isUpdateButtonDisabled = this.selectedUsers.length === 0;
   }
 }
