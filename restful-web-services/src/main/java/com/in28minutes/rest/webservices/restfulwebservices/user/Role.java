@@ -32,9 +32,14 @@ public class Role {
     // Default constructor
     public Role() {}
 
-    // Constructor with String argument
+    // Constructor with Long argument
     public Role(Long roleId) {
         this.roleId = roleId;
+    }
+    
+    // Constructor with String argument
+    public Role(String roleName) {
+        this.roleName = roleName;
     }
     
 	public Long getRoleId() {

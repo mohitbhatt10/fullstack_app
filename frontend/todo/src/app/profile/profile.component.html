@@ -1,15 +1,41 @@
-<h1>User Profile</h1>
-
-<form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-  <label for="firstName">First Name:</label>
-  <input type="text" formControlName="firstName">
-  <br>
-  <label for="lastName">Last Name:</label>
-  <input type="text" formControlName="lastName">
-  <br>
-  <label for="username">Username:</label>
-  <input type="text" formControlName="username">  
-  <!-- Add similar fields for Last Name, Password, Username, Phone Number, Roles, and Enabled -->
-
-  <button type="submit" class="btn btn-primary">Update Profile</button>
-</form>
+<div class="alert alert-warning" *ngIf="message" role="alert">{{message}}</div>
+<div class="profile-container">
+    <h1>User Profile</h1>
+  
+    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+      <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <input type="text" formControlName="firstName" class="form-control">
+      </div>
+  
+      <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <input type="text" formControlName="lastName" class="form-control">
+      </div>
+  
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" formControlName="username" class="form-control" [readonly]="true">
+      </div>
+  
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="text" formControlName="email" class="form-control" [readonly]="true">
+      </div>
+  
+      <!-- Assuming roles is a multiselect dropdown, use a dropdown component or a library for this -->
+      <div class="form-group">
+        <label for="roles">Roles:</label>
+        <input type="text" formControlName="roles" class="form-control" [readonly]="true">
+      </div>
+  
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="text" formControlName="phoneNumber" class="form-control" >
+      </div>
+  
+      <!-- Add similar fields for Password, Enabled, etc., as needed -->
+  
+      <button type="submit" class="btn btn-primary">Update Profile</button>
+    </form>
+  </div>

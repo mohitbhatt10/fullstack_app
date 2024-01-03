@@ -1,0 +1,17 @@
+/* Add your custom styling here */
+.profile-container {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+  }
+
+  /* Adjust styles as needed */
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-weight: bold;
+    font-family: "Lucida Console", "Courier New", monospace;
+  }

@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
+
   profileForm: FormGroup = this.formBuilder.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -19,6 +20,7 @@ export class ProfileComponent implements OnInit {
     roles: ['']
   });
   username: string = '';
+  message: string = '';
 
   constructor(
     private formBuilder: FormBuilder, 
@@ -42,7 +44,7 @@ export class ProfileComponent implements OnInit {
           password: [userData.password],
           email: [userData.email],
           phoneNumber: [userData.phoneNumber],
-          roles: [userData.roles]
+          roles: [ userData.roles.map((role: { roleName: string; }) => role.roleName).join(', ')]
         });
       },
       error => {
@@ -52,8 +54,19 @@ export class ProfileComponent implements OnInit {
   }
 
   updateProfile(): void {
-    // Implement logic to update the user profile
-    const updatedUserData = this.profileForm.value;
-    this.userProfileService.updateUserProfile(updatedUserData);
+    const updatedUserData = { ...this.profileForm.value }; // Create a copy to avoid modifying the original form value
+    delete updatedUserData.roles; // Remove the roles property
+    delete updatedUserData.password; // Remove the password property
+    console.log('Updated user data:', updatedUserData);
+    this.userProfileService.updateUserProfile(updatedUserData).subscribe(
+      data => {
+        console.log('User profile updated successfully:', data);
+        this.message = 'User profile updated successfully.';       
+      }
+      , error => {
+        console.error('Error updating user profile:', error);
+        this.message = 'Error updating user profile.';
+      }
+    );
   }
 }

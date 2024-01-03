@@ -79,6 +79,9 @@ public class UserService {
             else {
             	updatedUser.setPassword(originalUser.getPassword());
             }
+            if(updatedUser.getRoles() == null ) {
+            	updatedUser.setRoles(originalUser.getRoles());
+            }
             return userRepository.save(updatedUser);
         } else {
             // Handle the case where the user with the given ID is not found
