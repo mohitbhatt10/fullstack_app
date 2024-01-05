@@ -23,7 +23,14 @@ export class ListTodosComponent implements OnInit {
   filteredTodos: Todo[] = [];
   username: string = '';
   message: string = '';
-  filterType: string = 'All'; // Default filter type
+  filterType = {
+    name: "All" // Default filter type name: "All" }
+  }; // Default filter type
+  availStatus = [ 
+    { name: "All" }, 
+    { name: "Pending" }, 
+    { name: "Completed" }
+  ]
   // Pagination
   currentPage = 1;
   itemsPerPage = 5;
@@ -75,7 +82,7 @@ export class ListTodosComponent implements OnInit {
 
   // Function to apply the filter based on the selected type
   applyFilter() {
-    switch (this.filterType) {
+    switch (this.filterType.name) {
       case 'All':
         this.filteredTodos = this.todos;
         break;

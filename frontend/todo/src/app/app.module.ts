@@ -9,6 +9,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { LoadingBarModule } from '@ngx-loading-bar/core';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DropdownModule } from 'primeng/dropdown';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -52,7 +54,9 @@ import { ProfileComponent } from './profile/profile.component';
     BrowserAnimationsModule,
     LoadingBarModule,
     LoadingBarHttpClientModule,
-    LoadingBarRouterModule
+    LoadingBarRouterModule,
+    MultiSelectModule,
+    DropdownModule
   ],
   providers: [
      {provide: HTTP_INTERCEPTORS, useClass: HttpIntercepterBasicAuthService, multi: true }

@@ -4,12 +4,15 @@
 
 <!-- Dropdown for filter selection -->
 <div class="form-group mt-3">
-  <label for="filterSelect">Filter Todos based on completion status: </label>
-  <select class="form-control-sm" id="filterSelect" [(ngModel)]="filterType" (change)="applyFilter()">
-    <option value="All">All</option>
-    <option value="Completed">Completed</option>
-    <option value="Pending">Pending</option>
-  </select>
+  <label for="filterSelect">Filter Todos based on completion status:    </label>
+  <p-dropdown 
+    [(ngModel)]="filterType"
+    placeholder="Select a Status"
+    [options]="availStatus" 
+    optionLabel="name"
+    (onChange)="applyFilter()"
+    dropdownIcon="fas fa-caret-down">
+  </p-dropdown>
 </div>
 
 <div class="table-responsive">
