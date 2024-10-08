@@ -18,11 +18,11 @@ public class ValidAnagram {
 	
 	public boolean isAnagram(String s, String t) {
 
-		Map<Character, Long> sCountingMap = s.chars().mapToObj(letter -> (char) letter)
-				.collect(Collectors.groupingBy(Function.identity(), TreeMap<Character, Long> :: new , Collectors.counting()));
+		Map<Character, Integer> sCountingMap = s.chars().mapToObj(letter -> (char) letter)
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(c -> 1)));
 		
-		Map<Character, Long> tCountingMap = t.chars().mapToObj(letter -> (char) letter)
-				.collect(Collectors.groupingBy(Function.identity(), TreeMap<Character, Long> :: new , Collectors.counting()));
+		Map<Character, Integer> tCountingMap = t.chars().mapToObj(letter -> (char) letter)
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(c -> 1)));
 		
 		return sCountingMap.equals(tCountingMap);
 	}

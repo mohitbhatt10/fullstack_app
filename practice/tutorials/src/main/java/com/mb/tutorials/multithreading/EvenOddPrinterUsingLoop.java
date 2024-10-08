@@ -2,38 +2,51 @@ package com.mb.tutorials.multithreading;
 
 public class EvenOddPrinterUsingLoop {
 	
-	static int counter = 1;
+	static volatile int counter = 1;
 	
 	
 	public static void main(String[] args) throws InterruptedException {
 		
 		
-		Thread evenThread = new Thread(() -> printEven());
-		Thread oddThread =  new Thread(() -> printOdd());
-		
-		for(int i = 1 ;i<=10;i++) {
+		Thread evenThread = new Thread(() -> printSequence(),"evenThread");
+		Thread oddThread =  new Thread(() -> printSequence(),"oddThread");
 			
-			evenThread.start();
-			oddThread.start();
-			counter++;
+		evenThread.start();
+		oddThread.start();
 			
-		}
 		evenThread.join();
 		oddThread.join();
 		
 	}
 
 	private static void printEven() {
-		if(counter % 2 ==0) {
-			System.out.println("Printed by even thread: "+counter);
+		for(int i=1; i<=5;i++) {
+			if(counter % 2 ==0) {
+				System.out.println("Printed by even thread: "+counter);
+			}
+			counter++;
 		}
 	}
 	
 	private static void printOdd() {
-		if(counter %2 != 0) {
-			System.out.println("Printed by odd thread:" +counter);
+		for(int i=1; i<=5;i++) {
+			if(counter % 2 !=0) {
+				System.out.println("Printed by odd thread: "+counter);
+			}
+			counter++;
 		}
 	}
 	
+	
+	private synchronized static void printSequence() {
+		for(int i = 0 ;i<5; i++) {
+			if(counter % 2 ==0 ) {
+				System.out.println("Printed by :"+ Thread.currentThread().getName()+" thread: "+counter);
+			}else {
+				System.out.println("Printed by :"+ Thread.currentThread().getName()+" thread: "+counter);
+			}
+			counter++;
+		}
+	}
 
 }

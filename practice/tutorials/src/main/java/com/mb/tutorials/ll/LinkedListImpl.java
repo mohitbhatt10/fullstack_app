@@ -9,7 +9,8 @@ public class LinkedListImpl {
 		l.add(1);
 		l.add(2);
 		l.add(3);
-		l.delete(3);	
+		l.display();
+		l.deleteOtherApproach(4);	
 		l.display();
 	}
 

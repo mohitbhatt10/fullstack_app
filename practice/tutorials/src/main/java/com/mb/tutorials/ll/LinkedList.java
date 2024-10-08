@@ -13,7 +13,7 @@ class Node {
 // Define a LinkedList class to manage the linked list
 class LinkedList {
 	Node head;
-
+	
 	// Constructor to initialize an empty linked list
 	public LinkedList() {
 		head = null;
@@ -44,20 +44,53 @@ class LinkedList {
 		System.out.println("null");
 	}
 
-	public int delete(int data) {
-		int toBedeleted = -1;
-		if (head == null) {
-			return toBedeleted;
-		} else {
-			Node current = head;
-			while (current != null) {
-				if (current.data == data) {
-					toBedeleted = current.data;
-					current = null;
-				}
-				current = current.next;
-			}
-		}
-		return toBedeleted;
-	}
+	public void delete(int target) {
+        if (head == null) {
+            System.out.println("Linked list is empty. Nothing to delete.");
+            return;
+        }
+
+        if (head.data == target) {
+            head = head.next;
+            return;
+        }
+
+        Node current = head;
+        while (current.next != null) {
+            if (current.next.data == target) {
+                current.next = current.next.next;
+                return;
+            }
+            current = current.next;
+        }
+
+        System.out.println(target + " not found in the linked list.");
+    }
+	
+	public void deleteOtherApproach(int target) {
+        if (head == null) {
+            System.out.println("Linked list is empty. Nothing to delete.");
+            return;
+        }
+
+        if (head.data == target) {
+            head = head.next;
+            return;
+        }
+
+        Node current = head;
+        Node previous = null;
+        while (current != null) {
+            if (current.data == target) {
+                previous.next = current.next;
+                return;
+            }
+            else {
+            	previous = current;
+            	current = current.next;
+            }
+        }
+
+        System.out.println(target + " not found in the linked list.");
+    }
 }
