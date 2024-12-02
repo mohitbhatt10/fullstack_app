@@ -5,7 +5,7 @@ public class FirstBadVersion {
 	public static void main(String[] args) {
 			
 		int n = 2126753390;
-		System.out.println(firstBadVersion(n));
+		System.out.println(firstBadVersionBetterLetsSee(n));
 	}
 	
 	public static int firstBadVersion(int n) {
@@ -46,8 +46,27 @@ public class FirstBadVersion {
         
     }
 	
+	public static int firstBadVersionBetterLetsSee(int n) {
+        if(n==1) return n;
+
+        int start =1;
+        int end = n;
+        //int badVersion = 1;
+        while(start < end){
+            int mid = start +(end-start)/2;
+            if(isBadVersion(mid)){
+                end = mid;
+            }
+            else {
+            	start=mid+1;
+            }
+        }
+        return start;
+        
+    }
+	
 	public static boolean isBadVersion(int version) {
-		return version >= 1702766719; 
+		return version >= 4; 
 	}
 
 }

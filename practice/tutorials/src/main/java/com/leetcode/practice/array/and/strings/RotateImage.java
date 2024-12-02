@@ -20,7 +20,7 @@ public class RotateImage {
 		int rows = matrix.length;
 		int columns = matrix[0].length;
 		
-		//transpose:
+		//transpose: means all i becomes j and all j becomes i
 		for(int i =0;i<rows;i++) {
 			for(int j=i+1 ; j< columns; j++) {
 				int temp = matrix[i][j];
@@ -29,8 +29,7 @@ public class RotateImage {
 			}
 		}
 		
-		//refelection:
-		
+		//reflection: means take the vertical mirror image from middle column of array
 		for(int i= 0 ;i< rows;i++) {
 			for(int j = 0;j < rows/2 ;j++) {
 				int temp = matrix[i][j];
