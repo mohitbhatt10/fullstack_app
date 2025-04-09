@@ -30,17 +30,27 @@ public class MaxConsecutiveOnes {
 		System.out.println(longestOnes(nums, k));
 	}
 	
+	
+	/*
+	 * Good Example of sliding window algo where we define the boundary/window within array to find the 
+	 * Desired output. Asked in many coding interviews. 
+	 */
 	public static int longestOnes(int[] nums, int k) {
-        int start = 0;
-        int max = 0;
-        int zeros = 0;
+        int start = 0; // Left bound
+        int maxWindowSize = 0;  // counter to count the max window size of consecutive 1s after swapping with max k 0s.
+        int zeros = 0; // counter to count the zero till ith position in array within window (end-start+1)
         
+        //Right bound what will increase after every iteration
         for(int end=0 ; end< nums.length ; end++) {
         	
+        	// if ith element is 0 then increase the 0s counter
         	if(nums[end] == 0) {
         		zeros++;
         	}
         	
+        	//if 0s counter gets greater than k(desired one) than 
+        	// 1. Reduce 0s till it becomes k 
+        	// 2. Increase left bound(start) every time whether its 0 or 1 until 0s count becomes k
         	while(zeros > k) {
         		if(nums[start] == 0) {
         			zeros --;
@@ -48,10 +58,11 @@ public class MaxConsecutiveOnes {
         		start++;
         	}
         	
-        	max = Math.max(max, end-start+1);
+        	//Finally the maxWindowCount would be the maximum of current window vs Max window till now in the iteration
+        	maxWindowSize = Math.max(maxWindowSize, end-start+1);
         	
         }
-        return max;
+        return maxWindowSize;
     }
 	
 	int longestOnes2(int[] nums, int k) {
