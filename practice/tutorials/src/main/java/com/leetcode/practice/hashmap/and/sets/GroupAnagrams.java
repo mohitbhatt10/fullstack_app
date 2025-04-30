@@ -11,7 +11,7 @@ public class GroupAnagrams {
 	public static void main(String[] args) {
 
 		
-		String[] strs = {"a"};//{"eat","tea","tan","ate","nat","bat"};
+		String[] strs = {"eat","tea","tan","ate","nat","bat"};//{"a"};//{"eat","tea","tan","ate","nat","bat"};
 		GroupAnagrams obj = new GroupAnagrams();
 		System.out.println(obj.groupAnagrams(strs));
 		
@@ -21,7 +21,8 @@ public class GroupAnagrams {
 	public List<List<String>> groupAnagrams(String[] strs) {
         
 		if(strs.length == 1) {
-			List<String> innerList = List.of(strs[0]);
+			List<String> innerList = new ArrayList<>();
+			innerList.add(strs[0]);
 			List<List<String>> wholeString = new ArrayList<>();
 			wholeString.add(innerList);
 			return wholeString;

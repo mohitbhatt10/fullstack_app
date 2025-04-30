@@ -1,10 +1,7 @@
 package com.mb.tutorials;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CheckDuplicatesInAList {
@@ -12,7 +9,7 @@ public class CheckDuplicatesInAList {
 	public static void main(String[] args) {
 		
 		
-		List<Integer> list = List.of(1,2,3,4,5,1,2,3);
+		List<Integer> list = Arrays.asList(1,2,3,4,5,6,7);
 		
 		 Set<Integer> keySet = list.stream()
 		.collect(Collectors.groupingBy(num -> num, Collectors.counting()))

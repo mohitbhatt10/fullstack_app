@@ -16,7 +16,7 @@ public class FibonacciSeriesUsingDP {
 		else {
 			return getNthFibbonacciNumberUsingReccursion(n-1) + getNthFibbonacciNumberUsingReccursion(n-2);
 		}
-	}
+    }
 	
 	public static int getNthFibonacciUsingDP(int n) {
         // Handle edge cases for the first two Fibonacci numbers

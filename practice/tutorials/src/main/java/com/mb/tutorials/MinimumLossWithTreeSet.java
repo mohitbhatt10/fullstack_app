@@ -23,7 +23,7 @@ import java.util.TreeSet;
 public class MinimumLossWithTreeSet {
 
     public static void main(String[] args) {
-        List<Long> list = List.of(20l, 15l, 8l, 2l, 12l);
+        List<Long> list = Arrays.asList(20l, 15l, 8l, 2l, 12l);
         System.out.println(minimumLoss(list)); // Output should be 3
     }
 
