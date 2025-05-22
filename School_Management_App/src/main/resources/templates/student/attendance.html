@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>My Attendance - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header">
+                <h3>My Attendance</h3>
+            </div>
+            <div class="card-body">
+                <!-- Course Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="courseFilter" class="form-label">Filter by Course:</label>
+                        <select class="form-select" id="courseFilter" onchange="filterAttendance()">
+                            <option value="">All Courses</option>
+                            <option th:each="course : ${courses}"
+                                    th:value="${course.id}"
+                                    th:text="${course.name + ' (' + course.code + ')'}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="monthFilter" class="form-label">Filter by Month:</label>
+                        <input type="month" class="form-control" id="monthFilter" 
+                               onchange="filterAttendance()">
+                    </div>
+                </div>
+
+                <!-- Attendance Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Total Classes</h5>
+                                <p class="h3" id="totalClasses" th:text="${totalClasses}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Present</h5>
+                                <p class="h3" id="presentCount" th:text="${presentCount}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Absent</h5>
+                                <p class="h3" id="absentCount" th:text="${totalClasses - presentCount}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped" id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Course</th>
+                                <th>Teacher</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="attendance : ${attendanceList}">
+                                <td th:text="${#temporals.format(attendance.date, 'dd-MM-yyyy')}"></td>
+                                <td th:text="${attendance.courseName}"></td>
+                                <td th:text="${attendance.teacherName}"></td>
+                                <td>
+                                    <span th:if="${attendance.present}" class="badge bg-success">Present</span>
+                                    <span th:unless="${attendance.present}" class="badge bg-danger">Absent</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(attendanceList)}">
+                                <td colspan="4" class="text-center">No attendance records found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            function filterAttendance() {
+                const courseId = document.getElementById('courseFilter').value;
+                const month = document.getElementById('monthFilter').value;
+                
+                window.location.href = `/student/attendance?courseId=${courseId}&month=${month}`;
+            }
+
+            // Initialize filters with URL parameters
+            window.onload = function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const courseId = urlParams.get('courseId');
+                const month = urlParams.get('month');
+
+                if (courseId) {
+                    document.getElementById('courseFilter').value = courseId;
+                }
+                if (month) {
+                    document.getElementById('monthFilter').value = month;
+                }
+            };
+        </script>
+    </section>
+</body>
+</html>

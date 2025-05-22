@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>My Marks - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header">
+                <h3>My Academic Performance</h3>
+            </div>
+            <div class="card-body">
+                <!-- Semester Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="semesterFilter" class="form-label">Select Semester:</label>
+                        <select class="form-select" id="semesterFilter" onchange="filterMarks()">
+                            <option value="">All Semesters</option>
+                            <option th:each="sem : ${#numbers.sequence(1, 8)}"
+                                    th:value="${sem}"
+                                    th:text="'Semester ' + ${sem}"
+                                    th:selected="${sem == selectedSemester}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Performance Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Average Score</h5>
+                                <p class="h3" th:text="${#numbers.formatDecimal(averageScore, 1, 2) + '%'}">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Highest Score</h5>
+                                <p class="h3" th:text="${#numbers.formatDecimal(highestScore, 1, 2) + '%'}">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Total Courses</h5>
+                                <p class="h3" th:text="${totalCourses}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marks by Course -->
+                <div th:each="course : ${courseMarks}" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 th:text="${course.name + ' (' + course.code + ')'}">Course Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Exam Type</th>
+                                            <th>Marks Obtained</th>
+                                            <th>Total Marks</th>
+                                            <th>Percentage</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="mark : ${course.marks}">
+                                            <td th:text="${mark.examType}"></td>
+                                            <td th:text="${mark.marks}"></td>
+                                            <td th:text="${mark.maxMarks}"></td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar" role="progressbar"
+                                                         th:style="'width: ' + ${(mark.marks / mark.maxMarks * 100)} + '%'"
+                                                         th:text="${#numbers.formatDecimal((mark.marks / mark.maxMarks * 100), 1, 2) + '%'}">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td th:text="${#temporals.format(mark.createdAt, 'dd-MM-yyyy')}"></td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(course.marks)}">
+                                            <td colspan="5" class="text-center">No marks available for this course</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            function filterMarks() {
+                const semester = document.getElementById('semesterFilter').value;
+                window.location.href = `/student/marks?semester=${semester}`;
+            }
+
+            window.onload = function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const semester = urlParams.get('semester');
+                if (semester) {
+                    document.getElementById('semesterFilter').value = semester;
+                }
+            };
+        </script>
+    </section>
+</body>
+</html>

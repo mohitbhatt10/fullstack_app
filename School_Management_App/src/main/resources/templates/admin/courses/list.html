@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course List - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Course List</h2>
+            <a th:href="@{/admin/courses/add}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Course
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Teacher</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Students</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="course : ${courses}">
+                                <td th:text="${course.code}"></td>
+                                <td th:text="${course.name}"></td>
+                                <td>
+                                    <span th:if="${course.teacherId != null}" 
+                                          th:text="${course.teacherName}"></span>
+                                    <span th:unless="${course.teacherId != null}" 
+                                          class="text-muted">No teacher assigned</span>
+                                </td>                                <td th:text="${course.department}"></td>
+                                <td th:text="${course.semester}"></td>
+                                <td>
+                                    <a th:href="@{/admin/courses/{id}/students(id=${course.id})}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-users"></i> 
+                                        <span th:text="${#sets.size(course.studentIds)}">0</span> Students
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/admin/courses/{id}/schedule(id=${course.id})}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-calendar"></i> Schedule
+                                        </a>
+                                        <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}" 
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form th:action="@{/admin/courses/{id}/delete(id=${course.id})}" 
+                                              method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('Are you sure you want to delete this course?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(courses)}">
+                                <td colspan="7" class="text-center">No courses found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::#content})}">
+<head>
+    <title th:text="${student.id == null ? 'Add New Student' : 'Edit Student'}">Student Form</title>
+</head>
+<body>
+    <div id="content">
+        <section>
+            <!-- Load student form validation script -->
+            <script type="text/javascript" th:src="@{/js/student-form-validation.js}"></script>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header">
+                <h3 th:text="${student.id == null ? 'Add New Student' : 'Edit Student'}">Student Form</h3>
+            </div>
+            <div class="card-body">                <form id="studentForm" th:method="post" th:object="${student}"
+                      th:action="${student.id == null} ? @{/admin/students/add} : @{/admin/students/__${student.id}__/edit}" novalidate>
+                    
+                    <input type="hidden" th:field="*{id}" />
+                    <input type="hidden" th:field="*{role}" th:value="STUDENT" />
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" th:field="*{firstName}" 
+                                   required pattern="[A-Za-z]{2,50}" placeholder="Enter first name"
+                                   title="Name must be between 2 and 50 characters, letters only">
+                            <div class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" th:field="*{lastName}" 
+                                   required pattern="[A-Za-z]{2,50}" placeholder="Enter last name"
+                                   title="Name must be between 2 and 50 characters, letters only">
+                            <div class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" id="email" th:field="*{email}" 
+                                       required placeholder="name@example.com"
+                                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                       title="Enter a valid email address"
+                                       list="emailDomains"
+                                       aria-describedby="emailHelp">
+                                <select class="btn btn-outline-secondary" id="emailDomainSelect">
+                                    <option value="">Select domain...</option>
+                                    <option value="@student.university.edu">@student.university.edu</option>
+                                    <option value="@gmail.com">@gmail.com</option>
+                                    <option value="@outlook.com">@outlook.com</option>
+                                    <option value="@yahoo.com">@yahoo.com</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted mt-1" id="emailHelp">Choose a domain or type your email address</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" th:field="*{username}" 
+                                   required pattern="[a-zA-Z0-9_]{4,20}" placeholder="Choose a username"
+                                   title="Username must be 4-20 characters long and can contain letters, numbers and underscore">
+                            <div class="small text-muted mt-1">4-20 characters, letters, numbers and underscore allowed</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="rollNumber" class="form-label">Roll Number</label>
+                            <input type="text" class="form-control" id="rollNumber" th:field="*{rollNumber}" 
+                                   required pattern="[A-Z0-9]+" placeholder="e.g., CSE21001"
+                                   title="Roll number must contain only uppercase letters and numbers">
+                            <div class="text-danger" th:if="${#fields.hasErrors('rollNumber')}" th:errors="*{rollNumber}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" class="form-control" id="department" th:field="*{department}" 
+                                   required pattern="[A-Z]{2,5}" placeholder="e.g., CSE"
+                                   title="Department must be 2-5 uppercase letters"
+                                   list="departmentList" aria-describedby="departmentHelp">
+                            <datalist id="departmentList">
+                                <option value="CSE">Computer Science Engineering</option>
+                                <option value="ECE">Electronics and Communication Engineering</option>
+                                <option value="ME">Mechanical Engineering</option>
+                                <option value="CE">Civil Engineering</option>
+                                <option value="EEE">Electrical and Electronics Engineering</option>
+                                <option value="IT">Information Technology</option>
+                            </datalist>
+                            <div id="departmentHelp" class="small text-muted mt-1">Choose from suggestions or enter 2-5 uppercase letters</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('department')}" th:errors="*{department}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="semester" class="form-label">Semester</label>
+                            <input type="number" class="form-control" id="semester" th:field="*{semester}" 
+                                   required min="1" max="8" placeholder="1-8"
+                                   title="Semester must be between 1 and 8">
+                            <div class="small text-muted mt-1">Enter a number between 1 and 8</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}"></div>
+                        </div>
+                        <div class="col-md-6" th:if="${student.id == null}">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" th:field="*{password}" 
+                                       th:required="${student.id == null}" minlength="6"
+                                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}"
+                                       title="Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number and one special character (!@#$%^&*)"
+                                       aria-describedby="password-toggle passwordHelp"
+                                       autocomplete="new-password">
+                                <button class="btn btn-outline-secondary" type="button" id="password-toggle" 
+                                        aria-label="Toggle password visibility">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" type="button" id="generate-password" 
+                                        aria-label="Generate strong password">
+                                    <i class="fas fa-magic" aria-hidden="true"></i> Generate
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2" style="display: none;">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="small text-muted mt-1">Password strength: <span class="strength-text">Weak</span></div>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Password requirements:
+                                <ul class="mb-0 ps-3">
+                                    <li>At least 6 characters</li>
+                                    <li>One uppercase letter</li>
+                                    <li>One lowercase letter</li>
+                                    <li>One number</li>
+                                    <li>One special character (!@#$%^&*)</li>
+                                </ul>
+                            </div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a th:href="@{/admin/students}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="button" class="btn btn-outline-secondary" id="clearForm">
+                                <i class="fas fa-eraser" aria-hidden="true"></i> Clear Form
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-info me-2" id="previewBtn" data-bs-toggle="modal" data-bs-target="#previewModal">
+                                <i class="fas fa-eye" aria-hidden="true"></i> Preview
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save" aria-hidden="true"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewModalLabel">Student Details Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table class="table">
+                                    <tr>
+                                        <th>Full Name:</th>
+                                        <td id="previewFullName"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email:</th>
+                                        <td id="previewEmail"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Username:</th>
+                                        <td id="previewUsername"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Roll Number:</th>
+                                        <td id="previewRollNumber"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Department:</th>
+                                        <td id="previewDepartment"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Semester:</th>
+                                        <td id="previewSemester"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>        </section>
+    </div>
+</body>
+</html>

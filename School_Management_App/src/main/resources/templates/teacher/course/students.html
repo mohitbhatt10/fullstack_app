@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course Students - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Students in Course: <span th:text="${course.name + ' (' + course.code + ')'}"></span></h3>
+                <a th:href="@{/teacher/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="student : ${students}">
+                                <td th:text="${student.rollNumber}"></td>
+                                <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                <td th:text="${student.department}"></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/teacher/courses/{courseId}/marks/{studentId}(courseId=${course.id},studentId=${student.id})}" 
+                                           class="btn btn-sm btn-success">View Marks</a>
+                                        <a th:href="@{/teacher/courses/{courseId}/attendance/{studentId}(courseId=${course.id},studentId=${student.id})}" 
+                                           class="btn btn-sm btn-primary">View Attendance</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(students)}">
+                                <td colspan="4" class="text-center">No students enrolled in this course</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

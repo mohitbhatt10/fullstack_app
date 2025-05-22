@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Admin Dashboard - School Management System</title>
+</head>
+<body>
+    <section>
+        <h2 class="mb-4">Admin Dashboard</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Student Management</h5>
+                        <p class="card-text">Manage student records, enrollments, and information.</p>
+                        <a th:href="@{/admin/students}" class="btn btn-primary">Manage Students</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Teacher Management</h5>
+                        <p class="card-text">Manage teacher records and assignments.</p>
+                        <a th:href="@{/admin/teachers}" class="btn btn-primary">Manage Teachers</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Course Management</h5>
+                        <p class="card-text">Manage courses, assignments, and schedules.</p>
+                        <a th:href="@{/admin/courses}" class="btn btn-primary">Manage Courses</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

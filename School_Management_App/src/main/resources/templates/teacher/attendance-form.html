@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Mark Attendance - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header">
+                <h3>Mark Attendance</h3>
+            </div>
+            <div class="card-body">
+                <!-- Course Selection -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="courseSelect" class="form-label">Select Course:</label>
+                        <select class="form-select" id="courseSelect" onchange="loadStudents()">
+                            <option value="">Choose a course...</option>
+                            <option th:each="course : ${courses}"
+                                    th:value="${course.id}"
+                                    th:text="${course.name + ' (' + course.code + ')'}"
+                                    th:selected="${course.id == selectedCourseId}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="attendanceDate" class="form-label">Date:</label>
+                        <input type="date" class="form-control" id="attendanceDate" 
+                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                               onchange="loadStudents()">
+                    </div>
+                </div>
+
+                <!-- Time Window Information -->
+                <div id="timeWindowInfo" class="mb-4"></div>
+
+                <form th:if="${not #lists.isEmpty(students)}" 
+                      th:action="@{/teacher/attendance/submit}" 
+                      method="post" 
+                      id="attendanceForm">
+                    
+                    <input type="hidden" name="courseId" id="courseIdInput">
+                    <input type="hidden" name="date" id="dateInput">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Roll Number</th>
+                                    <th>Student Name</th>
+                                    <th>Present</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="student, stat : ${students}">
+                                    <td th:text="${student.rollNumber}"></td>
+                                    <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   th:name="'attendances[' + ${stat.index} + '].present'"
+                                                   th:checked="${student.present}">
+                                            <input type="hidden" 
+                                                   th:name="'attendances[' + ${stat.index} + '].studentId'"
+                                                   th:value="${student.id}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm"
+                                               th:name="'attendances[' + ${stat.index} + '].remarks'"
+                                               placeholder="Optional remarks">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
+                        <div>
+                            <button type="button" class="btn btn-outline-primary me-2" onclick="markAllPresent()">
+                                Mark All Present
+                            </button>
+                            <button type="submit" class="btn btn-primary">Save Attendance</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div th:if="${#lists.isEmpty(students) and selectedCourseId != null}" 
+                     class="alert alert-info text-center">
+                    No students found for the selected course.
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            function loadStudents() {
+                const courseId = document.getElementById('courseSelect').value;
+                const date = document.getElementById('attendanceDate').value;
+                if (courseId && date) {
+                    window.location.href = `/teacher/attendance?courseId=${courseId}&date=${date}`;
+                }
+            }
+
+            function markAllPresent() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+            }
+
+            window.onload = function() {
+                const courseId = document.getElementById('courseSelect').value;
+                const date = document.getElementById('attendanceDate').value;
+                if (courseId) {
+                    document.getElementById('courseIdInput').value = courseId;
+                    document.getElementById('dateInput').value = date;
+                }
+            };
+        </script>
+        <script th:src="@{/js/attendance-form-validation.js}"></script>
+    </section>
+</body>
+</html>

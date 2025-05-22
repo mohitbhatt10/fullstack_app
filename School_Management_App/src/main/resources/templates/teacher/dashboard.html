@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Teacher Dashboard - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Welcome, <span th:text="${#authentication.principal.firstName}"></span>!</h4>
+                        <p class="card-text">
+                            Department: <strong th:text="${#authentication.principal.department}"></strong><br>
+                            Designation: <strong th:text="${#authentication.principal.designation}"></strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-md-12 mb-4">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-clipboard-check fa-3x mb-3"></i>
+                                <h5 class="card-title">Mark Attendance</h5>
+                                <p class="card-text">Record student attendance for your courses</p>
+                                <a th:href="@{/teacher/attendance}" class="btn btn-primary">Mark Attendance</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <h5 class="card-title">Enter Marks</h5>
+                                <p class="card-text">Enter or update student marks</p>
+                                <a th:href="@{/teacher/marks}" class="btn btn-primary">Enter Marks</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h5 class="card-title">View Students</h5>
+                                <p class="card-text">View and manage your students</p>
+                                <a th:href="@{/teacher/students}" class="btn btn-primary">View Students</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Courses -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">My Courses</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Name</th>
+                                        <th>Code</th>
+                                        <th>Semester</th>
+                                        <th>Students</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="course : ${courses}">
+                                        <td th:text="${course.name}"></td>
+                                        <td th:text="${course.code}"></td>
+                                        <td th:text="${course.semester}"></td>
+                                        <td th:text="${course.studentCount}"></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a th:href="@{/teacher/courses/{id}/attendance(id=${course.id})}" 
+                                                   class="btn btn-sm btn-primary">Attendance</a>
+                                                <a th:href="@{/teacher/courses/{id}/marks(id=${course.id})}" 
+                                                   class="btn btn-sm btn-success">Marks</a>
+                                                <a th:href="@{/teacher/courses/{id}/students(id=${course.id})}" 
+                                                   class="btn btn-sm btn-info">Students</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(courses)}">
+                                        <td colspan="5" class="text-center">No courses assigned</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Attendance Records</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div th:each="record : ${recentAttendance}" 
+                                 class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${record.courseName}">Course Name</h6>
+                                        <small th:text="${#temporals.format(record.date, 'dd-MM-yyyy')}">Date</small>
+                                    </div>
+                                    <span class="badge bg-primary" 
+                                          th:text="${record.presentCount + ' present'}">0 present</span>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(recentAttendance)}" 
+                                 class="list-group-item text-center">
+                                No recent attendance records
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Marks Entries</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div th:each="entry : ${recentMarks}" 
+                                 class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${entry.courseName}">Course Name</h6>
+                                        <small th:text="${entry.examType}">Exam Type</small>
+                                    </div>
+                                    <small th:text="${#temporals.format(entry.createdAt, 'dd-MM-yyyy')}">Date</small>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(recentMarks)}" 
+                                 class="list-group-item text-center">
+                                No recent marks entries
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

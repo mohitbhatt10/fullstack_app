@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course Students - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Students in Course: <span th:text="${course.name + ' (' + course.code + ')'}"></span></h3>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                        <i class="fas fa-plus"></i> Add Student
+                    </button>
+                    <a th:href="@{/admin/courses}" class="btn btn-secondary ms-2">Back to Courses</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Success Message -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <!-- Error Message -->
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="student : ${enrolledStudents}">
+                                <td th:text="${student.rollNumber}"></td>
+                                <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                <td th:text="${student.department}"></td>
+                                <td th:text="${student.semester}"></td>
+                                <td>
+                                    <form th:action="@{/admin/courses/{courseId}/students/{studentId}/remove(courseId=${course.id},studentId=${student.id})}"
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to remove this student from the course?')">
+                                            <i class="fas fa-user-minus"></i> Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(enrolledStudents)}">
+                                <td colspan="5" class="text-center">No students enrolled in this course</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Student Modal -->
+        <div class="modal fade" id="addStudentModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Student to Course</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Roll Number</th>
+                                        <th>Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="student : ${availableStudents}">
+                                        <td th:text="${student.rollNumber}"></td>
+                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td>
+                                            <form th:action="@{/admin/courses/{courseId}/students/{studentId}/add(courseId=${course.id},studentId=${student.id})}"
+                                                  method="post">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-user-plus"></i> Add
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(availableStudents)}">
+                                        <td colspan="3" class="text-center">No students available to add</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
