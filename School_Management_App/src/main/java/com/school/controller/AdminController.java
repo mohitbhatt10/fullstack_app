@@ -1,27 +1,35 @@
 package com.school.controller;
 
-import com.school.dto.StudentDTO;
-import com.school.dto.TeacherDTO;
-import com.school.dto.CourseDTO;
-import com.school.service.StudentService;
-import com.school.service.TeacherService;
-import com.school.service.CourseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.school.dto.CourseDTO;
+import com.school.dto.StudentDTO;
+import com.school.dto.TeacherDTO;
+import com.school.service.CourseService;
+import com.school.service.StudentService;
+import com.school.service.TeacherService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/admin")
@@ -55,7 +63,8 @@ public class AdminController {
                     department, semester, name, page, size);
                     
         Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<StudentDTO> studentsPage = studentService.getStudentsByFilters(department, semester, name, pageable);
+        Page<StudentDTO> studentsPage = studentService.getStudentsByFilters(ObjectUtils.isEmpty(department) ? null : department
+        		, semester, ObjectUtils.isEmpty(name) ? null : name, pageable);
         
         // Add pagination data to model
         model.addAttribute("students", studentsPage);
