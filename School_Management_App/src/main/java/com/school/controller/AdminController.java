@@ -1,8 +1,19 @@
 package com.school.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.school.dto.CourseDTO;
@@ -82,6 +94,94 @@ public class AdminController {
         model.addAttribute("semesters", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
         
         return "admin/students/list";
+    }
+    
+    @GetMapping("/students/import")
+    public String showImportStudentsForm() {
+        logger.debug("Displaying import students form");
+        return "admin/students/import";
+    }
+    
+    @PostMapping("/students/import")
+    public String importStudents(@RequestParam("file") MultipartFile file,
+                                @RequestParam(value = "skipHeader", required = false, defaultValue = "true") boolean skipHeader,
+                                RedirectAttributes redirectAttributes) {
+        logger.info("Importing students from file: {}", file.getOriginalFilename());
+        
+        // Check if file is empty
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select a file to upload");
+            return "redirect:/admin/students/import";
+        }
+        
+        // Check if file is an Excel file
+        if (!file.getOriginalFilename().endsWith(".xlsx") && !file.getOriginalFilename().endsWith(".xls")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please upload an Excel file (.xlsx or .xls)");
+            return "redirect:/admin/students/import";
+        }
+        
+        try {
+            // Process the file and import students
+            List<StudentDTO> importedStudents = studentService.importStudentsFromExcel(file);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                    String.format("Successfully imported %d students", importedStudents.size()));
+            return "redirect:/admin/students";
+            
+        } catch (IOException e) {
+            logger.error("Failed to import students", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to import students: " + e.getMessage());
+            return "redirect:/admin/students/import";
+        }
+    }
+    
+    @GetMapping("/students/template")
+    public void downloadStudentTemplate(HttpServletResponse response) throws IOException {
+        logger.debug("Downloading student import template");
+        
+        // Set response headers
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=student_import_template.xlsx");
+        
+        // Create workbook
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Students");
+            
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"First Name", "Last Name", "Email", "Username", "Password", "Roll Number", "Department", "Semester"};
+            
+            // Create cell style for header
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+            
+            // Add headers
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.autoSizeColumn(i);
+            }
+            
+            // Add sample data row
+            Row sampleRow = sheet.createRow(1);
+            sampleRow.createCell(0).setCellValue("John");
+            sampleRow.createCell(1).setCellValue("Doe");
+            sampleRow.createCell(2).setCellValue("john.doe@example.com");
+            sampleRow.createCell(3).setCellValue("johndoe");
+            sampleRow.createCell(4).setCellValue("password123");
+            sampleRow.createCell(5).setCellValue("CSE001");
+            sampleRow.createCell(6).setCellValue("CSE");
+            sampleRow.createCell(7).setCellValue(1);
+            
+            // Write workbook to response
+            workbook.write(response.getOutputStream());
+        } catch (IOException e) {
+            logger.error("Error creating Excel template", e);
+            throw e;
+        }
     }
 
     @GetMapping("/students/add")

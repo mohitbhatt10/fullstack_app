@@ -1,13 +1,9 @@
 package com.school.dto;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.*;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 public class StudentDTO extends UserDTO {
     @NotBlank(message = "Roll number is required")
     @Pattern(regexp = "^[A-Z0-9]+$", message = "Roll number can only contain uppercase letters and numbers")

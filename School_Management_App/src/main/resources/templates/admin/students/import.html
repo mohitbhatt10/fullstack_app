@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Import Students - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Import Students</h2>
+            <a th:href="@{/admin/students}" class="btn btn-secondary">Back to List</a>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>Instructions:</h5>
+                    <ol>
+                        <li>Download the Excel template <a th:href="@{/admin/students/template}" class="text-primary">here</a>.</li>
+                        <li>Fill in the student details in the Excel file.</li>
+                        <li>Upload the completed Excel file using the form below.</li>
+                    </ol>
+                    <p><strong>Note:</strong> The Excel file should have the following columns:
+                        First Name, Last Name, Email, Username, Password, Roll Number, Department, Semester</p>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger" role="alert" id="errorMessage">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                <div th:unless="${errorMessage}" class="alert alert-danger d-none" role="alert" id="errorMessage"></div>
+                
+                <form id="importForm" th:action="@{/admin/students/import}" method="post" enctype="multipart/form-data" class="mt-4">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select Excel File:</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+                        <small class="text-muted">Maximum file size: 5MB</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skipHeader" name="skipHeader" checked>
+                            <label class="form-check-label" for="skipHeader">
+                                Skip header row
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import Students
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <script th:src="@{/js/excel-import.js}"></script>
+</body>
+</html>
