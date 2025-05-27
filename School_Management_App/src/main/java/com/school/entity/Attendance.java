@@ -31,6 +31,9 @@ public class Attendance {
     @Column(nullable = false)
     private Boolean present;
 
+    @Column(length = 500)
+    private String comments;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marked_by_teacher_id", nullable = false)
     @ToString.Exclude

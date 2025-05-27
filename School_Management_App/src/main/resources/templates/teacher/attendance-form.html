@@ -14,15 +14,11 @@
                 <!-- Course Selection -->
                 <div class="row mb-4">
                     <div class="col-md-4">
-                        <label for="courseSelect" class="form-label">Select Course:</label>
-                        <select class="form-select" id="courseSelect" onchange="loadStudents()">
-                            <option value="">Choose a course...</option>
-                            <option th:each="course : ${courses}"
-                                    th:value="${course.id}"
-                                    th:text="${course.name + ' (' + course.code + ')'}"
-                                    th:selected="${course.id == selectedCourseId}">
-                            </option>
-                        </select>
+                        <label for="courseSelect" class="form-label">Course:</label>
+                        <div class="form-control" id="courseSelect" readonly>
+                            <span th:text="${course.name + ' (' + course.code + ')'}"></span>
+                            <input type="hidden" name="courseId" th:value="${course.id}">
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="attendanceDate" class="form-label">Date:</label>
@@ -40,8 +36,20 @@
                       method="post" 
                       id="attendanceForm">
                     
-                    <input type="hidden" name="courseId" id="courseIdInput">
+                    <input type="hidden" name="courseId" id="courseId">
                     <input type="hidden" name="date" id="dateInput">
+                    
+                    <script>
+                        // Set values when document loads
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const courseIdHidden = document.querySelector("input[name='courseId'][type='hidden']:not(#courseId)").value;
+                            const date = document.getElementById('attendanceDate').value;
+                            
+                            // Set the values in the form's hidden fields
+                            document.getElementById('courseId').value = courseIdHidden;
+                            document.getElementById('dateInput').value = date;
+                        });
+                    </script>
                     
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -110,12 +118,12 @@
             }
 
             window.onload = function() {
-                const courseId = document.getElementById('courseSelect').value;
+                const courseIdHidden = document.querySelector("input[name='courseId']").value;
                 const date = document.getElementById('attendanceDate').value;
-                if (courseId) {
-                    document.getElementById('courseIdInput').value = courseId;
-                    document.getElementById('dateInput').value = date;
-                }
+                
+                // Set the values in the form's hidden fields
+                document.getElementById('courseId').value = courseIdHidden;
+                document.getElementById('dateInput').value = date;
             };
         </script>
         <script th:src="@{/js/attendance-form-validation.js}"></script>

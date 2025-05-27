@@ -7,6 +7,7 @@ import com.school.service.AttendanceService;
 import com.school.service.CourseService;
 import com.school.service.MarkService;
 import com.school.service.StudentService;
+import com.school.service.TeacherService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,6 +18,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,19 +26,24 @@ import java.util.Map;
 @RequestMapping("/teacher")
 public class TeacherController {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TeacherController.class);
+
     private final CourseService courseService;
     private final StudentService studentService;
     private final MarkService markService;
     private final AttendanceService attendanceService;
+    private final TeacherService teacherService;
 
     public TeacherController(CourseService courseService,
                            StudentService studentService,
                            MarkService markService,
-                           AttendanceService attendanceService) {
+                           AttendanceService attendanceService,
+                           TeacherService teacherService) {
         this.courseService = courseService;
         this.studentService = studentService;
         this.markService = markService;
         this.attendanceService = attendanceService;
+        this.teacherService = teacherService;
     }
 
     @GetMapping("/dashboard")
@@ -104,6 +111,86 @@ public class TeacherController {
         }
         attendanceService.createAttendance(attendance);
         return "redirect:/teacher/courses/" + courseId + "/attendance";
+    }
+    
+    @PostMapping("/attendance/submit")
+    public String submitAttendance(@RequestParam String courseId, 
+                                  @RequestParam String date,
+                                  @RequestParam Map<String, String> allParams, 
+                                  Principal principal,
+                                  Model model) {
+        
+        // Log the received parameters for debugging
+        logger.info("Received courseId: {}, date: {}", courseId, date);
+        
+        // Parse courseId
+        Long courseIdLong = Long.parseLong(courseId);
+        LocalDate attendanceDate = LocalDate.parse(date);
+
+        // Process attendance entries using the array structure
+        // Attendance records come in as attendances[0].studentId, attendances[0].present, etc.
+        Map<Long, Boolean> studentAttendances = new HashMap<>();
+        Map<Long, String> studentRemarks = new HashMap<>();
+        
+        for (String key : allParams.keySet()) {
+            if (key.matches("attendances\\[\\d+\\]\\.studentId")) {
+                // Extract the index from the parameter name
+                String indexStr = key.substring("attendances[".length(), key.indexOf("]"));
+                int index = Integer.parseInt(indexStr);
+                
+                // Get the studentId value
+                Long studentId = Long.parseLong(allParams.get(key));
+                
+                // Check if the corresponding "present" parameter exists
+                String presentKey = "attendances[" + index + "].present";
+                boolean isPresent = allParams.containsKey(presentKey);
+                
+                // Store the values
+                studentAttendances.put(studentId, isPresent);
+                
+                // Get remarks if available
+                String remarksKey = "attendances[" + index + "].remarks";
+                if (allParams.containsKey(remarksKey)) {
+                    studentRemarks.put(studentId, allParams.get(remarksKey));
+                }
+            }
+        }
+        
+        // Get the teacher ID from the authenticated user
+        String username = principal.getName();
+        Long teacherId = teacherService.getTeacherByUsername(username).getId();
+        
+        if (teacherId == null) {
+            logger.error("Could not find teacher with username: {}", username);
+            throw new RuntimeException("Teacher not found. Please log in with a valid teacher account.");
+        }
+        
+        logger.info("Teacher ID {} is marking attendance for course {}", teacherId, courseIdLong);
+        
+        // Now process all the attendance records
+        for (Map.Entry<Long, Boolean> entry : studentAttendances.entrySet()) {
+            Long studentId = entry.getKey();
+            Boolean isPresent = entry.getValue();
+        
+            AttendanceDTO attendance = new AttendanceDTO();
+            attendance.setStudentId(studentId);
+            attendance.setCourseId(courseIdLong);
+            attendance.setDate(attendanceDate);
+            attendance.setPresent(isPresent);
+        
+            // Set teacher who marked attendance
+            attendance.setMarkedByTeacherId(teacherId);
+            
+            // Add remarks if available
+            if (studentRemarks.containsKey(studentId)) {
+                // If your AttendanceDTO has a remarks field, set it here
+                // attendance.setRemarks(studentRemarks.get(studentId));
+            }
+
+            attendanceService.createAttendance(attendance);
+        }
+        
+        return "redirect:/teacher/courses/" + courseIdLong + "/attendance";
     }
 
     @GetMapping("/courses/{courseId}/marks")

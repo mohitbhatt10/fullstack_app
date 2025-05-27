@@ -49,7 +49,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public AttendanceDTO createAttendance(AttendanceDTO attendanceDTO) {
-        validateAttendanceSchedule(attendanceDTO);
+        //validateAttendanceSchedule(attendanceDTO);
 
         Attendance attendance = new Attendance();
         mapDTOToEntity(attendanceDTO, attendance);

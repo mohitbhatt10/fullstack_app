@@ -62,7 +62,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="record : ${attendanceRecords}">
-                                <td th:text="${#dates.format(record.date, 'yyyy-MM-dd')}">2025-05-20</td>
+                                <td th:text="${#temporals.format(record.date, 'yyyy-MM-dd')}">2025-05-20</td>
                                 <td th:text="${record.studentName}">John Doe</td>
                                 <td>
                                     <span th:if="${record.present}" class="badge bg-success">Present</span>
