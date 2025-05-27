@@ -25,10 +25,13 @@ public class AttendanceDTO {
     @NotNull(message = "Teacher who marked attendance is required")
     private Long markedByTeacherId;
 
+    private Long scheduleId;
+
     private String comments;
 
     // Display-only fields
     private String studentName;
     private String courseName;
     private String teacherName;
+    private String scheduleInfo;
 }

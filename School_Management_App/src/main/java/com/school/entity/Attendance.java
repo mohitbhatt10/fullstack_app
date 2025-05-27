@@ -35,6 +35,11 @@ public class Attendance {
     private String comments;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
+    @ToString.Exclude
+    private CourseSchedule schedule;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marked_by_teacher_id", nullable = false)
     @ToString.Exclude
     private Teacher markedByTeacher;

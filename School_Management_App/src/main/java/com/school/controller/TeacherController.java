@@ -3,11 +3,7 @@ package com.school.controller;
 import com.school.dto.AttendanceDTO;
 import com.school.dto.MarkDTO;
 import com.school.dto.StudentDTO;
-import com.school.service.AttendanceService;
-import com.school.service.CourseService;
-import com.school.service.MarkService;
-import com.school.service.StudentService;
-import com.school.service.TeacherService;
+import com.school.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,17 +29,19 @@ public class TeacherController {
     private final MarkService markService;
     private final AttendanceService attendanceService;
     private final TeacherService teacherService;
+    private final CourseScheduleService courseScheduleService;
 
     public TeacherController(CourseService courseService,
                            StudentService studentService,
                            MarkService markService,
                            AttendanceService attendanceService,
-                           TeacherService teacherService) {
+                           TeacherService teacherService, CourseScheduleService courseScheduleService) {
         this.courseService = courseService;
         this.studentService = studentService;
         this.markService = markService;
         this.attendanceService = attendanceService;
         this.teacherService = teacherService;
+        this.courseScheduleService = courseScheduleService;
     }
 
     @GetMapping("/dashboard")
@@ -64,6 +62,7 @@ public class TeacherController {
         model.addAttribute("course", courseService.getCourseById(courseId));
         model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
         model.addAttribute("attendance", new AttendanceDTO());
+        model.addAttribute("schedules", courseScheduleService.getSchedulesByCourseId(courseId));
         
         // Add attendance window information
         LocalDate today = LocalDate.now();
@@ -101,12 +100,16 @@ public class TeacherController {
         
         return "teacher/attendance";
     }
-    
+
     @PostMapping("/courses/{courseId}/attendance")
-    public String markAttendance(@PathVariable Long courseId,
-                               @Valid @ModelAttribute("attendance") AttendanceDTO attendance,
-                               BindingResult result) {
-        if (result.hasErrors()) {
+        public String markAttendance(@PathVariable Long courseId,
+                                   @Valid @ModelAttribute("attendance") AttendanceDTO attendance,
+                                   BindingResult result,
+                                   Model model) {
+            if (result.hasErrors()) {
+                model.addAttribute("course", courseService.getCourseById(courseId));
+                model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
+                model.addAttribute("schedules", courseScheduleService.getSchedulesByCourseId(courseId));
             return "teacher/attendance-form";
         }
         attendanceService.createAttendance(attendance);
@@ -126,6 +129,7 @@ public class TeacherController {
         // Parse courseId
         Long courseIdLong = Long.parseLong(courseId);
         LocalDate attendanceDate = LocalDate.parse(date);
+        Long scheduleId = Long.parseLong(allParams.get("scheduleId"));
 
         // Process attendance entries using the array structure
         // Attendance records come in as attendances[0].studentId, attendances[0].present, etc.
@@ -186,7 +190,7 @@ public class TeacherController {
                 // If your AttendanceDTO has a remarks field, set it here
                 // attendance.setRemarks(studentRemarks.get(studentId));
             }
-
+            attendance.setScheduleId(scheduleId);
             attendanceService.createAttendance(attendance);
         }
         

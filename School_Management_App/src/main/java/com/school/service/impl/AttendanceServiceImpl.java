@@ -244,6 +244,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         Teacher teacher = teacherRepository.findById(dto.getMarkedByTeacherId())
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
         entity.setMarkedByTeacher(teacher);
+
+        CourseSchedule schedule = courseScheduleRepository.findById(dto.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Course Schedule not found"));
+        entity.setSchedule(schedule);
     }
 
     private AttendanceDTO mapEntityToDTO(Attendance entity) {
@@ -257,7 +261,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         dto.setStudentName(entity.getStudent().getFirstName() + " " + entity.getStudent().getLastName());
         dto.setCourseName(entity.getCourse().getName());
         dto.setTeacherName(entity.getMarkedByTeacher().getFirstName() + " " + entity.getMarkedByTeacher().getLastName());
-
+        dto.setScheduleId(entity.getSchedule() == null ? null : entity.getSchedule().getId());
+        dto.setScheduleInfo(entity.getSchedule() == null? null : entity.getSchedule().getDayOfWeek()+": "+entity.getSchedule().getStartTime()+"-"+entity.getSchedule().getEndTime());
         return dto;
     }
 }

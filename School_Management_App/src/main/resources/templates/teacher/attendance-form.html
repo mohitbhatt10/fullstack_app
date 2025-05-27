@@ -26,6 +26,17 @@
                                th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                                onchange="loadStudents()">
                     </div>
+                    <div class="col-md-4">
+                        <label for="scheduleSelect" class="form-label">Schedule:</label>
+                        <select class="form-select" id="scheduleSelect" name="scheduleId">
+                            <option value="">-- Select Schedule --</option>
+                            <option th:each="schedule : ${schedules}" 
+                                    th:value="${schedule.id}" 
+                                    th:text="${schedule.dayOfWeek + ' ' + #temporals.format(schedule.startTime, 'HH:mm') + '-' + #temporals.format(schedule.endTime, 'HH:mm') + ' (' + schedule.classroom + ')'}">
+                                Monday 09:00-10:30 (Room 101)
+                            </option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Time Window Information -->
@@ -38,6 +49,7 @@
                     
                     <input type="hidden" name="courseId" id="courseId">
                     <input type="hidden" name="date" id="dateInput">
+                    <input type="hidden" name="scheduleId" id="scheduleIdInput">
                     
                     <script>
                         // Set values when document loads
@@ -48,6 +60,11 @@
                             // Set the values in the form's hidden fields
                             document.getElementById('courseId').value = courseIdHidden;
                             document.getElementById('dateInput').value = date;
+                            
+                            // Add event listener for schedule select change
+                            document.getElementById('scheduleSelect').addEventListener('change', function() {
+                                document.getElementById('scheduleIdInput').value = this.value;
+                            });
                         });
                     </script>
                     

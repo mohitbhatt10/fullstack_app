@@ -57,6 +57,7 @@
                                 <th>Date</th>
                                 <th>Student</th>
                                 <th>Status</th>
+                                <th>Schedule</th>
                                 <th>Comments</th>
                             </tr>
                         </thead>
@@ -68,6 +69,7 @@
                                     <span th:if="${record.present}" class="badge bg-success">Present</span>
                                     <span th:unless="${record.present}" class="badge bg-danger">Absent</span>
                                 </td>
+                                <td th:text="${record.scheduleInfo ?: '-'}">Monday 09:00-10:30 (Room 101)</td>
                                 <td th:text="${record.comments ?: '-'}">Late by 10 minutes</td>
                             </tr>
                         </tbody>
