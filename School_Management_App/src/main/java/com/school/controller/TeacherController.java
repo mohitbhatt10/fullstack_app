@@ -2,6 +2,7 @@ package com.school.controller;
 
 import com.school.dto.AttendanceDTO;
 import com.school.dto.MarkDTO;
+import com.school.dto.StudentDTO;
 import com.school.service.AttendanceService;
 import com.school.service.CourseService;
 import com.school.service.MarkService;
@@ -15,6 +16,8 @@ import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -49,7 +52,7 @@ public class TeacherController {
         return "teacher/course/students";
     }
 
-    @GetMapping("/courses/{courseId}/attendance")
+    @GetMapping("/courses/{courseId}/attendance/form")
     public String showAttendanceForm(@PathVariable Long courseId, Model model) {
         model.addAttribute("course", courseService.getCourseById(courseId));
         model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
@@ -64,7 +67,34 @@ public class TeacherController {
         
         return "teacher/course/attendance-form";
     }
-
+    
+    @GetMapping("/courses/{courseId}/attendance")
+    public String viewCourseAttendance(@PathVariable Long courseId, Model model, Principal principal) {
+        // Get the current authenticated teacher's username
+        String username = principal.getName();
+        
+        // Get course details
+        model.addAttribute("course", courseService.getCourseById(courseId));
+        
+        // Get attendance records for this course (if you have this method)
+        // If not available, use an empty list or implement in AttendanceService
+        List<AttendanceDTO> attendanceRecords = new ArrayList<>();
+        try {
+            attendanceRecords = attendanceService.getAttendanceByCourseId(courseId);
+        } catch (Exception e) {
+            // Handle case when method doesn't exist or errors
+            attendanceRecords = new ArrayList<>();
+        }
+        
+        // Get students enrolled in the course
+        List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
+        
+        model.addAttribute("attendanceRecords", attendanceRecords);
+        model.addAttribute("students", students);
+        
+        return "teacher/attendance";
+    }
+    
     @PostMapping("/courses/{courseId}/attendance")
     public String markAttendance(@PathVariable Long courseId,
                                @Valid @ModelAttribute("attendance") AttendanceDTO attendance,

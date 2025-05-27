@@ -76,9 +76,9 @@ public class GlobalExceptionHandler {
     public String handleNoResourceFoundException(NoResourceFoundException ex, HttpServletRequest request) {
         // Only log favicon.ico errors at debug level
         if (request.getRequestURI().endsWith("favicon.ico")) {
-            logger.debug("Favicon request: {}", ex.getMessage());
+            logger.debug("Favicon request: {}", ex);
         } else {
-            logger.warn("Resource not found: {}", ex.getMessage());
+            logger.warn("Resource not found: {}", ex);
         }
         return "error";
     }
