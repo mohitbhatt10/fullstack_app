@@ -14,6 +14,9 @@ public class StudentDTO extends UserDTO {
     @Max(value = 8, message = "Semester must be between 1 and 8")
     private Integer semester;
 
+    // Add the missing property
+    private boolean present;
+
     @NotBlank(message = "Department is required")
     private String department;
 

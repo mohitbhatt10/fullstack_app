@@ -65,7 +65,7 @@ public class TeacherController {
             model.addAttribute("timeWindow", timeWindow);
         }
         
-        return "teacher/course/attendance-form";
+        return "teacher/attendance-form";
     }
     
     @GetMapping("/courses/{courseId}/attendance")
@@ -100,7 +100,7 @@ public class TeacherController {
                                @Valid @ModelAttribute("attendance") AttendanceDTO attendance,
                                BindingResult result) {
         if (result.hasErrors()) {
-            return "teacher/course/attendance-form";
+            return "teacher/attendance-form";
         }
         attendanceService.createAttendance(attendance);
         return "redirect:/teacher/courses/" + courseId + "/attendance";
