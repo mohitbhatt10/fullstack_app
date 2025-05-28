@@ -3,6 +3,18 @@
       th:replace="~{layout :: layout(~{::title}, ~{::section})}">
 <head>
     <title>Mark Attendance - School Management System</title>
+    <style>
+        .attendance-elements input[disabled], 
+        .attendance-elements button[disabled],
+        .attendance-elements select[disabled] {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        #scheduleWarning {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <section>
@@ -21,21 +33,23 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label for="attendanceDate" class="form-label">Date:</label>
-                        <input type="date" class="form-control" id="attendanceDate" 
-                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
-                               onchange="loadStudents()">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="scheduleSelect" class="form-label">Schedule:</label>
-                        <select class="form-select" id="scheduleSelect" name="scheduleId">
+                        <label for="scheduleSelect" class="form-label">Schedule: <span class="text-danger">*</span></label>
+                        <select class="form-select" id="scheduleSelect" name="scheduleId" onchange="handleScheduleChange()">
                             <option value="">-- Select Schedule --</option>
                             <option th:each="schedule : ${schedules}" 
                                     th:value="${schedule.id}" 
-                                    th:text="${schedule.dayOfWeek + ' ' + #temporals.format(schedule.startTime, 'HH:mm') + '-' + #temporals.format(schedule.endTime, 'HH:mm') + ' (' + schedule.classroom + ')'}">
+                                    th:text="${schedule.dayOfWeek + ' ' + #temporals.format(schedule.startTime, 'HH:mm') + '-' + #temporals.format(schedule.endTime, 'HH:mm') + ' (' + schedule.classroom + ')'}"
+                                    th:selected="${selectedScheduleId != null && schedule.id == selectedScheduleId}">
                                 Monday 09:00-10:30 (Room 101)
                             </option>
                         </select>
+                        <div class="form-text text-muted">Please select a schedule first</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="attendanceDate" class="form-label">Date:</label>
+                        <input type="date" class="form-control" id="attendanceDate" 
+                               th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                               onchange="loadStudents()" disabled>
                     </div>
                 </div>
 
@@ -45,11 +59,15 @@
                 <form th:if="${not #lists.isEmpty(students)}" 
                       th:action="@{/teacher/attendance/submit}" 
                       method="post" 
-                      id="attendanceForm">
+                      id="attendanceForm" class="attendance-elements">
                     
                     <input type="hidden" name="courseId" id="courseId">
                     <input type="hidden" name="date" id="dateInput">
                     <input type="hidden" name="scheduleId" id="scheduleIdInput">
+                    
+                    <div class="alert alert-warning mb-4" id="scheduleWarning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Please select a schedule before marking attendance.
+                    </div>
                     
                     <script>
                         // Set values when document loads
@@ -61,11 +79,34 @@
                             document.getElementById('courseId').value = courseIdHidden;
                             document.getElementById('dateInput').value = date;
                             
-                            // Add event listener for schedule select change
-                            document.getElementById('scheduleSelect').addEventListener('change', function() {
-                                document.getElementById('scheduleIdInput').value = this.value;
-                            });
+                            // Initialize the form as disabled
+                            disableAttendanceElements(true);
                         });
+                        
+                        // Function to handle schedule change
+                        function handleScheduleChange() {
+                            const scheduleSelect = document.getElementById('scheduleSelect');
+                            const scheduleValue = scheduleSelect.value;
+                            document.getElementById('scheduleIdInput').value = scheduleValue;
+                            
+                            // Enable/disable date and form elements based on schedule selection
+                            const isScheduleSelected = scheduleValue !== '';
+                            document.getElementById('attendanceDate').disabled = !isScheduleSelected;
+                            disableAttendanceElements(!isScheduleSelected);
+                            
+                            // Show/hide warning
+                            document.getElementById('scheduleWarning').style.display = isScheduleSelected ? 'none' : 'block';
+                        }
+                        
+                        // Function to disable/enable all attendance form elements
+                        function disableAttendanceElements(disable) {
+                            const formElements = document.querySelectorAll('.attendance-elements input, .attendance-elements button, .attendance-elements select, .attendance-elements textarea');
+                            formElements.forEach(element => {
+                                if (element.id !== 'courseId' && element.id !== 'dateInput' && element.id !== 'scheduleIdInput') {
+                                    element.disabled = disable;
+                                }
+                            });
+                        }
                     </script>
                     
                     <div class="table-responsive">
@@ -84,16 +125,16 @@
                                     <td th:text="${student.firstName + ' ' + student.lastName}"></td>
                                     <td>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
+                                            <input class="form-check-input attendance-elements" type="checkbox" 
                                                    th:name="'attendances[' + ${stat.index} + '].present'"
                                                    th:checked="${student.present}">
                                             <input type="hidden" 
                                                    th:name="'attendances[' + ${stat.index} + '].studentId'"
                                                    th:value="${student.id}">
                                         </div>
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control form-control-sm"
+                                                                            </td>
+                                                                            <td>
+                                        <input type="text" class="form-control form-control-sm attendance-elements"
                                                th:name="'attendances[' + ${stat.index} + '].remarks'"
                                                placeholder="Optional remarks">
                                     </td>
@@ -105,10 +146,10 @@
                     <div class="d-flex justify-content-between mt-3">
                         <button type="button" class="btn btn-secondary" onclick="history.back()">Back</button>
                         <div>
-                            <button type="button" class="btn btn-outline-primary me-2" onclick="markAllPresent()">
+                            <button type="button" class="btn btn-outline-primary me-2 attendance-elements" onclick="markAllPresent()">
                                 Mark All Present
                             </button>
-                            <button type="submit" class="btn btn-primary">Save Attendance</button>
+                            <button type="submit" class="btn btn-primary attendance-elements">Save Attendance</button>
                         </div>
                     </div>
                 </form>
@@ -124,16 +165,21 @@
             function loadStudents() {
                 const courseId = document.getElementById('courseSelect').value;
                 const date = document.getElementById('attendanceDate').value;
-                if (courseId && date) {
-                    window.location.href = `/teacher/attendance?courseId=${courseId}&date=${date}`;
+                const scheduleId = document.getElementById('scheduleSelect').value;
+                
+                if (courseId && date && scheduleId) {
+                    window.location.href = `/teacher/attendance?courseId=${courseId}&date=${date}&scheduleId=${scheduleId}`;
+                } else if (!scheduleId) {
+                    alert('Please select a schedule first.');
+                    return false;
                 }
             }
-
+        
             function markAllPresent() {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(checkbox => checkbox.checked = true);
             }
-
+        
             window.onload = function() {
                 const courseIdHidden = document.querySelector("input[name='courseId']").value;
                 const date = document.getElementById('attendanceDate').value;
@@ -141,6 +187,9 @@
                 // Set the values in the form's hidden fields
                 document.getElementById('courseId').value = courseIdHidden;
                 document.getElementById('dateInput').value = date;
+                
+                // Initialize schedule dependency
+                handleScheduleChange();
             };
         </script>
         <script th:src="@{/js/attendance-form-validation.js}"></script>
