@@ -184,6 +184,19 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return timeWindow;
     }
+    
+    @Override
+    public boolean existsAttendanceForCourseScheduleAndDate(Long courseId, Long scheduleId, LocalDate date) {
+        return !attendanceRepository.findByCourseScheduleAndDate(courseId, scheduleId, date).isEmpty();
+    }
+    
+    @Override
+    public List<AttendanceDTO> getAttendanceByCourseScheduleAndDate(Long courseId, Long scheduleId, LocalDate date) {
+        List<Attendance> attendances = attendanceRepository.findByCourseScheduleAndDate(courseId, scheduleId, date);
+        return attendances.stream()
+            .map(this::mapEntityToDTO)
+            .collect(Collectors.toList());
+    }
 
     private void validateAttendanceSchedule(AttendanceDTO attendanceDTO) {
         DayOfWeek dayOfWeek = attendanceDTO.getDate().getDayOfWeek();

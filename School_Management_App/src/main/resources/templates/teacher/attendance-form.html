@@ -54,6 +54,34 @@
 </head>
 <body>
     <section>
+        <!-- Modal for attendance already exists notification -->
+        <div class="modal fade" id="attendanceExistsModal" tabindex="-1" aria-labelledby="attendanceExistsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title" id="attendanceExistsModalLabel">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Attendance Records Exist
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Attendance has already been recorded for this schedule and date.</p>
+                        <p>To modify existing attendance records, please use the edit attendance page.</p>
+                        <div id="existingRecordsSummary">
+                            <span id="presentCount">0</span> students marked present out of 
+                            <span id="totalCount">0</span> total students.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelAttendanceButton" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="viewAttendanceLink" class="btn btn-primary">
+                            View Attendance Records
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="card">
             <div class="card-header">
                 <h3>Mark Attendance</h3>
@@ -427,12 +455,65 @@
                 
                 // Only proceed if date is valid
                 if (isValid) {
-                    loadStudents();
+                    // First check if attendance already exists
+                    checkExistingAttendance(dateInput.value);
                 }
             }
             
+            // Function to check if attendance records already exist
+            function checkExistingAttendance(date) {
+                const courseId = document.querySelector("input[name='courseId'][type='hidden']:not(#courseId)").value;
+                const scheduleId = document.getElementById('scheduleSelect').value;
+                
+                if (!courseId || !scheduleId || !date) {
+                    return;
+                }
+                
+                // Show loading message
+                const dateHelperText = document.getElementById('dateHelperText');
+                const originalText = dateHelperText.innerHTML;
+                dateHelperText.innerHTML = '<i class="bi bi-hourglass-split"></i> Checking for existing records...';
+                
+                // Make API call to check if attendance exists
+                fetch(`/api/attendance/check?courseId=${courseId}&scheduleId=${scheduleId}&date=${date}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Reset helper text
+                        dateHelperText.innerHTML = originalText;
+                        
+                        if (data.exists) {
+                            // Update modal with record info
+                            document.getElementById('presentCount').textContent = data.presentCount || 0;
+                            document.getElementById('totalCount').textContent = data.count || 0;
+                            
+                            // Set the view attendance link
+                            document.getElementById('viewAttendanceLink').href = 
+                                `/teacher/courses/${courseId}/attendance`;
+                            
+                            // Show the modal
+                            const modal = new bootstrap.Modal(document.getElementById('attendanceExistsModal'));
+                            modal.show();
+                        } else {
+                            // No existing records, proceed with normal flow
+                            loadStudents();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking attendance:', error);
+                        dateHelperText.innerHTML = originalText;
+                        
+                        // If API fails, continue with normal flow to avoid blocking the user
+                        loadStudents();
+                    });
+            }
+            
             function loadStudents() {
-                const courseId = document.getElementById('courseSelect').value;
+                const courseId = document.querySelector("input[name='courseId'][type='hidden']:not(#courseId)").value;
                 const date = document.getElementById('attendanceDate').value;
                 const scheduleId = document.getElementById('scheduleSelect').value;
                 
@@ -454,7 +535,11 @@
                 }
                 
                 if (courseId && date && scheduleId) {
-                    window.location.href = `/teacher/attendance?courseId=${courseId}&date=${date}&scheduleId=${scheduleId}`;
+                    // Show loading indicator
+                    document.body.style.cursor = 'wait';
+                    
+                    // Navigate to the attendance form with parameters
+                    window.location.href = `/teacher/courses/${courseId}/attendance/form?date=${date}&scheduleId=${scheduleId}`;
                 }
             }
         
@@ -478,6 +563,42 @@
                 const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                 tooltipTriggerList.map(function (tooltipTriggerEl) {
                     return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+                
+                // Make sure Bootstrap is available for the modal
+                if (typeof bootstrap === 'undefined') {
+                    console.error('Bootstrap is not loaded. Modal functionality may not work properly.');
+                }
+                
+                // Add event listener for the cancel button on the attendance exists modal
+                document.getElementById('cancelAttendanceButton').addEventListener('click', function() {
+                    // Reset schedule and date fields
+                    const scheduleSelect = document.getElementById('scheduleSelect');
+                    const dateInput = document.getElementById('attendanceDate');
+                    
+                    // Reset schedule
+                    scheduleSelect.value = '';
+                    
+                    // Reset date
+                    dateInput.value = '';
+                    dateInput.disabled = true;
+                    document.getElementById('dateInput').value = '';
+                    
+                    // Reset global state variables
+                    isScheduleSelected = false;
+                    isValidDateSelected = false;
+                    
+                    // Reset UI
+                    document.getElementById('dateHelperText').textContent = 'Select a schedule first';
+                    document.querySelector('label[for="attendanceDate"]').innerHTML = 'Date:';
+                    dateInput.classList.remove('required-field');
+                    
+                    // Update warnings and UI
+                    document.getElementById('scheduleWarning').style.display = 'block';
+                    document.getElementById('dateWarning').style.display = 'none';
+                    
+                    // Disable form elements
+                    disableAttendanceElements(true);
                 });
             };
         </script>
