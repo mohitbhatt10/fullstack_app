@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Edit Attendance - School Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Edit Attendance</h2>
+            <a th:href="@{/teacher/courses/{id}/attendance(id=${course.id})}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Attendance List
+            </a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Attendance Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Course:</strong> <span th:text="${course.name + ' (' + course.code + ')'}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Schedule:</strong> <span th:text="${scheduleInfo}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Date:</strong> <span th:text="${#temporals.format(attendanceDate, 'yyyy-MM-dd')}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form th:action="@{/teacher/attendance/update}" method="post" id="editAttendanceForm">
+            <input type="hidden" name="courseId" th:value="${course.id}">
+            <input type="hidden" name="scheduleId" th:value="${scheduleId}">
+            <input type="hidden" name="date" th:value="${#temporals.format(attendanceDate, 'yyyy-MM-dd')}">
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Student Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle-fill"></i> 
+                        Update attendance records for this session. Changes will be saved once you click the "Update Attendance" button.
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Present</th>
+                                    <th>Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="record, stat : ${attendanceRecords}">
+                                    <td th:text="${record.studentId}"></td>
+                                    <td th:text="${record.studentName}"></td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   th:name="'attendances[' + ${stat.index} + '].present'"
+                                                   th:checked="${record.present}">
+                                            <input type="hidden" 
+                                                   th:name="'attendances[' + ${stat.index} + '].id'"
+                                                   th:value="${record.id}">
+                                            <input type="hidden" 
+                                                   th:name="'attendances[' + ${stat.index} + '].studentId'"
+                                                   th:value="${record.studentId}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm"
+                                               th:name="'attendances[' + ${stat.index} + '].comments'"
+                                               th:value="${record.comments}"
+                                               placeholder="Optional Comments">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                        <div>
+                            <button type="button" class="btn btn-outline-primary me-2" onclick="markAllPresent()">
+                                Mark All Present
+                            </button>
+                            <button type="submit" class="btn btn-primary">Update Attendance</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <script>
+            function markAllPresent() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+            }
+        </script>
+    </section>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.school.controller;
 
 import com.school.dto.AttendanceDTO;
+import com.school.dto.AttendanceSummaryDTO;
 import com.school.dto.MarkDTO;
 import com.school.dto.StudentDTO;
 import com.school.service.*;
@@ -82,23 +83,111 @@ public class TeacherController {
         // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
         
-        // Get attendance records for this course (if you have this method)
-        // If not available, use an empty list or implement in AttendanceService
-        List<AttendanceDTO> attendanceRecords = new ArrayList<>();
-        try {
-            attendanceRecords = attendanceService.getAttendanceByCourseId(courseId);
-        } catch (Exception e) {
-            // Handle case when method doesn't exist or errors
-            attendanceRecords = new ArrayList<>();
+            // Get attendance summary records for this course
+            List<AttendanceSummaryDTO> attendanceSummaryList = attendanceService.getAttendanceSummaryByCourseId(courseId);
+            
+            // Get attendance records for this course
+            List<AttendanceDTO> attendanceRecords = new ArrayList<>();
+            try {
+                attendanceRecords = attendanceService.getAttendanceByCourseId(courseId);
+            } catch (Exception e) {
+                // Handle case when method doesn't exist or errors
+                attendanceRecords = new ArrayList<>();
+            }
+            
+            // Get students enrolled in the course
+            List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
+            
+            model.addAttribute("attendanceRecords", attendanceRecords);
+            model.addAttribute("attendanceSummaryList", attendanceSummaryList);
+            model.addAttribute("students", students);
+            
+            return "teacher/attendance";
+        }
+    
+        @GetMapping("/courses/{courseId}/attendance/{scheduleId}/{date}/edit")
+        public String editAttendance(@PathVariable Long courseId, 
+                                    @PathVariable Long scheduleId,
+                                    @PathVariable String date,
+                                    Model model, 
+                                    Principal principal) {
+            
+            // Get course details
+            model.addAttribute("course", courseService.getCourseById(courseId));
+            
+            // Parse the date
+            LocalDate attendanceDate = LocalDate.parse(date);
+            model.addAttribute("attendanceDate", attendanceDate);
+            model.addAttribute("scheduleId", scheduleId);
+            
+            // Get schedule info
+            String scheduleInfo = "";
+            List<AttendanceDTO> attendanceRecords = attendanceService.getAttendanceByCourseScheduleAndDate(courseId, scheduleId, attendanceDate);
+            if (!attendanceRecords.isEmpty()) {
+                scheduleInfo = attendanceRecords.get(0).getScheduleInfo();
+            }
+            model.addAttribute("scheduleInfo", scheduleInfo);
+            
+            // Get attendance records for this course, schedule and date
+            model.addAttribute("attendanceRecords", attendanceRecords);
+            
+            return "teacher/edit-attendance";
         }
         
-        // Get students enrolled in the course
-        List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
-        
-        model.addAttribute("attendanceRecords", attendanceRecords);
-        model.addAttribute("students", students);
-        
-        return "teacher/attendance";
+        @PostMapping("/attendance/update")
+        public String updateAttendance(@RequestParam Long courseId,
+                                     @RequestParam Long scheduleId,
+                                     @RequestParam String date,
+                                     @RequestParam Map<String, String> allParams,
+                                     Principal principal,
+                                     Model model) {
+            
+            LocalDate attendanceDate = LocalDate.parse(date);
+            List<AttendanceDTO> attendanceUpdates = new ArrayList<>();
+
+            // Get the teacher ID from the authenticated user
+            String username = principal.getName();
+            Long teacherId = teacherService.getTeacherByUsername(username).getId();
+            // Process attendance entries using the array structure
+            for (String key : allParams.keySet()) {
+                if (key.matches("attendances\\[\\d+\\]\\.id")) {
+                    // Extract the index from the parameter name
+                    String indexStr = key.substring("attendances[".length(), key.indexOf("]"));
+                    int index = Integer.parseInt(indexStr);
+                    
+                    // Get the attendance ID
+                    Long attendanceId = Long.parseLong(allParams.get(key));
+                    
+                    // Get the student ID
+                    String studentIdKey = "attendances[" + index + "].studentId";
+                    Long studentId = Long.parseLong(allParams.get(studentIdKey));
+                    
+                    // Check if the corresponding "present" parameter exists
+                    String presentKey = "attendances[" + index + "].present";
+                    boolean isPresent = allParams.containsKey(presentKey);
+                    
+                    // Get remarks if available
+                    String remarksKey = "attendances[" + index + "].comments";
+                    String comments = allParams.getOrDefault(remarksKey, "");
+                    
+                    // Create the attendance update object
+                    AttendanceDTO attendance = new AttendanceDTO();
+                    attendance.setId(attendanceId);
+                    attendance.setStudentId(studentId);
+                    attendance.setPresent(isPresent);
+                    attendance.setComments(comments);
+                    attendance.setScheduleId(scheduleId);
+                    attendance.setCourseId(courseId);
+                    attendance.setMarkedByTeacherId(teacherId);
+                    attendance.setDate(attendanceDate);
+
+                    attendanceUpdates.add(attendance);
+                }
+            }
+            
+            // Update the attendance records
+            attendanceService.updateAttendance(attendanceUpdates);
+            return "redirect:/teacher/courses/" + courseId + "/attendance";
     }
 
     @PostMapping("/courses/{courseId}/attendance")
@@ -134,7 +223,7 @@ public class TeacherController {
         // Process attendance entries using the array structure
         // Attendance records come in as attendances[0].studentId, attendances[0].present, etc.
         Map<Long, Boolean> studentAttendances = new HashMap<>();
-        Map<Long, String> studentRemarks = new HashMap<>();
+        Map<Long, String> studentComments = new HashMap<>();
         
         for (String key : allParams.keySet()) {
             if (key.matches("attendances\\[\\d+\\]\\.studentId")) {
@@ -153,9 +242,9 @@ public class TeacherController {
                 studentAttendances.put(studentId, isPresent);
                 
                 // Get remarks if available
-                String remarksKey = "attendances[" + index + "].remarks";
-                if (allParams.containsKey(remarksKey)) {
-                    studentRemarks.put(studentId, allParams.get(remarksKey));
+                String comments = "attendances[" + index + "].comments";
+                if (allParams.containsKey(comments)) {
+                    studentComments.put(studentId, allParams.get(comments));
                 }
             }
         }
@@ -185,10 +274,10 @@ public class TeacherController {
             // Set teacher who marked attendance
             attendance.setMarkedByTeacherId(teacherId);
             
-            // Add remarks if available
-            if (studentRemarks.containsKey(studentId)) {
-                // If your AttendanceDTO has a remarks field, set it here
-                // attendance.setRemarks(studentRemarks.get(studentId));
+            // Add comments if available
+            if (studentComments.containsKey(studentId)) {
+                // If your AttendanceDTO has a comment field, set it here
+                attendance.setComments(studentComments.get(studentId));
             }
             attendance.setScheduleId(scheduleId);
             attendanceService.createAttendance(attendance);

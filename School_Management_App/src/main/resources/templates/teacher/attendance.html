@@ -44,33 +44,41 @@
             </div>
             <div class="card-body">
                 <!-- If no attendance records -->
-                <div th:if="${attendanceRecords.empty}" class="text-center py-5">
+                <div th:if="${attendanceSummaryList.empty}" class="text-center py-5">
                     <h5 class="mt-3">No Attendance Records Found</h5>
                     <p class="text-muted">Start marking attendance by clicking the "Mark Attendance" button above.</p>
                 </div>
                 
                 <!-- If attendance records exist -->
-                <div th:unless="${attendanceRecords.empty}" class="table-responsive">
+                <div th:unless="${attendanceSummaryList.empty}" class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>Date</th>
-                                <th>Student</th>
-                                <th>Status</th>
                                 <th>Schedule</th>
-                                <th>Comments</th>
+                                <th>Students Present</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="record : ${attendanceRecords}">
+                            <tr th:each="record : ${attendanceSummaryList}">
                                 <td th:text="${#temporals.format(record.date, 'yyyy-MM-dd')}">2025-05-20</td>
-                                <td th:text="${record.studentName}">John Doe</td>
+                                <td th:text="${record.scheduleInfo}">Monday 09:00-10:30 (Room 101)</td>
                                 <td>
-                                    <span th:if="${record.present}" class="badge bg-success">Present</span>
-                                    <span th:unless="${record.present}" class="badge bg-danger">Absent</span>
+                                    <span th:text="${record.presentCount + ' of ' + record.totalCount}">23 of 25</span>
+                                    <div class="progress" style="height: 5px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="'width: ' + (${record.presentCount} * 100 / ${record.totalCount}) + '%'"
+                                             th:aria-valuenow="${record.presentCount}"
+                                             aria-valuemin="0" th:aria-valuemax="${record.totalCount}"></div>
+                                    </div>
                                 </td>
-                                <td th:text="${record.scheduleInfo ?: '-'}">Monday 09:00-10:30 (Room 101)</td>
-                                <td th:text="${record.comments ?: '-'}">Late by 10 minutes</td>
+                                <td>
+                                    <a th:href="@{/teacher/courses/{courseId}/attendance/{scheduleId}/{date}/edit(courseId=${course.id},scheduleId=${record.scheduleId},date=${#temporals.format(record.date, 'yyyy-MM-dd')})}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Edit Attendance
+                                    </a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

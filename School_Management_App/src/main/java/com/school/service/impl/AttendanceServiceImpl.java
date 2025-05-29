@@ -1,6 +1,7 @@
 package com.school.service.impl;
 
 import com.school.dto.AttendanceDTO;
+import com.school.dto.AttendanceSummaryDTO;
 import com.school.entity.Attendance;
 import com.school.entity.Course;
 import com.school.entity.Student;
@@ -19,10 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,12 +57,19 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO) {
-        Attendance attendance = attendanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Attendance not found"));
-        mapDTOToEntity(attendanceDTO, attendance);
-        Attendance updatedAttendance = attendanceRepository.save(attendance);
-        return mapEntityToDTO(updatedAttendance);
+    public List<AttendanceDTO> updateAttendance(List<AttendanceDTO> attendanceDTOs) {
+        List<Long> attendanceIds = attendanceDTOs.stream().map(AttendanceDTO::getId).toList();
+        List<Attendance> attendances = attendanceRepository.findAllById(attendanceIds);
+        for(int i=0; i<attendanceDTOs.size(); i++) {
+            mapDTOToEntity(attendanceDTOs.get(i), attendances.get(i));
+        }
+        List<Attendance> updatedAttendances = attendanceRepository.saveAll(attendances);
+        List<AttendanceDTO> updatedAttendanceDTOs = new ArrayList<>();
+
+        for( Attendance updatedAttendance : updatedAttendances ) {
+            updatedAttendanceDTOs.add(mapEntityToDTO(updatedAttendance));
+        }
+        return updatedAttendanceDTOs;
     }
 
     @Override
@@ -97,6 +103,60 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendanceRepository.findByStudentIdAndCourseId(studentId, courseId).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttendanceSummaryDTO> getAttendanceSummaryByCourseId(Long courseId) {
+        // Get all attendance records for the course
+        List<Attendance> attendances = attendanceRepository.findByCourseId(courseId);
+
+        // Group by schedule and date combination
+        Map<String, List<Attendance>> groupedAttendance = attendances.stream()
+                .collect(Collectors.groupingBy(att ->
+                        att.getSchedule().getId() + "_" + att.getDate().toString()));
+
+        // Create summary DTOs
+        List<AttendanceSummaryDTO> summaryList = new ArrayList<>();
+
+        for (Map.Entry<String, List<Attendance>> entry : groupedAttendance.entrySet()) {
+            List<Attendance> recordsGroup = entry.getValue();
+            if (!recordsGroup.isEmpty()) {
+                Attendance first = recordsGroup.get(0);
+
+                // Count present students
+                long presentCount = recordsGroup.stream()
+                        .filter(Attendance::getPresent)
+                        .count();
+
+                // Format schedule info
+                String scheduleInfo = formatScheduleInfo(first.getSchedule());
+
+                // Create summary DTO
+                AttendanceSummaryDTO summary = AttendanceSummaryDTO.builder()
+                        .scheduleId(first.getSchedule().getId())
+                        .date(first.getDate())
+                        .scheduleInfo(scheduleInfo)
+                        .presentCount((int) presentCount)
+                        .totalCount(recordsGroup.size())
+                        .build();
+
+                summaryList.add(summary);
+            }
+        }
+
+        // Sort by date (most recent first) and then by schedule
+        summaryList.sort(Comparator.comparing(AttendanceSummaryDTO::getDate).reversed()
+                .thenComparing(AttendanceSummaryDTO::getScheduleInfo));
+
+        return summaryList;
+    }
+
+    private String formatScheduleInfo(CourseSchedule schedule) {
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        return schedule.getDayOfWeek() + " " +
+               schedule.getStartTime().format(timeFormatter) + "-" +
+               schedule.getEndTime().format(timeFormatter) +
+               " (" + schedule.getClassroom() + ")";
     }
 
     @Override

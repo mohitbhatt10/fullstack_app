@@ -1,7 +1,7 @@
 package com.school.service;
 
 import com.school.dto.AttendanceDTO;
-import java.time.DayOfWeek;
+import com.school.dto.AttendanceSummaryDTO;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface AttendanceService {
     AttendanceDTO createAttendance(AttendanceDTO attendanceDTO);
-    AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO);
+    List<AttendanceDTO> updateAttendance(List<AttendanceDTO> attendanceDTOs);
     void deleteAttendance(Long id);
     AttendanceDTO getAttendanceById(Long id);
     List<AttendanceDTO> getAttendanceByStudentId(Long studentId);
@@ -50,4 +50,5 @@ public interface AttendanceService {
      * @return List of attendance records
      */
     List<AttendanceDTO> getAttendanceByCourseScheduleAndDate(Long courseId, Long scheduleId, LocalDate date);
+    List<AttendanceSummaryDTO> getAttendanceSummaryByCourseId(Long courseId);
 }
