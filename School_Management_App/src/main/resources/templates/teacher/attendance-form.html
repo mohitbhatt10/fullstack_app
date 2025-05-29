@@ -534,13 +534,6 @@
                     return false;
                 }
                 
-                if (courseId && date && scheduleId) {
-                    // Show loading indicator
-                    document.body.style.cursor = 'wait';
-                    
-                    // Navigate to the attendance form with parameters
-                    window.location.href = `/teacher/courses/${courseId}/attendance/form?date=${date}&scheduleId=${scheduleId}`;
-                }
             }
         
             function markAllPresent() {
