@@ -3,9 +3,34 @@
       th:replace="~{layout :: layout(~{::title}, ~{::section})}">
 <head>
     <title>Enter Marks - School Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
 <body>
     <section>
+        <!-- Modal for marks already exists notification -->
+        <div class="modal fade" id="marksExistsModal" tabindex="-1" aria-labelledby="marksExistsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title" id="marksExistsModalLabel">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Marks Already Entered
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Marks are already entered for this course and exam type.</p>
+                        <p>Please edit them on the edit marks page.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="editMarksLink" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit Marks
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h3>Enter Student Marks</h3>
@@ -22,7 +47,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="examType" class="form-label">Exam Type:</label>
-                        <select class="form-select" id="examType" name="examType">
+                        <select class="form-select" id="examType" name="examType" onchange="checkExistingMarks()">
                             <option value="">Select exam type...</option>
                             <option value="MID_TERM" th:selected="${selectedExamType == 'MID_TERM'}">Mid Term</option>
                             <option value="FINAL" th:selected="${selectedExamType == 'FINAL'}">Final</option>
@@ -94,6 +119,41 @@
         </div>
 
         <script th:inline="javascript">
+            function checkExistingMarks() {
+                const courseId = document.getElementById('courseId').value;
+                const examType = document.getElementById('examType').value;
+
+                if (!courseId || !examType) {
+                    return;
+                }
+
+                // Make API call to check if marks exist for this course and exam type
+                fetch(`/api/marks/check?courseId=${courseId}&examType=${examType}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.exists) {
+                            // Setup the edit marks link
+                            document.getElementById('editMarksLink').href = 
+                                `/teacher/courses/${courseId}/marks/${examType}/edit`;
+
+                            // Show the modal
+                            const modal = new bootstrap.Modal(document.getElementById('marksExistsModal'));
+                            modal.show();
+
+                            // Reset the exam type dropdown
+                            document.getElementById('examType').value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking marks:', error);
+                    });
+            }
+
             function loadStudents() {
                 const courseId = document.getElementById('courseId').value;
                 const examType = document.getElementById('examType').value;
