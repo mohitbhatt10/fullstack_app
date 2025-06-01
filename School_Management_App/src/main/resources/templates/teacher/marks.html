@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course Marks - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Marks: <span th:text="${course.name}"></span></h2>
+            <div>
+                <a th:href="@{/teacher/courses/{id}/marks/form(id=${course.id})}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle"></i> Enter Marks
+                </a>
+                <a th:href="@{/teacher/dashboard}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Course Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Course Code:</strong> <span th:text="${course.code}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Department:</strong> <span th:text="${course.department}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Semester:</strong> <span th:text="${course.semester}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marks Records -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Marks Records</h5>
+            </div>
+            <div class="card-body">
+                <!-- If no marks records -->
+                <div th:if="${#lists.isEmpty(marksByExamType)}" class="text-center py-5">
+                    <h5 class="mt-3">No Marks Records Found</h5>
+                    <p class="text-muted">Start entering marks by clicking the "Enter Marks" button above.</p>
+                </div>
+
+                <!-- If marks records exist -->
+                <div th:unless="${#lists.isEmpty(marksByExamType)}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Exam Type</th>
+                                <th>Maximum Marks</th>
+                                <th>Average Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${marksByExamType}">
+                                <td>
+                                    <span th:text="${entry.key}">MIDTERM</span>
+                                </td>
+                                <td th:text="${entry.value.maxMarks}">100</td>
+                                <td>
+                                    <span th:text="${#numbers.formatDecimal(entry.value.averageMarks, 1, 1) + ' / ' + entry.value.maxMarks}">75.5 / 100</span>
+                                    <div class="progress" style="height: 5px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="'width: ' + (${entry.value.averageMarks} * 100 / ${entry.value.maxMarks}) + '%'"
+                                             th:aria-valuenow="${entry.value.averageMarks}"
+                                             aria-valuemin="0" th:aria-valuemax="${entry.value.maxMarks}"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a th:href="@{/teacher/courses/{courseId}/marks/{examType}/edit(courseId=${course.id},examType=${entry.key})}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Edit Marks
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Students in this Course</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Roll Number</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="student : ${students}">
+                                <td th:text="${student.firstName + ' ' + student.lastName}">John Doe</td>
+                                <td th:text="${student.rollNumber}">CSE001</td>
+                                <td>
+                                    <a th:href="@{/teacher/courses/{courseId}/marks/{studentId}(courseId=${course.id},studentId=${student.id})}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        View Marks
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

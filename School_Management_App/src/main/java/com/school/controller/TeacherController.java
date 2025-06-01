@@ -286,7 +286,7 @@ public class TeacherController {
         return "redirect:/teacher/courses/" + courseIdLong + "/attendance";
     }
 
-    @GetMapping("/courses/{courseId}/marks")
+    @GetMapping("/courses/{courseId}/marks/form")
     public String showMarksForm(@PathVariable Long courseId, 
                                @RequestParam(required = false) String examType,
                                Model model) {
@@ -329,6 +329,79 @@ public class TeacherController {
         model.addAttribute("mark", new MarkDTO());
 
         return "teacher/marks-form";
+    }
+
+    @GetMapping("/courses/{courseId}/marks")
+    public String viewCourseMarks(@PathVariable Long courseId, Model model, Principal principal) {
+        // Get the current authenticated teacher's username
+        String username = principal.getName();
+
+        // Get course details
+        model.addAttribute("course", courseService.getCourseById(courseId));
+
+        // Get all marks for this course
+        List<MarkDTO> marksList = markService.getMarksByCourseId(courseId);
+
+        // Group marks by exam type and calculate average for each type
+        Map<String, Map<String, Object>> marksByExamType = new HashMap<>();
+
+        for (MarkDTO mark : marksList) {
+            String examType = mark.getExamType();
+            if (!marksByExamType.containsKey(examType)) {
+                Map<String, Object> examStats = new HashMap<>();
+                examStats.put("count", 0);
+                examStats.put("totalMarks", 0.0);
+                examStats.put("maxMarks", mark.getMaxMarks());
+                examStats.put("averageMarks", 0.0);
+                marksByExamType.put(examType, examStats);
+            }
+
+            Map<String, Object> examStats = marksByExamType.get(examType);
+            int count = (int) examStats.get("count") + 1;
+            double totalMarks = (double) examStats.get("totalMarks") + mark.getMarks();
+            double averageMarks = totalMarks / count;
+
+            examStats.put("count", count);
+            examStats.put("totalMarks", totalMarks);
+            examStats.put("averageMarks", averageMarks);
+        }
+
+        // Get students enrolled in the course
+        List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
+
+        model.addAttribute("marksByExamType", marksByExamType);
+        model.addAttribute("students", students);
+
+        return "teacher/marks";
+    }
+
+    @GetMapping("/courses/{courseId}/marks/{examType}/edit")
+    public String editMarks(@PathVariable Long courseId,
+                           @PathVariable String examType,
+                           Model model,
+                           Principal principal) {
+        // Get course details
+        model.addAttribute("course", courseService.getCourseById(courseId));
+        model.addAttribute("examType", examType);
+
+        // Get all marks for this course and exam type
+        List<MarkDTO> marksList = markService.getMarksByCourseId(courseId);
+        List<MarkDTO> marksForExamType = new ArrayList<>();
+        Double maxMarks = 0.0;
+
+        // Filter marks by exam type
+        for (MarkDTO mark : marksList) {
+            if (mark.getExamType().equals(examType)) {
+                marksForExamType.add(mark);
+                // Get max marks (should be the same for all marks of this exam type)
+                maxMarks = mark.getMaxMarks();
+            }
+        }
+
+        model.addAttribute("marksRecords", marksForExamType);
+        model.addAttribute("maxMarks", maxMarks);
+
+        return "teacher/edit-marks";
     }
 
     @PostMapping("/courses/{courseId}/marks")
@@ -420,6 +493,65 @@ public class TeacherController {
         return "redirect:/teacher/courses/" + courseIdLong + "/marks";
     }
 
+    @PostMapping("/marks/update")
+    public String updateMarks(@RequestParam String courseId,
+                            @RequestParam String examType,
+                            @RequestParam String maxMarks,
+                            @RequestParam Map<String, String> allParams,
+                            Principal principal,
+                            Model model) {
+
+        // Parse parameters
+        Long courseIdLong = Long.parseLong(courseId);
+        Double maxMarksValue = Double.parseDouble(maxMarks);
+
+        // Get the teacher ID from the authenticated user
+        String username = principal.getName();
+        Long teacherId = teacherService.getTeacherByUsername(username).getId();
+
+        if (teacherId == null) {
+            logger.error("Could not find teacher with username: {}", username);
+            throw new RuntimeException("Teacher not found. Please log in with a valid teacher account.");
+        }
+
+        // Process marks entries using the array structure
+        for (String key : allParams.keySet()) {
+            if (key.matches("marks\\[\\d+\\]\\.id")) {
+                // Extract the index from the parameter name
+                String indexStr = key.substring("marks[".length(), key.indexOf("]"));
+                int index = Integer.parseInt(indexStr);
+
+                // Get the mark ID
+                Long markId = Long.parseLong(allParams.get(key));
+
+                // Get the student ID
+                String studentIdKey = "marks[" + index + "].studentId";
+                Long studentId = Long.parseLong(allParams.get(studentIdKey));
+
+                // Get marks value
+                String marksKey = "marks[" + index + "].marks";
+                if (allParams.containsKey(marksKey)) {
+                    Double marksValue = Double.parseDouble(allParams.get(marksKey));
+
+                    // Create the mark update object
+                    MarkDTO mark = markService.getMarkById(markId);
+                    mark.setMarks(marksValue);
+
+                    // Update the mark
+                    try {
+                        markService.updateMark(markId, mark);
+                        logger.info("Updated mark ID {} for student {} in course {}: {}", 
+                                   markId, studentId, courseIdLong, marksValue);
+                    } catch (Exception e) {
+                        logger.error("Error updating mark for student {}: {}", studentId, e.getMessage());
+                    }
+                }
+            }
+        }
+
+        return "redirect:/teacher/courses/" + courseIdLong + "/marks";
+    }
+
     @GetMapping("/courses/{courseId}/marks/{studentId}")
     public String viewStudentMarks(@PathVariable Long courseId,
                                  @PathVariable Long studentId,
@@ -427,6 +559,6 @@ public class TeacherController {
         model.addAttribute("course", courseService.getCourseById(courseId));
         model.addAttribute("student", studentService.getStudentById(studentId));
         model.addAttribute("marks", markService.getMarksByStudentIdAndCourseId(studentId, courseId));
-        return "teacher/course/student-marks";
+        return "teacher/student-marks";
     }
 }

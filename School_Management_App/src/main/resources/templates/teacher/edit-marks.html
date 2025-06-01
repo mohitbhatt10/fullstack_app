@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Edit Marks - School Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Edit Marks</h2>
+            <a th:href="@{/teacher/courses/{id}/marks(id=${course.id})}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Marks List
+            </a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Marks Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Course:</strong> <span th:text="${course.name + ' (' + course.code + ')'}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Exam Type:</strong> <span th:text="${examType}"></span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Maximum Marks:</strong> <span th:text="${maxMarks}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form th:action="@{/teacher/marks/update}" method="post" id="editMarksForm">
+            <input type="hidden" name="courseId" th:value="${course.id}">
+            <input type="hidden" name="examType" th:value="${examType}">
+            <input type="hidden" name="maxMarks" th:value="${maxMarks}">
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Student Marks</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle-fill"></i> 
+                        Update marks records for this exam. Changes will be saved once you click the "Update Marks" button.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Marks</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="record, stat : ${marksRecords}">
+                                    <td th:text="${record.studentId}"></td>
+                                    <td th:text="${record.studentName}"></td>
+                                    <td>
+                                        <input type="number" class="form-control form-control-sm" 
+                                               th:name="'marks[' + ${stat.index} + '].marks'"
+                                               th:value="${record.marks}"
+                                               min="0" th:max="${maxMarks}" step="0.5" required>
+                                        <input type="hidden" 
+                                               th:name="'marks[' + ${stat.index} + '].id'"
+                                               th:value="${record.id}">
+                                        <input type="hidden" 
+                                               th:name="'marks[' + ${stat.index} + '].studentId'"
+                                               th:value="${record.studentId}">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm"
+                                               th:name="'marks[' + ${stat.index} + '].remarks'"
+                                               placeholder="Optional Remarks">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Marks</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const maxMarks = parseFloat(document.querySelector('input[name="maxMarks"]').value);
+                const marksInputs = document.querySelectorAll('input[type="number"]');
+
+                marksInputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        const value = parseFloat(this.value);
+                        if (value > maxMarks) {
+                            alert('Marks cannot exceed maximum marks of ' + maxMarks);
+                            this.value = maxMarks;
+                        } else if (value < 0) {
+                            alert('Marks cannot be negative');
+                            this.value = 0;
+                        }
+                    });
+                });
+
+                // Form validation
+                document.getElementById('editMarksForm').addEventListener('submit', function(e) {
+                    let isValid = true;
+
+                    marksInputs.forEach(input => {
+                        if (input.value === '' || isNaN(parseFloat(input.value))) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        alert('Please enter valid marks for all students');
+                    }
+                });
+            });
+        </script>
+    </section>
+</body>
+</html>
