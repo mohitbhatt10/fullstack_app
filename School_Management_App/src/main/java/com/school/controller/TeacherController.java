@@ -287,11 +287,48 @@ public class TeacherController {
     }
 
     @GetMapping("/courses/{courseId}/marks")
-    public String showMarksForm(@PathVariable Long courseId, Model model) {
+    public String showMarksForm(@PathVariable Long courseId, 
+                               @RequestParam(required = false) String examType,
+                               Model model) {
+        // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
-        model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
+
+        // Get students for this course
+        List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
+
+        // If examType is provided, try to load existing marks for these students
+        if (examType != null && !examType.isEmpty()) {
+            try {
+                // Get existing marks for this course and exam type
+                Map<Long, Double> studentMarks = new HashMap<>();
+                List<MarkDTO> marks = markService.getMarksByCourseId(courseId);
+
+                for (MarkDTO mark : marks) {
+                    if (mark.getExamType().equals(examType)) {
+                        studentMarks.put(mark.getStudentId(), mark.getMarks());
+                    }
+                }
+
+                // Set marks for each student if they exist
+                for (StudentDTO student : students) {
+                    if (studentMarks.containsKey(student.getId())) {
+                        student.setMarks(studentMarks.get(student.getId()));
+                    }
+                }
+
+                // Add examType to model for the form selection
+                model.addAttribute("selectedExamType", examType);
+            } catch (Exception e) {
+                logger.error("Error loading existing marks", e);
+                // Continue without marks if there's an error
+            }
+        }
+
+        model.addAttribute("students", students);
+        model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("mark", new MarkDTO());
-        return "teacher/course/marks-form";
+
+        return "teacher/marks-form";
     }
 
     @PostMapping("/courses/{courseId}/marks")
@@ -303,6 +340,84 @@ public class TeacherController {
         }
         markService.createMark(mark);
         return "redirect:/teacher/courses/" + courseId + "/marks";
+    }
+
+    @PostMapping("/marks/submit")
+    public String submitMarks(@RequestParam String courseId,
+                            @RequestParam String examType,
+                            @RequestParam String maxMarks,
+                            @RequestParam Map<String, String> allParams,
+                            Principal principal,
+                            Model model) {
+
+        // Log the received parameters for debugging
+        logger.info("Received marks submission - courseId: {}, examType: {}, maxMarks: {}", courseId, examType, maxMarks);
+
+        // Parse parameters
+        Long courseIdLong = Long.parseLong(courseId);
+        Double maxMarksValue = Double.parseDouble(maxMarks);
+
+        // Get the teacher ID from the authenticated user
+        String username = principal.getName();
+        Long teacherId = teacherService.getTeacherByUsername(username).getId();
+
+        if (teacherId == null) {
+            logger.error("Could not find teacher with username: {}", username);
+            throw new RuntimeException("Teacher not found. Please log in with a valid teacher account.");
+        }
+
+        // Process marks entries using the array structure
+        for (String key : allParams.keySet()) {
+            if (key.matches("marks\\[\\d+\\]\\.studentId")) {
+                // Extract the index from the parameter name
+                String indexStr = key.substring("marks[".length(), key.indexOf("]"));
+                int index = Integer.parseInt(indexStr);
+
+                // Get the studentId value
+                Long studentId = Long.parseLong(allParams.get(key));
+
+                // Get marks value if available
+                String marksKey = "marks[" + index + "].marks";
+                if (allParams.containsKey(marksKey)) {
+                    Double marksValue = Double.parseDouble(allParams.get(marksKey));
+
+                    // Get remarks if available
+                    String remarksKey = "marks[" + index + "].remarks";
+                    String remarks = allParams.getOrDefault(remarksKey, "");
+
+                    // Create the mark object
+                    MarkDTO mark = new MarkDTO();
+                    mark.setStudentId(studentId);
+                    mark.setCourseId(courseIdLong);
+                    mark.setExamType(examType);
+                    mark.setMarks(marksValue);
+                    mark.setMaxMarks(maxMarksValue);
+
+                    // Get student's semester from the student service
+                    StudentDTO student = studentService.getStudentById(studentId);
+                    if (student != null) {
+                        mark.setSemester(student.getSemester());
+                    } else {
+                        logger.warn("Student with ID {} not found when submitting marks", studentId);
+                        // Default to semester 1 if student not found
+                        mark.setSemester(1);
+                    }
+
+                    // Set the teacher ID who entered these marks
+                    mark.setEnteredByTeacherId(teacherId);
+
+                    // Save the mark
+                    try {
+                        markService.createMark(mark);
+                        logger.info("Saved mark for student {} in course {}: {}", studentId, courseIdLong, marksValue);
+                    } catch (Exception e) {
+                        logger.error("Error saving mark for student {}: {}", studentId, e.getMessage());
+                    }
+                }
+            }
+        }
+
+        return "redirect:/teacher/courses/" + courseIdLong + "/marks";
     }
 
     @GetMapping("/courses/{courseId}/marks/{studentId}")

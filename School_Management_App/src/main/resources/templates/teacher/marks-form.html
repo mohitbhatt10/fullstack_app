@@ -14,24 +14,20 @@
                 <!-- Course and Exam Selection -->
                 <div class="row mb-4">
                     <div class="col-md-4">
-                        <label for="courseSelect" class="form-label">Select Course:</label>
-                        <select class="form-select" id="courseSelect" onchange="loadStudents()">
-                            <option value="">Choose a course...</option>
-                            <option th:each="course : ${courses}"
-                                    th:value="${course.id}"
-                                    th:text="${course.name + ' (' + course.code + ')'}"
-                                    th:selected="${course.id == selectedCourseId}">
-                            </option>
-                        </select>
+                        <label for="courseSelect" class="form-label">Course:</label>
+                        <div class="form-control" id="courseDisplay" readonly>
+                            <span th:text="${course.name + ' (' + course.code + ')'}">Course Name</span>
+                            <input type="hidden" name="courseId" id="courseId" th:value="${course.id}">
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label for="examType" class="form-label">Exam Type:</label>
-                        <select class="form-select" id="examType" name="examType" onchange="loadStudents()">
+                        <select class="form-select" id="examType" name="examType">
                             <option value="">Select exam type...</option>
-                            <option value="MID_TERM">Mid Term</option>
-                            <option value="FINAL">Final</option>
-                            <option value="ASSIGNMENT">Assignment</option>
-                            <option value="QUIZ">Quiz</option>
+                            <option value="MID_TERM" th:selected="${selectedExamType == 'MID_TERM'}">Mid Term</option>
+                            <option value="FINAL" th:selected="${selectedExamType == 'FINAL'}">Final</option>
+                            <option value="ASSIGNMENT" th:selected="${selectedExamType == 'ASSIGNMENT'}">Assignment</option>
+                            <option value="QUIZ" th:selected="${selectedExamType == 'QUIZ'}">Quiz</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -99,10 +95,10 @@
 
         <script th:inline="javascript">
             function loadStudents() {
-                const courseId = document.getElementById('courseSelect').value;
+                const courseId = document.getElementById('courseId').value;
                 const examType = document.getElementById('examType').value;
                 if (courseId && examType) {
-                    window.location.href = `/teacher/marks?courseId=${courseId}&examType=${examType}`;
+                    window.location.href = `/teacher/courses/${courseId}/marks?examType=${examType}`;
                 }
             }
 
@@ -119,14 +115,95 @@
             }
 
             window.onload = function() {
-                const courseId = document.getElementById('courseSelect').value;
-                const examType = document.getElementById('examType').value;
-                const maxMarks = document.getElementById('maxMarks').value;
+                const courseId = document.getElementById('courseId').value;
+                const examTypeSelect = document.getElementById('examType');
+                const maxMarksInput = document.getElementById('maxMarks');
+
+                // Set course ID in the hidden input
                 if (courseId) {
                     document.getElementById('courseIdInput').value = courseId;
-                    document.getElementById('examTypeInput').value = examType;
-                    document.getElementById('maxMarksInput').value = maxMarks;
                 }
+
+                // Set exam type in the hidden input based on the select value
+                if (examTypeSelect.value) {
+                    document.getElementById('examTypeInput').value = examTypeSelect.value;
+                }
+
+                // Set max marks in the hidden input if it has a value
+                if (maxMarksInput.value) {
+                    document.getElementById('maxMarksInput').value = maxMarksInput.value;
+                }
+
+                // Initialize form validation for the maxMarks field
+                maxMarksInput.addEventListener('change', function() {
+                    // Update the hidden input whenever the visible field changes
+                    document.getElementById('maxMarksInput').value = this.value;
+
+                    // Validate marks against the new maximum
+                    const marksInputs = document.querySelectorAll('.marks-input');
+                    marksInputs.forEach(function(input) {
+                        validateMarks(input);
+                    });
+                });
+
+                // Setup form validation
+                document.getElementById('marksForm').addEventListener('submit', function(e) {
+                    const examType = examTypeSelect.value;
+                    const maxMarksValue = maxMarksInput.value;
+
+                    // Validate required fields
+                    if (!examType) {
+                        e.preventDefault();
+                        alert('Please select an exam type.');
+                        examTypeSelect.focus();
+                        return false;
+                    }
+
+                    if (!maxMarksValue) {
+                        e.preventDefault();
+                        alert('Please provide maximum marks.');
+                        maxMarksInput.focus();
+                        return false;
+                    }
+
+                    // Validate all marks inputs
+                    const marksInputs = document.querySelectorAll('.marks-input');
+                    let isValid = true;
+
+                    marksInputs.forEach(function(input) {
+                        if (!input.value) {
+                            isValid = false;
+                            input.classList.add('is-invalid');
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        alert('Please enter marks for all students.');
+                        return false;
+                    }
+
+                    // Update hidden inputs with current values
+                    document.getElementById('examTypeInput').value = examType;
+                    document.getElementById('maxMarksInput').value = maxMarksValue;
+
+                    return true;
+                });
+
+                // Add validation styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    .is-invalid {
+                        border-color: #dc3545;
+                        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+                        background-repeat: no-repeat;
+                        background-position: right calc(0.375em + 0.1875rem) center;
+                        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+                    }
+                `;
+                document.head.appendChild(style);
             };
         </script>
     </section>
