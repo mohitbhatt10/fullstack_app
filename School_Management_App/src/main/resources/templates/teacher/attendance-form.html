@@ -74,8 +74,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" id="cancelAttendanceButton" data-bs-dismiss="modal">Cancel</button>
-                        <a href="#" id="viewAttendanceLink" class="btn btn-primary">
-                            View Attendance Records
+                        <a href="#" id="editAttendanceLink" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit Attendance
                         </a>
                     </div>
                 </div>
@@ -246,6 +246,12 @@
                             const formattedToday = formatDate(today);
                             dateInput.max = formattedToday;
                             
+                            // Set min date to a reasonable past date (e.g., 6 months ago)
+                            const sixMonthsAgo = new Date();
+                            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                            const formattedSixMonthsAgo = formatDate(sixMonthsAgo);
+                            dateInput.min = formattedSixMonthsAgo;
+
                             // Find the day of week index (0-6, where 0 is Sunday)
                             const dayOfWeekIndex = getDayOfWeekIndex(dayOfWeekStr);
                             
@@ -267,7 +273,7 @@
                             
                             // Add event listener for input validation
                             newDateInput.addEventListener('input', function() {
-                                validateDateSelection(this, dayOfWeekIndex);
+                                // No immediate validation on input - wait for onchange instead
                             });
                             
                             // Re-add the onchange handler
@@ -275,7 +281,7 @@
                             
                             // Show a hint about which day to select
                             document.getElementById('dateHelperText').innerHTML = 
-                                `Please select a <strong>${getDayName(dayOfWeekIndex)}</strong> from the calendar`;
+                                `Please select any <strong>${getDayName(dayOfWeekIndex)}</strong> from current or previous months (up to 6 months ago)`;
                             
                             // Update date warning
                             document.getElementById('dateWarning').innerHTML = 
@@ -321,44 +327,64 @@
                         }
                         
                         // Validate that the selected date matches the day of week
+                        let validationTimeout;
                         function validateDateSelection(inputElement, targetDayIndex) {
+                            // Clear any existing timeout to prevent multiple validations
+                            if (validationTimeout) {
+                                clearTimeout(validationTimeout);
+                            }
+
                             // Check if date is empty
                             if (!inputElement.value) {
                                 isValidDateSelected = false;
                                 updateAttendanceUI();
                                 return false;
                             }
-                            
-                            const selectedDate = new Date(inputElement.value);
-                            let isValid = true;
-                            
-                            // Check if the selected date is in the future
-                            const today = new Date();
-                            //today.setHours(0, 0, 0, 0);
-                            
-                            if (selectedDate > today) {
-                                alert('Future dates are not allowed.');
-                                inputElement.value = ''; // Clear the invalid date
-                                isValid = false;
-                            } else {
-                                // Check if the day of week matches
-                                if (selectedDate.getDay() !== targetDayIndex) {
-                                    alert(`Please select a date that falls on ${getDayName(targetDayIndex)}.`);
-                                    inputElement.value = ''; // Clear the invalid date
-                                    isValid = false;
-                                }
-                            }
-                            
-                            // Update the global state
-                            isValidDateSelected = isValid && inputElement.value !== '';
-                            
-                            // Update attendance UI based on new date validity
-                            updateAttendanceUI();
-                            
-                            // Update hidden date input
-                            document.getElementById('dateInput').value = inputElement.value;
-                            
-                            return isValid;
+
+                            // Store the current value to verify it hasn't changed during timeout
+                            const currentValue = inputElement.value;
+
+                            // Add a delay to allow the calendar to fully register selection
+                            return new Promise(resolve => {
+                                validationTimeout = setTimeout(() => {
+                                    // Make sure value hasn't changed during timeout
+                                    if (currentValue !== inputElement.value) {
+                                        resolve(false);
+                                        return;
+                                    }
+
+                                    const selectedDate = new Date(inputElement.value);
+                                    let isValid = true;
+
+                                    // Check if the selected date is in the future
+                                    const today = new Date();
+                                    today.setHours(23, 59, 59, 999); // End of current day
+
+                                    if (selectedDate > today) {
+                                        alert('Future dates are not allowed.');
+                                        inputElement.value = ''; // Clear the invalid date
+                                        isValid = false;
+                                    } else {
+                                        // Check if the day of week matches
+                                        if (selectedDate.getDay() !== targetDayIndex) {
+                                            alert(`Please select a date that falls on ${getDayName(targetDayIndex)}.`);
+                                            inputElement.value = ''; // Clear the invalid date
+                                            isValid = false;
+                                        }
+                                    }
+
+                                    // Update the global state
+                                    isValidDateSelected = isValid && inputElement.value !== '';
+
+                                    // Update attendance UI based on new date validity
+                                    updateAttendanceUI();
+
+                                    // Update hidden date input
+                                    document.getElementById('dateInput').value = inputElement.value;
+
+                                    resolve(isValid);
+                                }, 200); // 200ms delay
+                            });
                         }
                         
                         // Get day name from index
@@ -450,14 +476,14 @@
                 const dateInput = document.getElementById('attendanceDate');
                 const dayIndex = parseInt(dateInput.getAttribute('data-day-index'));
                 
-                // Validate the selected date
-                const isValid = validateDateSelection(dateInput, dayIndex);
-                
-                // Only proceed if date is valid
-                if (isValid) {
-                    // First check if attendance already exists
-                    checkExistingAttendance(dateInput.value);
-                }
+                // Validate the selected date (now returns a Promise)
+                validateDateSelection(dateInput, dayIndex).then(isValid => {
+                    // Only proceed if date is valid
+                    if (isValid) {
+                        // First check if attendance already exists
+                        checkExistingAttendance(dateInput.value);
+                    }
+                });
             }
             
             // Function to check if attendance records already exist
@@ -491,13 +517,28 @@
                             document.getElementById('presentCount').textContent = data.presentCount || 0;
                             document.getElementById('totalCount').textContent = data.count || 0;
                             
-                            // Set the view attendance link
-                            document.getElementById('viewAttendanceLink').href = 
-                                `/teacher/courses/${courseId}/attendance`;
-                            
+                            // Set the edit attendance link to direct to edit page
+                            document.getElementById('editAttendanceLink').href = 
+                                `/teacher/courses/${courseId}/attendance/${scheduleId}/${date}/edit`;
+
                             // Show the modal
                             const modal = new bootstrap.Modal(document.getElementById('attendanceExistsModal'));
                             modal.show();
+
+                            // Clear the date when the modal is hidden
+                            const modalElement = document.getElementById('attendanceExistsModal');
+                            modalElement.addEventListener('hidden.bs.modal', function() {
+                                // Reset the date input
+                                const dateInput = document.getElementById('attendanceDate');
+                                dateInput.value = '';
+                                document.getElementById('dateInput').value = '';
+
+                                // Reset global state variables
+                                isValidDateSelected = false;
+
+                                // Update UI
+                                updateAttendanceUI();
+                            }, {once: true});
                         } else {
                             // No existing records, proceed with normal flow
                             loadStudents();
@@ -562,36 +603,43 @@
                 if (typeof bootstrap === 'undefined') {
                     console.error('Bootstrap is not loaded. Modal functionality may not work properly.');
                 }
+
+                // Setup modal events
+                const attendanceExistsModal = document.getElementById('attendanceExistsModal');
+                attendanceExistsModal.addEventListener('click', function(event) {
+                    // Check if click was outside the modal content (on the backdrop)
+                    if (event.target === attendanceExistsModal) {
+                        // Reset the date input
+                        const dateInput = document.getElementById('attendanceDate');
+                        dateInput.value = '';
+                        document.getElementById('dateInput').value = '';
+
+                        // Reset global state variable
+                        isValidDateSelected = false;
+
+                        // Update UI
+                        updateAttendanceUI();
+                    }
+                });
                 
                 // Add event listener for the cancel button on the attendance exists modal
-                document.getElementById('cancelAttendanceButton').addEventListener('click', function() {
-                    // Reset schedule and date fields
-                    const scheduleSelect = document.getElementById('scheduleSelect');
+                // First remove any existing listeners to avoid duplicates
+                const cancelButton = document.getElementById('cancelAttendanceButton');
+                const newCancelButton = cancelButton.cloneNode(true);
+                cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+
+                // Add the event listener
+                newCancelButton.addEventListener('click', function() {
+                    // Reset date field only
                     const dateInput = document.getElementById('attendanceDate');
-                    
-                    // Reset schedule
-                    scheduleSelect.value = '';
-                    
-                    // Reset date
                     dateInput.value = '';
-                    dateInput.disabled = true;
                     document.getElementById('dateInput').value = '';
-                    
-                    // Reset global state variables
-                    isScheduleSelected = false;
+
+                    // Reset date validity state
                     isValidDateSelected = false;
-                    
-                    // Reset UI
-                    document.getElementById('dateHelperText').textContent = 'Select a schedule first';
-                    document.querySelector('label[for="attendanceDate"]').innerHTML = 'Date:';
-                    dateInput.classList.remove('required-field');
-                    
-                    // Update warnings and UI
-                    document.getElementById('scheduleWarning').style.display = 'block';
-                    document.getElementById('dateWarning').style.display = 'none';
-                    
-                    // Disable form elements
-                    disableAttendanceElements(true);
+
+                    // Update UI
+                    updateAttendanceUI();
                 });
             };
         </script>
