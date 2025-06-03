@@ -47,6 +47,10 @@
                         <i class="bi bi-info-circle-fill"></i> 
                         Update attendance records for this session. Changes will be saved once you click the "Update Attendance" button.
                     </div>
+                    <div class="alert alert-warning mb-4">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Students who were added to the course after this attendance was originally taken are marked as absent by default.
+                    </div>
                     
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -67,7 +71,8 @@
                                             <input class="form-check-input" type="checkbox" 
                                                    th:name="'attendances[' + ${stat.index} + '].present'"
                                                    th:checked="${record.present}">
-                                            <input type="hidden" 
+                                            <!-- Only include ID field if it's not null (existing record) -->
+                                            <input th:if="${record.id != null}" type="hidden" 
                                                    th:name="'attendances[' + ${stat.index} + '].id'"
                                                    th:value="${record.id}">
                                             <input type="hidden" 

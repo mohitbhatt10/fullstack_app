@@ -38,4 +38,5 @@ public class MarkDTO {
     private String studentName;
     private String courseName;
     private String teacherName;
+    private String remarks;
 }

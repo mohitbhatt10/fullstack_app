@@ -52,6 +52,7 @@ public class MarkServiceImpl implements MarkService {
         mark.setExamType(markDTO.getExamType());
         mark.setMarks(markDTO.getMarks());
         mark.setMaxMarks(markDTO.getMaxMarks());
+        mark.setRemarks(markDTO.getRemarks());
         
         Mark savedMark = markRepository.save(mark);
         return mapEntityToDTO(savedMark);
@@ -76,6 +77,7 @@ public class MarkServiceImpl implements MarkService {
         mark.setExamType(markDTO.getExamType());
         mark.setMarks(markDTO.getMarks());
         mark.setMaxMarks(markDTO.getMaxMarks());
+        mark.setRemarks(markDTO.getRemarks());
         
         Mark updatedMark = markRepository.save(mark);
         return mapEntityToDTO(updatedMark);

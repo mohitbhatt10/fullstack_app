@@ -40,4 +40,7 @@ public class Mark {
     @JoinColumn(name = "entered_by_teacher_id", nullable = false)
     @ToString.Exclude
     private Teacher enteredByTeacher;
+
+    @Column(length = 500)
+    private String remarks;
 }

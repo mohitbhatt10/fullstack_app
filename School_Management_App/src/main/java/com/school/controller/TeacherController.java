@@ -14,10 +14,7 @@ import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/teacher")
@@ -122,14 +119,56 @@ public class TeacherController {
             
             // Get schedule info
             String scheduleInfo = "";
-            List<AttendanceDTO> attendanceRecords = attendanceService.getAttendanceByCourseScheduleAndDate(courseId, scheduleId, attendanceDate);
-            if (!attendanceRecords.isEmpty()) {
-                scheduleInfo = attendanceRecords.get(0).getScheduleInfo();
+            List<AttendanceDTO> existingAttendanceRecords = attendanceService.getAttendanceByCourseScheduleAndDate(courseId, scheduleId, attendanceDate);
+            if (!existingAttendanceRecords.isEmpty()) {
+                scheduleInfo = existingAttendanceRecords.get(0).getScheduleInfo();
             }
             model.addAttribute("scheduleInfo", scheduleInfo);
-            
-            // Get attendance records for this course, schedule and date
-            model.addAttribute("attendanceRecords", attendanceRecords);
+
+            // Get all current students enrolled in the course
+            List<StudentDTO> currentStudents = studentService.getStudentsByCourseId(courseId);
+
+            // Create a map of existing attendance records by student ID
+            Map<Long, AttendanceDTO> attendanceByStudentId = new HashMap<>();
+            for (AttendanceDTO record : existingAttendanceRecords) {
+                attendanceByStudentId.put(record.getStudentId(), record);
+            }
+
+            // Get the teacher ID from the authenticated user
+            String username = principal.getName();
+            Long teacherId = teacherService.getTeacherByUsername(username).getId();
+
+            // Create a combined list of attendance records that includes all current students
+            List<AttendanceDTO> allAttendanceRecords = new ArrayList<>();
+
+            // Add all existing records first
+            allAttendanceRecords.addAll(existingAttendanceRecords);
+
+            // Add newly enrolled students who don't have attendance records yet
+            for (StudentDTO student : currentStudents) {
+                if (!attendanceByStudentId.containsKey(student.getId())) {
+                    // Create a new attendance record for this student (marked as absent by default)
+                    AttendanceDTO newRecord = new AttendanceDTO();
+                    newRecord.setStudentId(student.getId());
+                    newRecord.setStudentName(student.getFirstName() + " " + student.getLastName());
+                    newRecord.setCourseId(courseId);
+                    newRecord.setScheduleId(scheduleId);
+                    newRecord.setDate(attendanceDate);
+                    newRecord.setPresent(false); // Default to absent
+                    newRecord.setComments("");
+                    newRecord.setMarkedByTeacherId(teacherId);
+                    newRecord.setId(null); // This is a new record, so no ID yet
+
+                    // Add to the list of all records
+                    allAttendanceRecords.add(newRecord);
+                }
+            }
+
+            // Sort the records by student name for consistency
+            allAttendanceRecords.sort(Comparator.comparing(AttendanceDTO::getStudentName));
+
+            // Add to the model
+            model.addAttribute("attendanceRecords", allAttendanceRecords);
             
             return "teacher/edit-attendance";
         }
@@ -144,49 +183,75 @@ public class TeacherController {
             
             LocalDate attendanceDate = LocalDate.parse(date);
             List<AttendanceDTO> attendanceUpdates = new ArrayList<>();
+            List<AttendanceDTO> newAttendanceRecords = new ArrayList<>();
 
             // Get the teacher ID from the authenticated user
             String username = principal.getName();
             Long teacherId = teacherService.getTeacherByUsername(username).getId();
+
             // Process attendance entries using the array structure
             for (String key : allParams.keySet()) {
-                if (key.matches("attendances\\[\\d+\\]\\.id")) {
+                if (key.matches("attendances\\[\\d+\\]\\.studentId")) {
                     // Extract the index from the parameter name
                     String indexStr = key.substring("attendances[".length(), key.indexOf("]"));
                     int index = Integer.parseInt(indexStr);
-                    
-                    // Get the attendance ID
-                    Long attendanceId = Long.parseLong(allParams.get(key));
-                    
+
                     // Get the student ID
-                    String studentIdKey = "attendances[" + index + "].studentId";
-                    Long studentId = Long.parseLong(allParams.get(studentIdKey));
-                    
+                    Long studentId = Long.parseLong(allParams.get(key));
+
                     // Check if the corresponding "present" parameter exists
                     String presentKey = "attendances[" + index + "].present";
                     boolean isPresent = allParams.containsKey(presentKey);
-                    
+
                     // Get remarks if available
                     String remarksKey = "attendances[" + index + "].comments";
                     String comments = allParams.getOrDefault(remarksKey, "");
-                    
-                    // Create the attendance update object
-                    AttendanceDTO attendance = new AttendanceDTO();
-                    attendance.setId(attendanceId);
-                    attendance.setStudentId(studentId);
-                    attendance.setPresent(isPresent);
-                    attendance.setComments(comments);
-                    attendance.setScheduleId(scheduleId);
-                    attendance.setCourseId(courseId);
-                    attendance.setMarkedByTeacherId(teacherId);
-                    attendance.setDate(attendanceDate);
 
-                    attendanceUpdates.add(attendance);
+                    // Check if there's an ID field (existing record) or not (new record)
+                    String idKey = "attendances[" + index + "].id";
+
+                    if (allParams.containsKey(idKey) && !allParams.get(idKey).isEmpty()) {
+                        // This is an existing record to update
+                        Long attendanceId = Long.parseLong(allParams.get(idKey));
+
+                        // Create the attendance update object
+                        AttendanceDTO attendance = new AttendanceDTO();
+                        attendance.setId(attendanceId);
+                        attendance.setStudentId(studentId);
+                        attendance.setPresent(isPresent);
+                        attendance.setComments(comments);
+                        attendance.setScheduleId(scheduleId);
+                        attendance.setCourseId(courseId);
+                        attendance.setMarkedByTeacherId(teacherId);
+                        attendance.setDate(attendanceDate);
+
+                        attendanceUpdates.add(attendance);
+                    } else {
+                        // This is a new record to create
+                        AttendanceDTO attendance = new AttendanceDTO();
+                        attendance.setStudentId(studentId);
+                        attendance.setPresent(isPresent);
+                        attendance.setComments(comments);
+                        attendance.setScheduleId(scheduleId);
+                        attendance.setCourseId(courseId);
+                        attendance.setMarkedByTeacherId(teacherId);
+                        attendance.setDate(attendanceDate);
+
+                        newAttendanceRecords.add(attendance);
+                    }
                 }
             }
-            
-            // Update the attendance records
-            attendanceService.updateAttendance(attendanceUpdates);
+
+            // Update existing attendance records
+            if (!attendanceUpdates.isEmpty()) {
+                attendanceService.updateAttendance(attendanceUpdates);
+            }
+
+            // Create new attendance records
+            for (AttendanceDTO newRecord : newAttendanceRecords) {
+                attendanceService.createAttendance(newRecord);
+            }
+
             return "redirect:/teacher/courses/" + courseId + "/attendance";
     }
 
@@ -386,19 +451,72 @@ public class TeacherController {
 
         // Get all marks for this course and exam type
         List<MarkDTO> marksList = markService.getMarksByCourseId(courseId);
-        List<MarkDTO> marksForExamType = new ArrayList<>();
+        List<MarkDTO> existingMarksForExamType = new ArrayList<>();
         Double maxMarks = 0.0;
 
         // Filter marks by exam type
         for (MarkDTO mark : marksList) {
             if (mark.getExamType().equals(examType)) {
-                marksForExamType.add(mark);
+                existingMarksForExamType.add(mark);
                 // Get max marks (should be the same for all marks of this exam type)
                 maxMarks = mark.getMaxMarks();
             }
         }
 
-        model.addAttribute("marksRecords", marksForExamType);
+        // Get all current students enrolled in the course
+        List<StudentDTO> currentStudents = studentService.getStudentsByCourseId(courseId);
+
+        // Create a map of existing marks records by student ID
+        Map<Long, MarkDTO> marksByStudentId = new HashMap<>();
+        for (MarkDTO mark : existingMarksForExamType) {
+            marksByStudentId.put(mark.getStudentId(), mark);
+        }
+
+        // Get the teacher ID from the authenticated user
+        String username = principal.getName();
+        Long teacherId = teacherService.getTeacherByUsername(username).getId();
+
+        // Create a combined list of mark records that includes all current students
+        List<MarkDTO> allMarksRecords = new ArrayList<>();
+
+        // Add all existing records first
+        allMarksRecords.addAll(existingMarksForExamType);
+
+        // Add newly enrolled students who don't have marks records yet
+        for (StudentDTO student : currentStudents) {
+            if (!marksByStudentId.containsKey(student.getId())) {
+                // Create a new mark record for this student (marked as 0 by default)
+                MarkDTO newRecord = new MarkDTO();
+                newRecord.setStudentId(student.getId());
+                newRecord.setStudentName(student.getFirstName() + " " + student.getLastName());
+                newRecord.setCourseId(courseId);
+                newRecord.setExamType(examType);
+                newRecord.setMarks(0.0); // Default to 0
+                newRecord.setMaxMarks(maxMarks);
+                newRecord.setSemester(student.getSemester());
+                newRecord.setEnteredByTeacherId(teacherId);
+                newRecord.setId(null); // This is a new record, so no ID yet
+
+                // Add to the list of all records
+                allMarksRecords.add(newRecord);
+            }
+        }
+
+        // Sort the records by student name for consistency
+        allMarksRecords.sort(Comparator.comparing(mark -> {
+            // If studentName is null or empty, try to get student details
+            if (mark.getStudentName() == null || mark.getStudentName().isEmpty()) {
+                try {
+                    StudentDTO student = studentService.getStudentById(mark.getStudentId());
+                    return student.getFirstName() + " " + student.getLastName();
+                } catch (Exception e) {
+                    return "Unknown Student";
+                }
+            }
+            return mark.getStudentName();
+        }));
+
+        model.addAttribute("marksRecords", allMarksRecords);
         model.addAttribute("maxMarks", maxMarks);
 
         return "teacher/edit-marks";
@@ -514,38 +632,99 @@ public class TeacherController {
             throw new RuntimeException("Teacher not found. Please log in with a valid teacher account.");
         }
 
+        // Lists to track existing marks to update and new marks to create
+        List<MarkDTO> existingMarksToUpdate = new ArrayList<>();
+        List<MarkDTO> newMarksToCreate = new ArrayList<>();
+
         // Process marks entries using the array structure
         for (String key : allParams.keySet()) {
-            if (key.matches("marks\\[\\d+\\]\\.id")) {
+            if (key.matches("marks\\[\\d+\\]\\.studentId")) {
                 // Extract the index from the parameter name
                 String indexStr = key.substring("marks[".length(), key.indexOf("]"));
                 int index = Integer.parseInt(indexStr);
 
-                // Get the mark ID
-                Long markId = Long.parseLong(allParams.get(key));
-
                 // Get the student ID
-                String studentIdKey = "marks[" + index + "].studentId";
-                Long studentId = Long.parseLong(allParams.get(studentIdKey));
+                Long studentId = Long.parseLong(allParams.get(key));
 
                 // Get marks value
                 String marksKey = "marks[" + index + "].marks";
+                Double marksValue = 0.0;
                 if (allParams.containsKey(marksKey)) {
-                    Double marksValue = Double.parseDouble(allParams.get(marksKey));
+                    marksValue = Double.parseDouble(allParams.get(marksKey));
+                }
 
-                    // Create the mark update object
-                    MarkDTO mark = markService.getMarkById(markId);
-                    mark.setMarks(marksValue);
+                // Get remarks if available
+                String remarksKey = "marks[" + index + "].remarks";
+                String remarks = allParams.getOrDefault(remarksKey, "");
 
-                    // Update the mark
+                // Check if there's an ID field (existing record) or not (new record)
+                String idKey = "marks[" + index + "].id";
+
+                if (allParams.containsKey(idKey) && !allParams.get(idKey).isEmpty()) {
+                    // This is an existing record to update
+                    Long markId = Long.parseLong(allParams.get(idKey));
+
                     try {
-                        markService.updateMark(markId, mark);
-                        logger.info("Updated mark ID {} for student {} in course {}: {}", 
+                        // Get the existing mark and update its value
+                        MarkDTO mark = markService.getMarkById(markId);
+                        mark.setMarks(marksValue);
+                        mark.setRemarks(remarks);
+
+                        existingMarksToUpdate.add(mark);
+
+                        logger.info("Prepared update for mark ID {} for student {} in course {}: {}", 
                                    markId, studentId, courseIdLong, marksValue);
                     } catch (Exception e) {
-                        logger.error("Error updating mark for student {}: {}", studentId, e.getMessage());
+                        logger.error("Error preparing update for mark ID {} for student {}: {}", 
+                                    markId, studentId, e.getMessage());
                     }
+                } else {
+                    // This is a new record to create
+                    MarkDTO newMark = new MarkDTO();
+                    newMark.setStudentId(studentId);
+                    newMark.setCourseId(courseIdLong);
+                    newMark.setExamType(examType);
+                    newMark.setMarks(marksValue);
+                    newMark.setMaxMarks(maxMarksValue);
+                    newMark.setRemarks(remarks);
+                    newMark.setEnteredByTeacherId(teacherId);
+
+                    // Get student's semester
+                    try {
+                        StudentDTO student = studentService.getStudentById(studentId);
+                        if (student != null) {
+                            newMark.setSemester(student.getSemester());
+                        } else {
+                            newMark.setSemester(1); // Default if student not found
+                        }
+                    } catch (Exception e) {
+                        newMark.setSemester(1); // Default if error
+                        logger.error("Error getting semester for student {}: {}", studentId, e.getMessage());
+                    }
+
+                    newMarksToCreate.add(newMark);
+
+                    logger.info("Prepared new mark for student {} in course {}: {}", 
+                               studentId, courseIdLong, marksValue);
                 }
+            }
+        }
+
+        // Update existing marks
+        for (MarkDTO mark : existingMarksToUpdate) {
+            try {
+                markService.updateMark(mark.getId(), mark);
+            } catch (Exception e) {
+                logger.error("Error updating mark ID {}: {}", mark.getId(), e.getMessage());
+            }
+        }
+
+        // Create new marks
+        for (MarkDTO mark : newMarksToCreate) {
+            try {
+                markService.createMark(mark);
+            } catch (Exception e) {
+                logger.error("Error creating new mark for student {}: {}", mark.getStudentId(), e.getMessage());
             }
         }
 
