@@ -26,13 +26,20 @@ public class Course {
     private String code;
 
     @Column(nullable = false)
-    private Integer semester;    @Column(nullable = false)
+    private Integer semester;    
+
+    @Column(nullable = false)
     private String department;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     @ToString.Exclude
     private Teacher teacher;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "session_id", nullable = false)
+    @ToString.Exclude
+    private Session session;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

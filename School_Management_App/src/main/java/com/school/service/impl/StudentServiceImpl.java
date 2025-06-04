@@ -1,10 +1,12 @@
 package com.school.service.impl;
 
 import com.school.dto.StudentDTO;
+import com.school.entity.CourseEnrollment;
 import com.school.entity.Student;
 import com.school.entity.Course;
 import com.school.entity.UserRole;
 import com.school.exception.FileProcessingException;
+import com.school.repository.CourseEnrollmentRepository;
 import com.school.repository.StudentRepository;
 import com.school.repository.CourseRepository;
 import com.school.service.StudentService;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,16 +42,20 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final CourseEnrollmentRepository courseEnrollmentRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public StudentServiceImpl(StudentRepository studentRepository, 
-                            CourseRepository courseRepository,
-                            PasswordEncoder passwordEncoder) {
+    public StudentServiceImpl(StudentRepository studentRepository,
+                              CourseRepository courseRepository,
+                              CourseEnrollmentRepository courseEnrollmentRepository,
+                              PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
+        this.courseEnrollmentRepository = courseEnrollmentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     @Override
     public StudentDTO createStudent(StudentDTO studentDTO) {
         // Create and save the new student
@@ -56,7 +63,8 @@ public class StudentServiceImpl implements StudentService {
         BeanUtils.copyProperties(studentDTO, student);
         student.setRole(UserRole.STUDENT);
         student.setPassword(passwordEncoder.encode(studentDTO.getPassword()));
-        Student savedStudent = studentRepository.save(student);        // Find and enroll in all courses for the student's semester and department
+        Student savedStudent = studentRepository.save(student);
+        // Find and enroll in all courses for the student's semester and department
         List<Course> courses = courseRepository.findBySemesterAndDepartment(student.getSemester(), student.getDepartment());
         for (Course course : courses) {
             if (course.getStudents() == null) {
@@ -64,6 +72,15 @@ public class StudentServiceImpl implements StudentService {
             }
             course.getStudents().add(savedStudent);
             courseRepository.save(course);
+
+            // Create course enrollment entry
+            CourseEnrollment enrollment = new CourseEnrollment();
+            enrollment.setStudent(savedStudent);
+            enrollment.setCourse(course);
+            enrollment.setEnrollmentDate(LocalDate.now());
+            enrollment.setActive(true);
+            enrollment.setSession(course.getSession()); // Assuming course has a session field
+            courseEnrollmentRepository.save(enrollment);
         }
 
         // Return the student DTO
@@ -335,5 +352,10 @@ public class StudentServiceImpl implements StudentService {
         }
         
         return true;
+    }
+
+    @Override
+    public Integer getStudentCount() {
+        return (int) studentRepository.count();
     }
 }

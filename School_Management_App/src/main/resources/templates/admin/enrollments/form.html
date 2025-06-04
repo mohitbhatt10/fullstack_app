@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${enrollment.id == null ? 'Create Enrollment' : 'Edit Enrollment'}">Enrollment Form</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between mb-4">
+            <h2 th:text="${enrollment.id == null ? 'Create Course Enrollment' : 'Edit Course Enrollment'}">Enrollment Form</h2>
+            <a href="/admin/enrollments" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Enrollments
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Enrollment Details</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="${enrollment.id == null ? '/admin/enrollments' : '/admin/enrollments/' + enrollment.id}" 
+                      th:object="${enrollment}" method="post">
+
+                    <!-- Student Selection -->
+                    <div class="mb-3" th:if="${enrollment.id == null}">
+                        <label for="studentId" class="form-label">Student</label>
+                        <select class="form-select" id="studentId" th:field="*{studentId}" required>
+                            <option value="">Select Student</option>
+                            <option th:each="student : ${students}" 
+                                    th:value="${student.id}"
+                                    th:text="${student.firstName + ' ' + student.lastName + ' (' + student.rollNumber + ')'}">Student Name</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('studentId')}" th:errors="*{studentId}"></div>
+                    </div>
+
+                    <!-- Display student info if editing -->
+                    <div class="mb-3" th:if="${enrollment.id != null}">
+                        <label class="form-label">Student</label>
+                        <div class="form-control" readonly th:text="${enrollment.studentName + ' (' + enrollment.studentRollNumber + ')'}">Student Name</div>
+                        <input type="hidden" th:field="*{studentId}">
+                    </div>
+
+                    <!-- Course Selection -->
+                    <div class="mb-3" th:if="${enrollment.id == null}">
+                        <label for="courseId" class="form-label">Course</label>
+                        <select class="form-select" id="courseId" th:field="*{courseId}" required>
+                            <option value="">Select Course</option>
+                            <option th:each="course : ${courses}" 
+                                    th:value="${course.id}"
+                                    th:text="${course.name + ' (' + course.code + ') - Semester ' + course.semester}">Course Name</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('courseId')}" th:errors="*{courseId}"></div>
+                    </div>
+
+                    <!-- Display course info if editing -->
+                    <div class="mb-3" th:if="${enrollment.id != null}">
+                        <label class="form-label">Course</label>
+                        <div class="form-control" readonly th:text="${enrollment.courseName + ' (' + enrollment.courseCode + ')'}">Course Name</div>
+                        <input type="hidden" th:field="*{courseId}">
+                    </div>
+
+                    <!-- Session Selection -->
+                    <div class="mb-3" th:if="${enrollment.id == null}">
+                        <label for="sessionId" class="form-label">Academic Session</label>
+                        <select class="form-select" id="sessionId" th:field="*{sessionId}" required>
+                            <option value="">Select Session</option>
+                            <option th:each="session : ${sessions}" 
+                                    th:value="${session.id}"
+                                    th:text="${session.name + (session.active ? ' (Active)' : '')}">Session Name</option>
+                        </select>
+                        <div class="text-danger" th:if="${#fields.hasErrors('sessionId')}" th:errors="*{sessionId}"></div>
+                    </div>
+
+                    <!-- Display session info if editing -->
+                    <div class="mb-3" th:if="${enrollment.id != null}">
+                        <label class="form-label">Academic Session</label>
+                        <div class="form-control" readonly th:text="${enrollment.sessionName}">Session Name</div>
+                        <input type="hidden" th:field="*{sessionId}">
+                    </div>
+
+                    <!-- Status (only for editing) -->
+                    <div class="mb-3" th:if="${enrollment.id != null}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="active" th:field="*{active}">
+                            <label class="form-check-label" for="active">
+                                Active Enrollment
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="/admin/enrollments" class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Enrollment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

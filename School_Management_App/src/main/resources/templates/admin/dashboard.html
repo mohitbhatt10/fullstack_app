@@ -6,32 +6,152 @@
 </head>
 <body>
     <section>
-        <h2 class="mb-4">Admin Dashboard</h2>
         <div class="row">
-            <div class="col-md-4 mb-4">
+            <div class="col-md-12 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Student Management</h5>
-                        <p class="card-text">Manage student records, enrollments, and information.</p>
-                        <a th:href="@{/admin/students}" class="btn btn-primary">Manage Students</a>
+                        <h4 class="card-title">Welcome, <span th:text="${#authentication.principal.firstName}"></span>!</h4>
+                        <p class="card-text">This is your admin dashboard where you can manage the entire school system.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Teacher Management</h5>
-                        <p class="card-text">Manage teacher records and assignments.</p>
-                        <a th:href="@{/admin/teachers}" class="btn btn-primary">Manage Teachers</a>
+
+            <!-- Quick Actions -->
+            <div class="col-md-12 mb-4">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-graduate fa-3x mb-3"></i>
+                                <h5 class="card-title">Students</h5>
+                                <p class="card-text">Manage student records</p>
+                                <a th:href="@{/admin/students}" class="btn btn-primary">Manage Students</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chalkboard-teacher fa-3x mb-3"></i>
+                                <h5 class="card-title">Teachers</h5>
+                                <p class="card-text">Manage teacher records</p>
+                                <a th:href="@{/admin/teachers}" class="btn btn-primary">Manage Teachers</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-book fa-3x mb-3"></i>
+                                <h5 class="card-title">Courses</h5>
+                                <p class="card-text">Manage courses and schedules</p>
+                                <a th:href="@{/admin/courses}" class="btn btn-primary">Manage Courses</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                                <h5 class="card-title">Sessions</h5>
+                                <p class="card-text">Manage academic sessions</p>
+                                <a th:href="@{/admin/sessions}" class="btn btn-primary">Manage Sessions</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Course Management</h5>
-                        <p class="card-text">Manage courses, assignments, and schedules.</p>
-                        <a th:href="@{/admin/courses}" class="btn btn-primary">Manage Courses</a>
+
+            <!-- Advanced Management -->
+            <div class="col-md-12 mb-4">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-plus fa-3x mb-3"></i>
+                                <h5 class="card-title">Enrollments</h5>
+                                <p class="card-text">Manage student enrollments in courses</p>
+                                <a th:href="@{/admin/enrollments}" class="btn btn-primary">Manage Enrollments</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-calendar-check fa-3x mb-3"></i>
+                                <h5 class="card-title">Schedules</h5>
+                                <p class="card-text">Manage course schedules</p>
+                                <a th:href="@{/admin/schedules}" class="btn btn-primary">Manage Schedules</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card dashboard-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                <h5 class="card-title">Reports</h5>
+                                <p class="card-text">View and generate reports</p>
+                                <a th:href="@{/admin/reports}" class="btn btn-primary">View Reports</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Total Students</h6>
+                                        <h2 class="display-4" th:text="${stats.studentCount}">0</h2>
+                                    </div>
+                                    <i class="fas fa-user-graduate fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Total Teachers</h6>
+                                        <h2 class="display-4" th:text="${stats.teacherCount}">0</h2>
+                                    </div>
+                                    <i class="fas fa-chalkboard-teacher fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Total Courses</h6>
+                                        <h2 class="display-4" th:text="${stats.courseCount}">0</h2>
+                                    </div>
+                                    <i class="fas fa-book fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Active Session</h6>
+                                        <h4 th:text="${activeSession != null ? activeSession.name : 'None'}">None</h4>
+                                    </div>
+                                    <i class="fas fa-calendar-alt fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

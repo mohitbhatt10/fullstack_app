@@ -28,7 +28,12 @@ public class CourseDTO {
     // Display-only field
     private String teacherName;
     private Set<Long> studentIds;
+    private String sessionName;
 
     // Display-only fields for UI
     private int studentCount;
+
+    @NotNull(message = "Session is required")
+    private Long sessionId;
+
 }

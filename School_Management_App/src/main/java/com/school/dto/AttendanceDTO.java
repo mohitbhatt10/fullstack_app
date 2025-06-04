@@ -29,9 +29,13 @@ public class AttendanceDTO {
 
     private String comments;
 
+    @NotNull(message = "Session is required")
+    private Long sessionId;
+
     // Display-only fields
     private String studentName;
     private String courseName;
     private String teacherName;
     private String scheduleInfo;
+    private String sessionName;
 }

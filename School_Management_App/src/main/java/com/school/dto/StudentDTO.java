@@ -21,6 +21,14 @@ public class StudentDTO extends UserDTO {
     @NotBlank(message = "Department is required")
     private String department;
 
+    // For session-related operations
+    private Long sessionId;
+    private String sessionName;
+
+    // For enrollment-related operations
+    private Long enrollmentId;
+    private boolean currentlyEnrolled;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

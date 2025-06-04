@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -21,9 +23,18 @@ public class Student extends User {
     @Column(nullable = false)
     private String department;
 
-    @ManyToMany(mappedBy = "students", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private Set<Course> courses;
+    private Set<CourseEnrollment> enrollments = new HashSet<>();
+
+    // Helper method to get all courses this student is enrolled in
+    @Transient
+    public Set<Course> getCourses() {
+        return enrollments.stream()
+                .filter(CourseEnrollment::isActive)
+                .map(CourseEnrollment::getCourse)
+                .collect(java.util.stream.Collectors.toSet());
+    }
 
     @Override
     public boolean equals(Object o) {

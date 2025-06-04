@@ -90,4 +90,9 @@ public class TeacherServiceImpl implements TeacherService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Integer getTeacherCount() {
+        return (int) teacherRepository.count();
+    }
 }

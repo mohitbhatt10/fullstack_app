@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.school.dto.*;
+import com.school.service.SessionService;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -34,9 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.school.dto.CourseDTO;
-import com.school.dto.StudentDTO;
-import com.school.dto.TeacherDTO;
 import com.school.service.CourseService;
 import com.school.service.StudentService;
 import com.school.service.TeacherService;
@@ -51,16 +50,33 @@ public class AdminController {
     private final StudentService studentService;
     private final TeacherService teacherService;
     private final CourseService courseService;
+    private final SessionService sessionService;
 
-    public AdminController(StudentService studentService, TeacherService teacherService, CourseService courseService) {
+    public AdminController(StudentService studentService, TeacherService teacherService, CourseService courseService, SessionService sessionService) {
         this.studentService = studentService;
         this.teacherService = teacherService;
         this.courseService = courseService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("/dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(Model model) {
         logger.debug("Accessing admin dashboard");
+        // Get basic stats
+        DashboardStatsDTO stats = new DashboardStatsDTO();
+        stats.setStudentCount(studentService.getStudentCount());
+        stats.setTeacherCount(teacherService.getTeacherCount());
+        stats.setCourseCount(courseService.getCourseCount());
+
+        model.addAttribute("stats", stats);
+
+        // Get active session
+        try {
+            SessionDTO activeSession = sessionService.getActiveSession();
+            model.addAttribute("activeSession", activeSession);
+        } catch (Exception e) {
+            // No active session found, that's okay
+        }
         return "admin/dashboard";
     }
 
@@ -417,5 +433,10 @@ public class AdminController {
         model.addAttribute("enrolledStudents", enrolledStudents);
         model.addAttribute("availableStudents", availableStudents);
         return "admin/courses/students";
+    }
+
+    @GetMapping("/")
+    public String redirectToDashboard() {
+        return "redirect:/admin/dashboard";
     }
 }

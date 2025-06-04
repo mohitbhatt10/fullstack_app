@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course Enrollments - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between mb-4">
+            <h2>Course Enrollments</h2>
+            <a href="/admin/enrollments/new" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Enrollment
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Manage Course Enrollments</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Roll Number</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Enrollment Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enrollment : ${enrollments}">
+                                <td th:text="${enrollment.studentName}">Student Name</td>
+                                <td th:text="${enrollment.studentRollNumber}">Roll Number</td>
+                                <td th:text="${enrollment.courseName + ' (' + enrollment.courseCode + ')'}">Course Name</td>
+                                <td th:text="${enrollment.sessionName}">Session Name</td>
+                                <td th:text="${#temporals.format(enrollment.enrollmentDate, 'yyyy-MM-dd')}">2024-08-01</td>
+                                <td>
+                                    <span th:if="${enrollment.active}" class="badge bg-success">Active</span>
+                                    <span th:unless="${enrollment.active}" class="badge bg-danger">Withdrawn</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/admin/enrollments/{id}/edit(id=${enrollment.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <a th:if="${enrollment.active}" 
+                                           th:href="@{/admin/enrollments/{id}/withdraw(id=${enrollment.id})}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Are you sure you want to withdraw this student from the course?')">
+                                            <i class="bi bi-x-circle"></i> Withdraw
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(enrollments)}">
+                                <td colspan="7" class="text-center">No enrollments found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

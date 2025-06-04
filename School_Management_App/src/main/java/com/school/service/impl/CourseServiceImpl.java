@@ -165,12 +165,24 @@ public class CourseServiceImpl implements CourseService {
                     .collect(Collectors.toSet());
             entity.setStudents(students);
         }
-    }    private CourseDTO mapEntityToDTO(Course entity) {        CourseDTO dto = new CourseDTO();
+    }    
+    private CourseDTO mapEntityToDTO(Course entity) {
+                
+        CourseDTO dto = new CourseDTO();
         BeanUtils.copyProperties(entity, dto);
         
         if (entity.getTeacher() != null) {
             dto.setTeacherId(entity.getTeacher().getId());
             dto.setTeacherName(entity.getTeacher().getFirstName() + " " + entity.getTeacher().getLastName());
+        }
+
+        if(entity.getSession() != null) {
+            dto.setSessionName(entity.getSession().getName());
+            dto.setSessionId(entity.getSession().getId());
+        }
+        else {
+            dto.setSessionName("N/A");
+            dto.setSessionId(null);
         }
         
         if (entity.getStudents() != null) {
@@ -183,5 +195,10 @@ public class CourseServiceImpl implements CourseService {
             dto.setStudentCount(0);
         }
         return dto;
+    }
+
+    @Override
+    public Integer getCourseCount() {
+        return (int) courseRepository.count();
     }
 }

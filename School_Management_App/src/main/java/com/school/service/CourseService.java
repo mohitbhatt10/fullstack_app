@@ -17,4 +17,5 @@ public interface CourseService {
     void addStudentToCourse(Long courseId, Long studentId);
     void removeStudentFromCourse(Long courseId, Long studentId);
     boolean existsByCode(String code);
+    Integer getCourseCount();
 }

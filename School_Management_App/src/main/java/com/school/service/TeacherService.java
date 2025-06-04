@@ -11,4 +11,5 @@ public interface TeacherService {
     TeacherDTO getTeacherByUsername(String username);
     List<TeacherDTO> getAllTeachers();
     List<TeacherDTO> getTeachersByDepartment(String department);
+    Integer getTeacherCount();
 }

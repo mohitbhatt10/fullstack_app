@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <nav th:fragment="sidebar" class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <!-- Admin Menu -->
+                <div th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                    <div class="sb-sidenav-menu-heading">Administration</div>
+                    <a class="nav-link" th:href="@{/admin/dashboard}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUsers" aria-expanded="false" aria-controls="collapseUsers">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        User Management
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseUsers" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" th:href="@{/admin/students}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-graduate"></i></div>
+                                Students
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/teachers}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                                Teachers
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/admins}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
+                                Administrators
+                            </a>
+                        </nav>
+                    </div>
+
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAcademics" aria-expanded="false" aria-controls="collapseAcademics">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
+                        Academic Management
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseAcademics" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" th:href="@{/admin/sessions}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
+                                Academic Sessions
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/courses}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                Courses
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/enrollments}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-plus"></i></div>
+                                Enrollments
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/schedules}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
+                                Schedules
+                            </a>
+                        </nav>
+                    </div>
+
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
+                        Reports
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseReports" aria-labelledby="headingThree" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" th:href="@{/admin/reports/attendance}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                                Attendance Reports
+                            </a>
+                            <a class="nav-link" th:href="@{/admin/reports/marks}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-graduation-cap"></i></div>
+                                Marks Reports
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Teacher Menu -->
+                <div th:if="${#authorization.expression('hasRole(''ROLE_TEACHER'')')}">
+                    <div class="sb-sidenav-menu-heading">Teacher Portal</div>
+                    <a class="nav-link" th:href="@{/teacher/dashboard}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <a class="nav-link" th:href="@{/teacher/courses}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        My Courses
+                    </a>
+                    <a class="nav-link" th:href="@{/teacher/students}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user-graduate"></i></div>
+                        My Students
+                    </a>
+                    <a class="nav-link" th:href="@{/teacher/attendance}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                        Attendance
+                    </a>
+                    <a class="nav-link" th:href="@{/teacher/marks}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                        Marks
+                    </a>
+                </div>
+
+                <!-- Student Menu -->
+                <div th:if="${#authorization.expression('hasRole(''ROLE_STUDENT'')')}">
+                    <div class="sb-sidenav-menu-heading">Student Portal</div>
+                    <a class="nav-link" th:href="@{/student/dashboard}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <a class="nav-link" th:href="@{/student/courses}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        My Courses
+                    </a>
+                    <a class="nav-link" th:href="@{/student/attendance}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                        My Attendance
+                    </a>
+                    <a class="nav-link" th:href="@{/student/marks}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                        My Marks
+                    </a>
+                    <a class="nav-link" th:href="@{/student/schedule}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
+                        My Schedule
+                    </a>
+                </div>
+
+                <div class="sb-sidenav-menu-heading">Account</div>
+                <a class="nav-link" th:href="@{/profile}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-user-circle"></i></div>
+                    Profile
+                </a>
+                <a class="nav-link" th:href="@{/logout}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
+                    Logout
+                </a>
+            </div>
+        </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Logged in as:</div>
+            <span th:text="${#authentication.principal.firstName + ' ' + #authentication.principal.lastName}"></span>
+        </div>
+    </nav>
+</body>
+</html>

@@ -32,4 +32,7 @@ public interface StudentService {
      * @throws IOException if file processing fails
      */
     List<StudentDTO> importStudentsFromExcel(MultipartFile file) throws IOException;
+
+    Integer getStudentCount();
+
 }
