@@ -320,6 +320,7 @@ public class AdminController {
     public String showAddCourseForm(Model model) {
         model.addAttribute("course", new CourseDTO());
         model.addAttribute("teachers", teacherService.getAllTeachers());
+        model.addAttribute("academicSessions", sessionService.getAllSessions());
         return "admin/courses/form";
     }
 
@@ -330,6 +331,7 @@ public class AdminController {
                          RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("teachers", teacherService.getAllTeachers());
+            model.addAttribute("academicSessions", sessionService.getAllSessions());
             return "admin/courses/form";
         }
         try {
@@ -347,6 +349,7 @@ public class AdminController {
     public String showEditCourseForm(@PathVariable Long id, Model model) {
         model.addAttribute("course", courseService.getCourseById(id));
         model.addAttribute("teachers", teacherService.getAllTeachers());
+        model.addAttribute("academicSessions", sessionService.getAllSessions());
         return "admin/courses/form";
     }
 
@@ -358,6 +361,7 @@ public class AdminController {
                            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("teachers", teacherService.getAllTeachers());
+            model.addAttribute("academicSessions", sessionService.getAllSessions());
             return "admin/courses/form";
         }
         try {
@@ -367,6 +371,7 @@ public class AdminController {
         } catch (RuntimeException ex) {
             result.rejectValue("code", "error.course", ex.getMessage());
             model.addAttribute("teachers", teacherService.getAllTeachers());
+            model.addAttribute("academicSessions", sessionService.getAllSessions());
             return "admin/courses/form";
         }
     }

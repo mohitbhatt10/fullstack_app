@@ -75,7 +75,8 @@
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-3">                                <label for="semester" class="form-label">Semester</label>
+                            <div class="col-md-6">
+                                <label for="semester" class="form-label">Semester</label>
                                 <select class="form-select" id="semester" th:field="*{semester}" required>
                                     <option value="">Select semester...</option>
                                     <option th:each="sem : ${#numbers.sequence(1, 8)}"
@@ -84,6 +85,18 @@
                                 </select>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('semester')}" th:errors="*{semester}">
                                     Please select a semester
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sessionId" class="form-label">Academic Session</label>
+                                <select class="form-select" id="sessionId" th:field="*{sessionId}" required>
+                                    <option value="">Select session...</option>
+                                    <option th:each="academicSession : ${academicSessions}"
+                                            th:value="${academicSession.id}"
+                                            th:text="${academicSession.name + (academicSession.active ? ' (Active)' : '')}">Session Name</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('sessionId')}" th:errors="*{sessionId}">
+                                    Please select a session
                                 </div>
                             </div>
                         </div>
