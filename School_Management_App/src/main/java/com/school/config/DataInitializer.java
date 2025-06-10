@@ -18,6 +18,7 @@ public class DataInitializer {
             BaseUserRepository userRepository,
             StudentRepository studentRepository,
             TeacherRepository teacherRepository,
+            SessionRepository sessionRepository,
             CourseRepository courseRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
@@ -71,6 +72,22 @@ public class DataInitializer {
                     .orElseThrow(() -> new RuntimeException("Student not found"));
             }
 
+            // Create default session if not exists
+            Session session;
+            if(!sessionRepository.existsById(1L)){
+                session = new Session();
+                session.setName("2024-2025");
+                session.setStartDate(java.time.LocalDate.of(2024, 1, 1));
+                session.setEndDate(java.time.LocalDate.of(2025, 1, 1));
+                session.setActive(true);
+                session = sessionRepository.save(session);
+            }
+            else{
+                session = sessionRepository.findById(1L)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+                session.setActive(true);
+            }
+
             // Create default course if not exists
             if (!courseRepository.existsByCode("CS101")) {
                 Course course = new Course();                course.setName("Introduction to Programming");
@@ -78,6 +95,7 @@ public class DataInitializer {
                 course.setSemester(1);
                 course.setDepartment("Computer Science");
                 course.setTeacher(teacher);
+                course.setSession(session);
                 course.setStudents(new HashSet<>());
                 course.getStudents().add(student);
                 courseRepository.save(course);
