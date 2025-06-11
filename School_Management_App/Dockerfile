@@ -7,7 +7,7 @@ WORKDIR /app
 COPY target/*.jar app.jar
 
 # Set JVM options for memory constraints
-ENV JAVA_OPTS="-Xmx300m -Xss512k -XX:+UseSerialGC -XX:CICompilerCount=2"
+ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:-TieredCompilation"
 
 # Expose port
 EXPOSE 80
