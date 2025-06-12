@@ -101,6 +101,25 @@
                             </div>
                         </div>
 
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="syllabus" class="form-label">
+                                    <i class="fas fa-book me-2"></i>Course Syllabus
+                                </label>
+                                <textarea class="form-control" id="syllabus" th:field="*{syllabus}" 
+                                          rows="6" maxlength="5000" 
+                                          placeholder="Enter the course syllabus, learning objectives, topics covered, etc."></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('syllabus')}" th:errors="*{syllabus}">
+                                    Invalid syllabus
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Describe the course content, learning objectives, topics covered, and any other relevant information.
+                                    <span class="text-muted">(<span id="syllabusCharCount">0</span>/5000 characters)</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <a th:href="@{/admin/courses}" class="btn btn-secondary me-2">
@@ -118,7 +137,46 @@
                 </div>
             </div>
         </section>
-
+        <script>
+            $(document).ready(function() {
+                // Clear form functionality
+                $('#clearForm').on('click', function() {
+                    if (confirm('Are you sure you want to clear the form?')) {
+                        selectedTeachers = [];
+                        updateHiddenSelect();
+                        renderSelectedTeachers();
+                        renderTeacherOptions();
+                        updateTeacherCount();
+                        $('.teacher-error-message').remove();
+                        $('#courseForm')[0].reset();
+                        $('#courseForm').removeClass('was-validated');
+                        updateSyllabusCharCount();
+                    }
+                });
+                
+                // Syllabus character count functionality
+                function updateSyllabusCharCount() {
+                    const syllabusText = $('#syllabus').val() || '';
+                    const charCount = syllabusText.length;
+                    $('#syllabusCharCount').text(charCount);
+                    
+                    // Change color based on character count
+                    const countElement = $('#syllabusCharCount').parent();
+                    if (charCount > 4500) {
+                        countElement.removeClass('text-muted text-warning').addClass('text-danger');
+                    } else if (charCount > 4000) {
+                        countElement.removeClass('text-muted text-danger').addClass('text-warning');
+                    } else {
+                        countElement.removeClass('text-warning text-danger').addClass('text-muted');
+                    }
+                }
+                
+                // Initialize character count and add event listener
+                $('#syllabus').on('input', updateSyllabusCharCount);
+                updateSyllabusCharCount();
+            });
+        </script>
+        
         <script th:src="@{/js/course-form-validation.js}"></script>
     </div>
 </body>

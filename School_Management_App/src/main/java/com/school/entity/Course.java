@@ -31,6 +31,9 @@ public class Course {
     @Column(nullable = false)
     private String department;
 
+    @Column(columnDefinition = "TEXT")
+    private String syllabus;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "course_teachers",

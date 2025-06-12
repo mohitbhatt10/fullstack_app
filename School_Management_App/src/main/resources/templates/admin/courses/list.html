@@ -23,6 +23,7 @@
                                 <th>Teachers</th>
                                 <th>Department</th>
                                 <th>Semester</th>
+                                <th>Syllabus</th>
                                 <th>Students</th>
                                 <th>Actions</th>
                             </tr>
@@ -38,6 +39,18 @@
                                           class="text-muted">No teachers assigned</span>
                                 </td>                                <td th:text="${course.department}"></td>
                                 <td th:text="${course.semester}"></td>
+                                <td>
+                                    <span th:if="${!#strings.isEmpty(course.syllabus)}">
+                                        <i class="fas fa-book text-success me-1" title="Syllabus available"></i>
+                                        <span th:text="${#strings.abbreviate(course.syllabus, 50)}" 
+                                              class="text-truncate" 
+                                              th:title="${course.syllabus}"></span>
+                                    </span>
+                                    <span th:if="${#strings.isEmpty(course.syllabus)}" 
+                                          class="text-muted">
+                                        <i class="fas fa-book-open text-muted me-1"></i>No syllabus
+                                    </span>
+                                </td>
                                 <td>
                                     <a th:href="@{/admin/courses/{id}/students(id=${course.id})}" 
                                        class="btn btn-sm btn-info">
@@ -66,7 +79,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(courses)}">
-                                <td colspan="7" class="text-center">No courses found</td>
+                                <td colspan="8" class="text-center">No courses found</td>
                             </tr>
                         </tbody>
                     </table>

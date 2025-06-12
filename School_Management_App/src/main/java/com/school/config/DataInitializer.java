@@ -97,6 +97,20 @@ public class DataInitializer {
                 course.setCode("CS101");
                 course.setSemester(1);
                 course.setDepartment("Computer Science");
+                course.setSyllabus("This course introduces students to the fundamentals of programming using modern programming languages. " +
+                    "Topics covered include:\n\n" +
+                    "• Programming fundamentals and problem-solving techniques\n" +
+                    "• Variables, data types, and operators\n" +
+                    "• Control structures (loops, conditionals)\n" +
+                    "• Functions and modular programming\n" +
+                    "• Arrays and basic data structures\n" +
+                    "• Object-oriented programming concepts\n" +
+                    "• File handling and input/output operations\n" +
+                    "• Debugging and testing strategies\n" +
+                    "• Software development best practices\n\n" +
+                    "Learning Objectives:\n" +
+                    "By the end of this course, students will be able to write, debug, and maintain simple to moderately complex programs, " +
+                    "understand fundamental programming concepts, and apply problem-solving skills to develop software solutions.");
                 course.setTeachers(new HashSet<>());
                 course.getTeachers().add(teacher);
                 course.setSession(session);

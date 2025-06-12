@@ -23,6 +23,9 @@ public class CourseDTO {
     private Integer semester;    @NotBlank(message = "Department is required")
     private String department;
 
+    @Size(max = 5000, message = "Syllabus cannot exceed 5000 characters")
+    private String syllabus;
+
     @NotNull(message = "At least one teacher is required")
     @Size(min = 1, message = "At least one teacher must be selected")
     private Set<Long> teacherIds = new HashSet<>();
