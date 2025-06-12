@@ -40,18 +40,18 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="teacherId" class="form-label">Teacher</label>
-                                <select class="form-select" id="teacherId" th:field="*{teacherId}" required>
-                                    <option value="">Select teacher...</option>
+                                <label for="teacherIds" class="form-label">Teachers</label>
+                                <select class="form-select" id="teacherIds" th:field="*{teacherIds}" multiple required size="5">
                                     <option th:each="teacher : ${teachers}"
                                             th:value="${teacher.id}"
                                             th:text="${teacher.firstName + ' ' + teacher.lastName + ' (' + teacher.department + ')'}">
                                         Teacher Name
                                     </option>
                                 </select>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('teacherId')}" th:errors="*{teacherId}">
-                                    Please select a teacher
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('teacherIds')}" th:errors="*{teacherIds}">
+                                    Please select at least one teacher
                                 </div>
+                                <div class="form-text">Hold Ctrl (Cmd on Mac) to select multiple teachers</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="department" class="form-label">Department</label>

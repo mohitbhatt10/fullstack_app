@@ -13,6 +13,8 @@ public interface CourseService {
     List<CourseDTO> getCoursesBySemester(Integer semester);
     List<CourseDTO> getCoursesByTeacherId(Long teacherId);
     List<CourseDTO> getCoursesByTeacherUsername(String username);
+    void addTeacherToCourse(Long courseId, Long teacherId);
+    void removeTeacherFromCourse(Long courseId, Long teacherId);
     List<CourseDTO> getCoursesByStudentId(Long studentId);
     void addStudentToCourse(Long courseId, Long studentId);
     void removeStudentFromCourse(Long courseId, Long studentId);

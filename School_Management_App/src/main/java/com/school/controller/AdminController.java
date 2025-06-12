@@ -329,6 +329,11 @@ public class AdminController {
                          BindingResult result,
                          Model model,
                          RedirectAttributes redirectAttributes) {
+        // Validate that at least one teacher is selected
+        if (course.getTeacherIds() == null || course.getTeacherIds().isEmpty()) {
+            result.rejectValue("teacherIds", "error.course", "At least one teacher must be selected");
+        }
+        
         if (result.hasErrors()) {
             model.addAttribute("teachers", teacherService.getAllTeachers());
             model.addAttribute("academicSessions", sessionService.getAllSessions());
@@ -341,6 +346,7 @@ public class AdminController {
         } catch (RuntimeException ex) {
             result.rejectValue("code", "error.course", ex.getMessage());
             model.addAttribute("teachers", teacherService.getAllTeachers());
+            model.addAttribute("academicSessions", sessionService.getAllSessions());
             return "admin/courses/form";
         }
     }
@@ -359,6 +365,11 @@ public class AdminController {
                            BindingResult result,
                            Model model,
                            RedirectAttributes redirectAttributes) {
+        // Validate that at least one teacher is selected
+        if (course.getTeacherIds() == null || course.getTeacherIds().isEmpty()) {
+            result.rejectValue("teacherIds", "error.course", "At least one teacher must be selected");
+        }
+        
         if (result.hasErrors()) {
             model.addAttribute("teachers", teacherService.getAllTeachers());
             model.addAttribute("academicSessions", sessionService.getAllSessions());

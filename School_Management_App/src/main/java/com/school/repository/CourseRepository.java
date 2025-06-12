@@ -10,6 +10,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     Optional<Course> findByCode(String code);
     List<Course> findBySemester(Integer semester);
     List<Course> findBySemesterAndDepartment(Integer semester, String department);
-    List<Course> findByTeacherId(Long teacherId);
+    List<Course> findByTeachersId(Long teacherId);
     boolean existsByCode(String code);
 }

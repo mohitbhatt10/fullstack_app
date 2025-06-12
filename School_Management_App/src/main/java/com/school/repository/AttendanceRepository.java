@@ -18,10 +18,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByCourseSemester(Integer semester);
     
-    @Query("SELECT a FROM Attendance a WHERE a.course.teacher.id = :teacherId ORDER BY a.date DESC")
+    @Query("SELECT a FROM Attendance a WHERE :teacherId IN (SELECT t.id FROM a.course.teachers t) ORDER BY a.date DESC")
     List<Attendance> findByCourseTeacherId(@Param("teacherId") Long teacherId);
     
-    @Query("SELECT a FROM Attendance a WHERE a.course.teacher.username = :username ORDER BY a.date DESC")
+    @Query("SELECT a FROM Attendance a WHERE :username IN (SELECT t.username FROM a.course.teachers t) ORDER BY a.date DESC")
     List<Attendance> findByCourseTeacherUsername(@Param("username") String username);
     
     /**

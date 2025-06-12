@@ -20,7 +20,7 @@
                         <thead>
                             <tr>                                <th>Code</th>
                                 <th>Name</th>
-                                <th>Teacher</th>
+                                <th>Teachers</th>
                                 <th>Department</th>
                                 <th>Semester</th>
                                 <th>Students</th>
@@ -32,10 +32,10 @@
                                 <td th:text="${course.code}"></td>
                                 <td th:text="${course.name}"></td>
                                 <td>
-                                    <span th:if="${course.teacherId != null}" 
-                                          th:text="${course.teacherName}"></span>
-                                    <span th:unless="${course.teacherId != null}" 
-                                          class="text-muted">No teacher assigned</span>
+                                    <span th:if="${!#strings.isEmpty(course.teacherNames)}" 
+                                          th:text="${course.teacherNames}"></span>
+                                    <span th:if="${#strings.isEmpty(course.teacherNames)}" 
+                                          class="text-muted">No teachers assigned</span>
                                 </td>                                <td th:text="${course.department}"></td>
                                 <td th:text="${course.semester}"></td>
                                 <td>

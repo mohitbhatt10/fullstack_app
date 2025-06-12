@@ -3,6 +3,7 @@ package com.school.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -22,11 +23,12 @@ public class CourseDTO {
     private Integer semester;    @NotBlank(message = "Department is required")
     private String department;
 
-    @NotNull(message = "Teacher is required")
-    private Long teacherId;
+    @NotNull(message = "At least one teacher is required")
+    @Size(min = 1, message = "At least one teacher must be selected")
+    private Set<Long> teacherIds = new HashSet<>();
 
     // Display-only field
-    private String teacherName;
+    private String teacherNames;
     private Set<Long> studentIds;
     private String sessionName;
 

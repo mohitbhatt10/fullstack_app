@@ -92,11 +92,13 @@ public class DataInitializer {
 
             // Create default course if not exists
             if (!courseRepository.existsByCode("CS101")) {
-                Course course = new Course();                course.setName("Introduction to Programming");
+                Course course = new Course();                
+                course.setName("Introduction to Programming");
                 course.setCode("CS101");
                 course.setSemester(1);
                 course.setDepartment("Computer Science");
-                course.setTeacher(teacher);
+                course.setTeachers(new HashSet<>());
+                course.getTeachers().add(teacher);
                 course.setSession(session);
                 course.setStudents(new HashSet<>());
                 course.getStudents().add(student);

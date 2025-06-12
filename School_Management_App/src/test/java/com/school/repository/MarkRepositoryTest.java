@@ -65,12 +65,13 @@ class MarkRepositoryTest {
         student.setSemester(1);
         student.setDepartment("Computer Science");
         student.setRole(UserRole.STUDENT);
-        studentRepository.save(student);        // Create and save a course        course = new Course();
+        studentRepository.save(student);        // Create and save a course        
+        course = new Course();
         course.setName("Test Course");
         course.setCode("TC101");
         course.setSemester(1);
         course.setDepartment("Computer Science");
-        course.setTeacher(teacher);
+        course.getTeachers().add(teacher);
         course.getStudents().add(student);
         courseRepository.save(course);
 

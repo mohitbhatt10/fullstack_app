@@ -3,15 +3,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearFormBtn = document.getElementById('clearForm');
     const codeInput = document.getElementById('code');
     const nameInput = document.getElementById('name');
+    const teacherSelect = document.getElementById('teacherIds');
 
     // Form validation
     if (courseForm) {
         courseForm.addEventListener('submit', function(event) {
+            // Validate teacher selection
+            if (teacherSelect && teacherSelect.selectedOptions.length === 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                teacherSelect.setCustomValidity('Please select at least one teacher');
+            } else if (teacherSelect) {
+                teacherSelect.setCustomValidity('');
+            }
+            
             if (!this.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
             }
             this.classList.add('was-validated');
+        });
+    }
+
+    // Teacher selection validation
+    if (teacherSelect) {
+        teacherSelect.addEventListener('change', function() {
+            if (this.selectedOptions.length === 0) {
+                this.setCustomValidity('Please select at least one teacher');
+            } else {
+                this.setCustomValidity('');
+            }
         });
     }
 
@@ -46,7 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (confirm('Are you sure you want to clear the form?')) {
                 const inputs = courseForm.querySelectorAll('input:not([type="hidden"]), select');
                 inputs.forEach(input => {
-                    input.value = '';
+                    if (input.multiple) {
+                        // Clear multiple select
+                        Array.from(input.options).forEach(option => option.selected = false);
+                    } else {
+                        input.value = '';
+                    }
                 });
                 courseForm.classList.remove('was-validated');
             }

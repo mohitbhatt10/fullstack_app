@@ -25,7 +25,7 @@ public interface CourseScheduleRepository extends JpaRepository<CourseSchedule, 
 
     @Query("SELECT cs FROM CourseSchedule cs " +
            "WHERE cs.dayOfWeek = :dayOfWeek " +
-           "AND cs.course.teacher.id = :teacherId")
+           "AND :teacherId IN (SELECT t.id FROM cs.course.teachers t)")
     List<CourseSchedule> findByDayOfWeekAndTeacherId(
         @Param("dayOfWeek") DayOfWeek dayOfWeek,
         @Param("teacherId") Long teacherId

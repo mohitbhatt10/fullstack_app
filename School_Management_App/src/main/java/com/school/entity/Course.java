@@ -31,10 +31,14 @@ public class Course {
     @Column(nullable = false)
     private String department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_id", nullable = false)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "course_teachers",
+        joinColumns = @JoinColumn(name = "course_id"),
+        inverseJoinColumns = @JoinColumn(name = "teacher_id")
+    )
     @ToString.Exclude
-    private Teacher teacher;
+    private Set<Teacher> teachers = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "session_id", nullable = false)

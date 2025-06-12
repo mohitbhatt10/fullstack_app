@@ -65,12 +65,13 @@ class AttendanceRepositoryTest {
         student.setSemester(1);
         student.setDepartment("Computer Science");
         student.setRole(UserRole.STUDENT);
-        studentRepository.save(student);        // Create and save a course        course = new Course();
+        studentRepository.save(student);        // Create and save a course        
+        course = new Course();
         course.setName("Test Course");
         course.setCode("TC102");
         course.setSemester(1);
         course.setDepartment("Computer Science");
-        course.setTeacher(teacher);
+        course.getTeachers().add(teacher);
         course.getStudents().add(student);
         courseRepository.save(course);
 
@@ -128,6 +129,6 @@ class AttendanceRepositoryTest {
         
         assertThat(attendanceList).isNotEmpty();
         assertThat(attendanceList).hasSize(1);
-        assertThat(attendanceList.get(0).getCourse().getTeacher().getUsername()).isEqualTo(teacher.getUsername());
+        assertThat(attendanceList.get(0).getCourse().getTeachers()).contains(teacher);
     }
 }

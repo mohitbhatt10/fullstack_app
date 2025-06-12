@@ -85,7 +85,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseDTO> getCoursesByTeacherId(Long teacherId) {
-        return courseRepository.findByTeacherId(teacherId).stream()
+        return courseRepository.findByTeachersId(teacherId).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
@@ -103,9 +103,38 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseDTO> getCoursesByTeacherUsername(String username) {
         Teacher teacher = teacherRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
-        return courseRepository.findByTeacherId(teacher.getId()).stream()
+        return courseRepository.findByTeachersId(teacher.getId()).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void addTeacherToCourse(Long courseId, Long teacherId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        
+        if (course.getTeachers() == null) {
+            course.setTeachers(new HashSet<>());
+        }
+        course.getTeachers().add(teacher);
+        courseRepository.save(course);
+    }
+
+    @Override
+    @Transactional
+    public void removeTeacherFromCourse(Long courseId, Long teacherId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        
+        if (course.getTeachers() != null) {
+            course.getTeachers().remove(teacher);
+            courseRepository.save(course);
+        }
     }
 
     @Override
@@ -152,12 +181,21 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
-    private void mapDTOToEntity(CourseDTO dto, Course entity) {        BeanUtils.copyProperties(dto, entity, "id", "teacherId", "studentIds");
+    private void mapDTOToEntity(CourseDTO dto, Course entity) {        
+        BeanUtils.copyProperties(dto, entity, "id", "teacherIds", "studentIds");
         
-        Teacher teacher = teacherRepository.findById(dto.getTeacherId())
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
-        entity.setTeacher(teacher);
+        // Handle teachers
+        if (dto.getTeacherIds() != null && !dto.getTeacherIds().isEmpty()) {
+            Set<Teacher> teachers = dto.getTeacherIds().stream()
+                    .map(id -> teacherRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("Teacher not found with id: " + id)))
+                    .collect(Collectors.toSet());
+            entity.setTeachers(teachers);
+        } else {
+            entity.setTeachers(new HashSet<>());
+        }
 
+        // Handle students
         if (dto.getStudentIds() != null && !dto.getStudentIds().isEmpty()) {
             Set<Student> students = dto.getStudentIds().stream()
                     .map(id -> studentRepository.findById(id)
@@ -171,11 +209,23 @@ public class CourseServiceImpl implements CourseService {
         CourseDTO dto = new CourseDTO();
         BeanUtils.copyProperties(entity, dto);
         
-        if (entity.getTeacher() != null) {
-            dto.setTeacherId(entity.getTeacher().getId());
-            dto.setTeacherName(entity.getTeacher().getFirstName() + " " + entity.getTeacher().getLastName());
+        // Handle teachers
+        if (entity.getTeachers() != null && !entity.getTeachers().isEmpty()) {
+            Set<Long> teacherIds = entity.getTeachers().stream()
+                    .map(Teacher::getId)
+                    .collect(Collectors.toSet());
+            dto.setTeacherIds(teacherIds);
+            
+            String teacherNames = entity.getTeachers().stream()
+                    .map(teacher -> teacher.getFirstName() + " " + teacher.getLastName())
+                    .collect(Collectors.joining(", "));
+            dto.setTeacherNames(teacherNames);
+        } else {
+            dto.setTeacherIds(new HashSet<>());
+            dto.setTeacherNames("");
         }
 
+        // Handle session
         if(entity.getSession() != null) {
             dto.setSessionName(entity.getSession().getName());
             dto.setSessionId(entity.getSession().getId());
@@ -185,6 +235,7 @@ public class CourseServiceImpl implements CourseService {
             dto.setSessionId(null);
         }
         
+        // Handle students
         if (entity.getStudents() != null) {
             Set<Long> studentIds = entity.getStudents().stream()
                     .map(Student::getId)

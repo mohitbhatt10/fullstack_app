@@ -110,8 +110,15 @@ public class CourseScheduleServiceImpl implements CourseScheduleService {
         dto.setCourseId(entity.getCourse().getId());
         dto.setCourseName(entity.getCourse().getName());
         dto.setCourseCode(entity.getCourse().getCode());
-        dto.setTeacherName(entity.getCourse().getTeacher().getFirstName() + " " + 
-                          entity.getCourse().getTeacher().getLastName());
+        // Handle multiple teachers
+        if (entity.getCourse().getTeachers() != null && !entity.getCourse().getTeachers().isEmpty()) {
+            String teacherNames = entity.getCourse().getTeachers().stream()
+                    .map(teacher -> teacher.getFirstName() + " " + teacher.getLastName())
+                    .collect(Collectors.joining(", "));
+            dto.setTeacherName(teacherNames);
+        } else {
+            dto.setTeacherName("No teachers assigned");
+        }
         
         return dto;
     }
