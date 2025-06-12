@@ -28,18 +28,22 @@ public class TeacherController {
     private final AttendanceService attendanceService;
     private final TeacherService teacherService;
     private final CourseScheduleService courseScheduleService;
+    private final ExamTypeService examTypeService;
 
     public TeacherController(CourseService courseService,
                            StudentService studentService,
                            MarkService markService,
                            AttendanceService attendanceService,
-                           TeacherService teacherService, CourseScheduleService courseScheduleService) {
+                           TeacherService teacherService, 
+                           CourseScheduleService courseScheduleService,
+                           ExamTypeService examTypeService) {
         this.courseService = courseService;
         this.studentService = studentService;
         this.markService = markService;
         this.attendanceService = attendanceService;
         this.teacherService = teacherService;
         this.courseScheduleService = courseScheduleService;
+        this.examTypeService = examTypeService;
     }
 
     @GetMapping("/dashboard")
@@ -353,23 +357,26 @@ public class TeacherController {
 
     @GetMapping("/courses/{courseId}/marks/form")
     public String showMarksForm(@PathVariable Long courseId, 
-                               @RequestParam(required = false) String examType,
+                               @RequestParam(required = false) Long examTypeId,
                                Model model) {
         // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
 
+        // Get active exam types for the dropdown
+        model.addAttribute("examTypes", examTypeService.getActiveExamTypesOrdered());
+
         // Get students for this course
         List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
 
-        // If examType is provided, try to load existing marks for these students
-        if (examType != null && !examType.isEmpty()) {
+        // If examTypeId is provided, try to load existing marks for these students
+        if (examTypeId != null) {
             try {
                 // Get existing marks for this course and exam type
                 Map<Long, Double> studentMarks = new HashMap<>();
                 List<MarkDTO> marks = markService.getMarksByCourseId(courseId);
 
                 for (MarkDTO mark : marks) {
-                    if (mark.getExamType().equals(examType)) {
+                    if (mark.getExamTypeId().equals(examTypeId)) {
                         studentMarks.put(mark.getStudentId(), mark.getMarks());
                     }
                 }
@@ -381,8 +388,8 @@ public class TeacherController {
                     }
                 }
 
-                // Add examType to model for the form selection
-                model.addAttribute("selectedExamType", examType);
+                // Add examTypeId to model for the form selection
+                model.addAttribute("selectedExamTypeId", examTypeId);
             } catch (Exception e) {
                 logger.error("Error loading existing marks", e);
                 // Continue without marks if there's an error
@@ -411,24 +418,27 @@ public class TeacherController {
         Map<String, Map<String, Object>> marksByExamType = new HashMap<>();
 
         for (MarkDTO mark : marksList) {
-            String examType = mark.getExamType();
-            if (!marksByExamType.containsKey(examType)) {
+            String examTypeName = mark.getExamTypeName();
+            if (examTypeName != null && !marksByExamType.containsKey(examTypeName)) {
                 Map<String, Object> examStats = new HashMap<>();
                 examStats.put("count", 0);
                 examStats.put("totalMarks", 0.0);
                 examStats.put("maxMarks", mark.getMaxMarks());
                 examStats.put("averageMarks", 0.0);
-                marksByExamType.put(examType, examStats);
+                examStats.put("examTypeId", mark.getExamTypeId());
+                marksByExamType.put(examTypeName, examStats);
             }
 
-            Map<String, Object> examStats = marksByExamType.get(examType);
-            int count = (int) examStats.get("count") + 1;
-            double totalMarks = (double) examStats.get("totalMarks") + mark.getMarks();
-            double averageMarks = totalMarks / count;
+            if (examTypeName != null) {
+                Map<String, Object> examStats = marksByExamType.get(examTypeName);
+                int count = (int) examStats.get("count") + 1;
+                double totalMarks = (double) examStats.get("totalMarks") + mark.getMarks();
+                double averageMarks = totalMarks / count;
 
-            examStats.put("count", count);
-            examStats.put("totalMarks", totalMarks);
-            examStats.put("averageMarks", averageMarks);
+                examStats.put("count", count);
+                examStats.put("totalMarks", totalMarks);
+                examStats.put("averageMarks", averageMarks);
+            }
         }
 
         // Get students enrolled in the course
@@ -440,23 +450,30 @@ public class TeacherController {
         return "teacher/marks";
     }
 
-    @GetMapping("/courses/{courseId}/marks/{examType}/edit")
+    @GetMapping("/courses/{courseId}/marks/{examTypeId}/edit")
     public String editMarks(@PathVariable Long courseId,
-                           @PathVariable String examType,
+                           @PathVariable Long examTypeId,
                            Model model,
                            Principal principal) {
         // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
-        model.addAttribute("examType", examType);
+        
+        // Get exam type details
+        try {
+            model.addAttribute("examType", examTypeService.getExamTypeById(examTypeId));
+        } catch (Exception e) {
+            logger.error("Error getting exam type with ID {}: {}", examTypeId, e.getMessage());
+            return "redirect:/teacher/courses/" + courseId + "/marks";
+        }
 
         // Get all marks for this course and exam type
         List<MarkDTO> marksList = markService.getMarksByCourseId(courseId);
         List<MarkDTO> existingMarksForExamType = new ArrayList<>();
         Double maxMarks = 0.0;
 
-        // Filter marks by exam type
+        // Filter marks by exam type ID
         for (MarkDTO mark : marksList) {
-            if (mark.getExamType().equals(examType)) {
+            if (mark.getExamTypeId() != null && mark.getExamTypeId().equals(examTypeId)) {
                 existingMarksForExamType.add(mark);
                 // Get max marks (should be the same for all marks of this exam type)
                 maxMarks = mark.getMaxMarks();
@@ -490,7 +507,7 @@ public class TeacherController {
                 newRecord.setStudentId(student.getId());
                 newRecord.setStudentName(student.getFirstName() + " " + student.getLastName());
                 newRecord.setCourseId(courseId);
-                newRecord.setExamType(examType);
+                newRecord.setExamTypeId(examTypeId);
                 newRecord.setMarks(0.0); // Default to 0
                 newRecord.setMaxMarks(maxMarks);
                 newRecord.setSemester(student.getSemester());
@@ -546,6 +563,7 @@ public class TeacherController {
 
         // Parse parameters
         Long courseIdLong = Long.parseLong(courseId);
+        Long examTypeId = Long.parseLong(examType); // Now expecting exam type ID
         Double maxMarksValue = Double.parseDouble(maxMarks);
 
         // Get the teacher ID from the authenticated user
@@ -580,9 +598,10 @@ public class TeacherController {
                     MarkDTO mark = new MarkDTO();
                     mark.setStudentId(studentId);
                     mark.setCourseId(courseIdLong);
-                    mark.setExamType(examType);
+                    mark.setExamTypeId(examTypeId);
                     mark.setMarks(marksValue);
                     mark.setMaxMarks(maxMarksValue);
+                    mark.setRemarks(remarks);
 
                     // Get student's semester from the student service
                     StudentDTO student = studentService.getStudentById(studentId);
@@ -621,6 +640,7 @@ public class TeacherController {
 
         // Parse parameters
         Long courseIdLong = Long.parseLong(courseId);
+        Long examTypeId = Long.parseLong(examType); // Now expecting exam type ID
         Double maxMarksValue = Double.parseDouble(maxMarks);
 
         // Get the teacher ID from the authenticated user
@@ -683,7 +703,7 @@ public class TeacherController {
                     MarkDTO newMark = new MarkDTO();
                     newMark.setStudentId(studentId);
                     newMark.setCourseId(courseIdLong);
-                    newMark.setExamType(examType);
+                    newMark.setExamTypeId(examTypeId);
                     newMark.setMarks(marksValue);
                     newMark.setMaxMarks(maxMarksValue);
                     newMark.setRemarks(remarks);

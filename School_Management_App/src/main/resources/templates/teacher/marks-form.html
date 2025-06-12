@@ -49,10 +49,12 @@
                         <label for="examType" class="form-label">Exam Type:</label>
                         <select class="form-select" id="examType" name="examType" onchange="checkExistingMarks()">
                             <option value="">Select exam type...</option>
-                            <option value="MID_TERM" th:selected="${selectedExamType == 'MID_TERM'}">Mid Term</option>
-                            <option value="FINAL" th:selected="${selectedExamType == 'FINAL'}">Final</option>
-                            <option value="ASSIGNMENT" th:selected="${selectedExamType == 'ASSIGNMENT'}">Assignment</option>
-                            <option value="QUIZ" th:selected="${selectedExamType == 'QUIZ'}">Quiz</option>
+                            <option th:each="examType : ${examTypes}" 
+                                    th:value="${examType.id}" 
+                                    th:text="${examType.name}"
+                                    th:selected="${selectedExamTypeId != null and selectedExamTypeId == examType.id}">
+                                Exam Type
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -128,7 +130,7 @@
                 }
 
                 // Make API call to check if marks exist for this course and exam type
-                fetch(`/api/marks/check?courseId=${courseId}&examType=${examType}`)
+                fetch(`/api/marks/check?courseId=${courseId}&examTypeId=${examType}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -158,7 +160,7 @@
                 const courseId = document.getElementById('courseId').value;
                 const examType = document.getElementById('examType').value;
                 if (courseId && examType) {
-                    window.location.href = `/teacher/courses/${courseId}/marks?examType=${examType}`;
+                    window.location.href = `/teacher/courses/${courseId}/marks?examTypeId=${examType}`;
                 }
             }
 

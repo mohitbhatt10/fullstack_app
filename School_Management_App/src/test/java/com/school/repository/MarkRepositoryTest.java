@@ -6,6 +6,7 @@ import com.school.entity.Mark;
 import com.school.entity.Student;
 import com.school.entity.Teacher;
 import com.school.entity.UserRole;
+import com.school.entity.ExamType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,14 @@ class MarkRepositoryTest {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    @Autowired
+    private ExamTypeRepository examTypeRepository;
+
     private Student student;
     private Course course;
     private Teacher teacher;
     private Mark mark;
+    private ExamType examType;
 
     @BeforeEach
     void setUp() {
@@ -75,12 +80,20 @@ class MarkRepositoryTest {
         course.getStudents().add(student);
         courseRepository.save(course);
 
+        // Create and save an exam type
+        examType = new ExamType();
+        examType.setName("Midterm");
+        examType.setDescription("Midterm Examination");
+        examType.setActive(true);
+        examType.setDisplayOrder(1);
+        examTypeRepository.save(examType);
+
         // Create and save a mark
         mark = new Mark();
         mark.setStudent(student);
         mark.setCourse(course);
         mark.setSemester(1);
-        mark.setExamType("Midterm");
+        mark.setExamType(examType);
         mark.setMarks(85.0);
         mark.setMaxMarks(100.0);
         mark.setEnteredByTeacher(teacher);

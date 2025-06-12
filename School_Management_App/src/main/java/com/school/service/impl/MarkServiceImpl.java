@@ -5,10 +5,12 @@ import com.school.entity.Mark;
 import com.school.entity.Course;
 import com.school.entity.Student;
 import com.school.entity.Teacher;
+import com.school.entity.ExamType;
 import com.school.repository.MarkRepository;
 import com.school.repository.CourseRepository;
 import com.school.repository.StudentRepository;
 import com.school.repository.TeacherRepository;
+import com.school.repository.ExamTypeRepository;
 import com.school.service.MarkService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -23,16 +25,19 @@ public class MarkServiceImpl implements MarkService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
+    private final ExamTypeRepository examTypeRepository;
 
     public MarkServiceImpl(
             MarkRepository markRepository,
             StudentRepository studentRepository,
             CourseRepository courseRepository,
-            TeacherRepository teacherRepository) {
+            TeacherRepository teacherRepository,
+            ExamTypeRepository examTypeRepository) {
         this.markRepository = markRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
+        this.examTypeRepository = examTypeRepository;
     }
 
     @Override
@@ -44,12 +49,14 @@ public class MarkServiceImpl implements MarkService {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         Teacher teacher = teacherRepository.findById(markDTO.getEnteredByTeacherId())
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        ExamType examType = examTypeRepository.findById(markDTO.getExamTypeId())
+                .orElseThrow(() -> new RuntimeException("Exam type not found"));
         
         mark.setCourse(course);
         mark.setStudent(student);
         mark.setEnteredByTeacher(teacher);
         mark.setSemester(markDTO.getSemester());
-        mark.setExamType(markDTO.getExamType());
+        mark.setExamType(examType);
         mark.setMarks(markDTO.getMarks());
         mark.setMaxMarks(markDTO.getMaxMarks());
         mark.setRemarks(markDTO.getRemarks());
@@ -69,12 +76,14 @@ public class MarkServiceImpl implements MarkService {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         Teacher teacher = teacherRepository.findById(markDTO.getEnteredByTeacherId())
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        ExamType examType = examTypeRepository.findById(markDTO.getExamTypeId())
+                .orElseThrow(() -> new RuntimeException("Exam type not found"));
         
         mark.setCourse(course);
         mark.setStudent(student);
         mark.setEnteredByTeacher(teacher);
         mark.setSemester(markDTO.getSemester());
-        mark.setExamType(markDTO.getExamType());
+        mark.setExamType(examType);
         mark.setMarks(markDTO.getMarks());
         mark.setMaxMarks(markDTO.getMaxMarks());
         mark.setRemarks(markDTO.getRemarks());
@@ -131,8 +140,15 @@ public class MarkServiceImpl implements MarkService {
     }
 
     @Override
-    public List<MarkDTO> getMarksByExamType(String examType) {
-        return markRepository.findByExamType(examType).stream()
+    public List<MarkDTO> getMarksByExamTypeId(Long examTypeId) {
+        return markRepository.findByExamTypeId(examTypeId).stream()
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarkDTO> getMarksByExamTypeName(String examTypeName) {
+        return markRepository.findByExamTypeName(examTypeName).stream()
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
@@ -187,6 +203,10 @@ public class MarkServiceImpl implements MarkService {
         if (mark.getEnteredByTeacher() != null) {
             dto.setEnteredByTeacherId(mark.getEnteredByTeacher().getId());
             dto.setTeacherName(mark.getEnteredByTeacher().getFirstName() + " " + mark.getEnteredByTeacher().getLastName());
+        }
+        if (mark.getExamType() != null) {
+            dto.setExamTypeId(mark.getExamType().getId());
+            dto.setExamTypeName(mark.getExamType().getName());
         }
         
         return dto;

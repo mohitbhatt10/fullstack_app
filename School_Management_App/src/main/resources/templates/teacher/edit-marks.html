@@ -24,7 +24,7 @@
                         <p><strong>Course:</strong> <span th:text="${course.name + ' (' + course.code + ')'}"></span></p>
                     </div>
                     <div class="col-md-4">
-                        <p><strong>Exam Type:</strong> <span th:text="${examType}"></span></p>
+                        <p><strong>Exam Type:</strong> <span th:text="${examType.name}"></span></p>
                     </div>
                     <div class="col-md-4">
                         <p><strong>Maximum Marks:</strong> <span th:text="${maxMarks}"></span></p>
@@ -35,7 +35,7 @@
 
         <form th:action="@{/teacher/marks/update}" method="post" id="editMarksForm">
             <input type="hidden" name="courseId" th:value="${course.id}">
-            <input type="hidden" name="examType" th:value="${examType}">
+            <input type="hidden" name="examType" th:value="${examType.id}">
             <input type="hidden" name="maxMarks" th:value="${maxMarks}">
 
             <div class="card">

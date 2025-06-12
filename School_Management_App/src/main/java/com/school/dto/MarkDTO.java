@@ -20,8 +20,11 @@ public class MarkDTO {
     @Max(value = 8, message = "Semester must be between 1 and 8")
     private Integer semester;
 
-    @NotBlank(message = "Exam type is required")
-    private String examType;
+    @NotNull(message = "Exam type is required")
+    private Long examTypeId;
+    
+    // Display-only field for exam type name
+    private String examTypeName;
 
     @NotNull(message = "Marks are required")
     @DecimalMin(value = "0.0", message = "Marks cannot be negative")

@@ -27,8 +27,10 @@ public class Mark {
     @Column(nullable = false)
     private Integer semester;
 
-    @Column(nullable = false)
-    private String examType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_type_id", nullable = false)
+    @ToString.Exclude
+    private ExamType examType;
 
     @Column(nullable = false)
     private Double marks;

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${examType.id != null ? 'Edit Exam Type' : 'Add New Exam Type'} + ' - School Management System'">Exam Type Form - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 th:text="${examType.id != null ? 'Edit Exam Type' : 'Add New Exam Type'}">Add New Exam Type</h2>
+            <div>
+                <a th:href="@{/admin/exam-types}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+                <!-- Exam Type Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" th:text="${examType.id != null ? 'Edit Exam Type Details' : 'Enter Exam Type Details'}">Enter Exam Type Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${examType.id != null ? '/admin/exam-types/' + examType.id : '/admin/exam-types'}" 
+                              th:object="${examType}" 
+                              method="post" 
+                              novalidate>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Exam Type Name <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               th:class="${#fields.hasErrors('name')} ? 'form-control is-invalid' : 'form-control'"
+                                               id="name" 
+                                               th:field="*{name}" 
+                                               placeholder="e.g., Mid Term, Final, Quiz"
+                                               required>
+                                        <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
+                                            <span th:errors="*{name}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="displayOrder" class="form-label">Display Order</label>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               th:class="${#fields.hasErrors('displayOrder')} ? 'form-control is-invalid' : 'form-control'"
+                                               id="displayOrder" 
+                                               th:field="*{displayOrder}" 
+                                               placeholder="0"
+                                               min="0">
+                                        <div class="form-text">Lower numbers appear first in lists</div>
+                                        <div th:if="${#fields.hasErrors('displayOrder')}" class="invalid-feedback">
+                                            <span th:errors="*{displayOrder}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description</label>
+                                        <textarea class="form-control" 
+                                                  th:class="${#fields.hasErrors('description')} ? 'form-control is-invalid' : 'form-control'"
+                                                  id="description" 
+                                                  th:field="*{description}" 
+                                                  rows="3" 
+                                                  placeholder="Optional description for this exam type"></textarea>
+                                        <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
+                                            <span th:errors="*{description}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   id="active" 
+                                                   th:field="*{active}">
+                                            <label class="form-check-label" for="active">
+                                                Active
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Only active exam types can be used for marking</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="/admin/exam-types" class="btn btn-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> 
+                                            <span th:text="${examType.id != null ? 'Update Exam Type' : 'Create Exam Type'}">Create Exam Type</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+    </section>
+</body>
+</html>

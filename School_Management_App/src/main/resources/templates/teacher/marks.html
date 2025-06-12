@@ -76,8 +76,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <a th:href="@{/teacher/courses/{courseId}/marks/{examType}/edit(courseId=${course.id},examType=${entry.key})}" 
-                                       class="btn btn-sm btn-warning">
+                                    <a th:href="@{/teacher/courses/{courseId}/marks/{examTypeId}/edit(courseId=${course.id},examTypeId=${entry.value.examTypeId})}"
+                                    class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i> Edit Marks
                                     </a>
                                 </td>

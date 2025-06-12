@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Exam Types Management - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Exam Types Management</h2>
+            <div>
+                <a th:href="@{/admin/exam-types/new}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Exam Type
+                </a>
+            </div>
+        </div>
+
+                <!-- Exam Types Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Exam Types List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(examTypes)}" class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Exam Types Found</h5>
+                            <p class="text-muted">Click "Add New Exam Type" to create your first exam type.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(examTypes)}" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Display Order</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="examType : ${examTypes}">
+                                        <td>
+                                            <strong th:text="${examType.name}">Mid Term</strong>
+                                        </td>
+                                        <td th:text="${examType.description ?: 'No description'}">Mid term examination</td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${examType.displayOrder}">1</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${examType.active}" class="badge bg-success">Active</span>
+                                            <span th:unless="${examType.active}" class="badge bg-danger">Inactive</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a th:href="@{/admin/exam-types/{id}/edit(id=${examType.id})}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#deleteModal' + ${examType.id}">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </div>
+
+                                            <!-- Delete Confirmation Modal -->
+                                            <div class="modal fade" th:id="'deleteModal' + ${examType.id}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirm Delete</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete the exam type "<strong th:text="${examType.name}"></strong>"?</p>
+                                                            <p class="text-warning"><small><i class="fas fa-exclamation-triangle"></i> This action will deactivate the exam type instead of permanently deleting it.</small></p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <form th:action="@{/admin/exam-types/{id}/delete(id=${examType.id})}" method="post" style="display: inline;">
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+    </section>
+</body>
+</html>

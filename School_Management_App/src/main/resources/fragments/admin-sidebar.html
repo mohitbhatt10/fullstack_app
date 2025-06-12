@@ -39,4 +39,12 @@
             <span class="nav-link-text ms-1">Courses</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" th:href="@{/admin/exam-types}" th:classappend="${#httpServletRequest.requestURI.contains('/admin/exam-types') ? 'active' : ''}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="ni ni-collection text-danger text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Exam Types</span>
+        </a>
+    </li>
 </ul>

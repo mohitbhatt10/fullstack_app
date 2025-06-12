@@ -12,7 +12,8 @@ public interface MarkService {
     List<MarkDTO> getMarksByCourseId(Long courseId);
     List<MarkDTO> getMarksByStudentIdAndSemester(Long studentId, Integer semester);
     List<MarkDTO> getMarksByStudentIdAndCourseId(Long studentId, Long courseId);
-    List<MarkDTO> getMarksByExamType(String examType);
+    List<MarkDTO> getMarksByExamTypeId(Long examTypeId);
+    List<MarkDTO> getMarksByExamTypeName(String examTypeName);
     double calculateStudentAverage(Long studentId, Integer semester);
     List<MarkDTO> getAllMarks();
     List<MarkDTO> getMarksByStudent(Long studentId);

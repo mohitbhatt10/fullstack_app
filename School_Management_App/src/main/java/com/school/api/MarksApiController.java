@@ -25,7 +25,8 @@ public class MarksApiController {
     @GetMapping("/check")
     public ResponseEntity<Map<String, Object>> checkMarksExist(
             @RequestParam("courseId") Long courseId,
-            @RequestParam("examType") String examType) {
+            @RequestParam(value = "examTypeId", required = false) Long examTypeId,
+            @RequestParam(value = "examType", required = false) String examType) {
 
         // Get all marks for this course
         List<MarkDTO> allMarks = markService.getMarksByCourseId(courseId);
@@ -35,7 +36,15 @@ public class MarksApiController {
 
         // Check if any marks exist for the specified exam type
         for (MarkDTO mark : allMarks) {
-            if (mark.getExamType().equals(examType)) {
+            boolean matches = false;
+            
+            if (examTypeId != null && mark.getExamTypeId() != null) {
+                matches = mark.getExamTypeId().equals(examTypeId);
+            } else if (examType != null && mark.getExamTypeName() != null) {
+                matches = mark.getExamTypeName().equals(examType);
+            }
+            
+            if (matches) {
                 marksExist = true;
                 count++;
             }
