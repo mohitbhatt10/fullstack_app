@@ -15,12 +15,36 @@
             <div class="card-header">
                 <h3 th:text="${student.id == null ? 'Add New Student' : 'Edit Student'}">Student Form</h3>
             </div>
-            <div class="card-body">                <form id="studentForm" th:method="post" th:object="${student}"
-                      th:action="${student.id == null} ? @{/admin/students/add} : @{/admin/students/__${student.id}__/edit}" novalidate>
+            <div class="card-body">                
+                <form id="studentForm" th:method="post" th:object="${student}"
+                      th:action="${student.id == null} ? @{/admin/students/add} : @{/admin/students/__${student.id}__/edit}" enctype="multipart/form-data" novalidate>
                     
                     <input type="hidden" th:field="*{id}" />
                     <input type="hidden" th:field="*{role}" th:value="STUDENT" />
                     
+                    <div class="row mb-3">
+                        <!-- Profile Picture Section -->
+                        <div class="col-md-12 text-right">
+                            <div class="text-center mb-3">
+                                <img th:if="${student.id != null && student.profilePicture != null}"
+                                     th:src="@{'/profile-picture/' + ${student.id}}"
+                                     alt="Profile Picture"
+                                     class="img-thumbnail rounded-circle"
+                                     style="width: 200px; height: 200px; object-fit: cover;">
+                                <img th:unless="${student.id != null && student.profilePicture != null}"
+                                     th:src="@{/images/default-profile.jpg}"
+                                     alt="Default Profile Picture"
+                                     class="img-thumbnail rounded-circle"
+                                     style="width: 200px; height: 200px; object-fit: cover;">
+                            </div>
+                            <div class="mb-3">
+                                <label for="profilePicture" class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" id="profilePicture" name="profilePictureFile" accept="image/*">
+                                <small class="form-text text-muted">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF</small>
+                            </div>
+                        </div>
+                    </div>    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="firstName" class="form-label">First Name</label>

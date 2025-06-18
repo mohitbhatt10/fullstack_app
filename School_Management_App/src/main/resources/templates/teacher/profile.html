@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::#content})}">
+<head>
+    <title>Teacher Profile</title>
+</head>
+<body>
+    <div id="content">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Profile Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-4 text-center">
+                                    <div class="profile-image-container">
+                                        <img th:if="${teacher.id != null && teacher.profilePicture != null}"
+                                             th:src="@{'/profile-picture/' + ${teacher.id}}"
+                                             alt="Profile Picture"
+                                             class="img-thumbnail rounded-circle"
+                                             style="width: 200px; height: 200px; object-fit: cover;">
+                                        <img th:unless="${teacher.id != null && teacher.profilePicture != null}"
+                                             th:src="@{/images/default-profile.png}"
+                                             alt="Default Profile Picture"
+                                             class="img-thumbnail rounded-circle"
+                                             style="width: 200px; height: 200px; object-fit: cover;">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <form th:action="@{/teacher/profile/update}" method="post" enctype="multipart/form-data">
+                                        <input type="hidden" th:field="*{teacher.id}">
+
+                                        <div class="mb-3">
+                                            <label for="profilePicture" class="form-label">Change Profile Picture</label>
+                                            <input type="file" class="form-control" id="profilePicture" name="profilePicture" accept="image/*">
+                                            <small class="form-text text-muted">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="firstName" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="firstName" th:field="*{teacher.firstName}" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="lastName" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="lastName" th:field="*{teacher.lastName}" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" th:field="*{teacher.email}" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="department" class="form-label">Department</label>
+                                            <input type="text" class="form-control" id="department" th:field="*{teacher.department}" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="designation" class="form-label">Designation</label>
+                                            <input type="text" class="form-control" id="designation" th:field="*{teacher.designation}" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="specialization" class="form-label">Specialization</label>
+                                            <input type="text" class="form-control" id="specialization" th:field="*{teacher.specialization}" required>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

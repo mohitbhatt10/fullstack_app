@@ -4,13 +4,17 @@ import com.school.dto.AttendanceDTO;
 import com.school.dto.AttendanceSummaryDTO;
 import com.school.dto.MarkDTO;
 import com.school.dto.StudentDTO;
+import com.school.dto.TeacherDTO;
 import com.school.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -759,5 +763,38 @@ public class TeacherController {
         model.addAttribute("student", studentService.getStudentById(studentId));
         model.addAttribute("marks", markService.getMarksByStudentIdAndCourseId(studentId, courseId));
         return "teacher/student-marks";
+    }
+
+    @GetMapping("/profile")
+    public String viewProfile(Model model, Principal principal) {
+        String username = principal.getName();
+        TeacherDTO teacher = teacherService.getTeacherByUsername(username);
+        model.addAttribute("teacher", teacher);
+        return "teacher/profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute @Valid TeacherDTO teacherDTO,
+                              BindingResult result,
+                              @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+                              Principal principal,
+                              RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "teacher/profile";
+        }
+
+        try {
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                teacherDTO.setProfilePicture(profilePicture.getBytes());
+                teacherDTO.setProfilePictureContentType(profilePicture.getContentType());
+            }
+
+            teacherService.updateTeacher(teacherDTO.getId(), teacherDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
+            return "redirect:/teacher/profile";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update profile: " + e.getMessage());
+            return "redirect:/teacher/profile";
+        }
     }
 }

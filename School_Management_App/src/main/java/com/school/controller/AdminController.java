@@ -209,14 +209,26 @@ public class AdminController {
 
     @PostMapping("/students/add")
     public String addStudent(@Valid @ModelAttribute("student") StudentDTO student,
-                           BindingResult result) {
+                           BindingResult result,
+                           @RequestParam(value = "profilePictureFile", required = false) MultipartFile profilePictureFile) {
         if (result.hasErrors()) {
             logger.warn("Validation errors occurred while adding student: {}", result.getAllErrors());
             return "admin/students/form";
         }
-        logger.info("Creating new student: {}", student.getUsername());
-        studentService.createStudent(student);
-        return "redirect:/admin/students";
+
+        try {
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                student.setProfilePicture(profilePictureFile.getBytes());
+                student.setProfilePictureContentType(profilePictureFile.getContentType());
+            }
+            logger.info("Creating new student: {}", student.getUsername());
+            studentService.createStudent(student);
+            return "redirect:/admin/students";
+        } catch (IOException e) {
+            logger.error("Failed to process profile picture", e);
+            result.rejectValue("profilePicture", "error.profilePicture", "Failed to process profile picture");
+            return "admin/students/form";
+        }
     }
 
     @GetMapping("/teachers")
@@ -233,19 +245,24 @@ public class AdminController {
 
     @PostMapping("/teachers/add")
     public String addTeacher(@Valid @ModelAttribute("teacher") TeacherDTO teacher,
-                           BindingResult result,
-                           RedirectAttributes redirectAttributes) {
+                             BindingResult result,
+                             RedirectAttributes redirectAttributes,
+                             @RequestParam(value = "profilePictureFile", required = false) MultipartFile profilePictureFile) {
         if (result.hasErrors()) {
-            logger.warn("Validation errors occurred while adding teacher: {}", result.getAllErrors());
+            logger.error("Failed to process teacher data during Add: {}", result.getAllErrors());
+            result.rejectValue("teacher", "error.teacher", "Failed to parse teacher data");
             return "admin/teachers/form";
         }
         try {
-            logger.info("Creating new teacher: {}", teacher.getUsername());
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                teacher.setProfilePicture(profilePictureFile.getBytes());
+                teacher.setProfilePictureContentType(profilePictureFile.getContentType());
+            }
             teacherService.createTeacher(teacher);
-            redirectAttributes.addFlashAttribute("successMessage", "Teacher added successfully");
+            redirectAttributes.addFlashAttribute("successMessage", "Teacher updated successfully");
             return "redirect:/admin/teachers";
-        } catch (RuntimeException ex) {
-            logger.error("Failed to create teacher: {}", teacher.getUsername(), ex);
+        } catch (RuntimeException | IOException ex ) {
+            logger.error("Failed to process profile picture or some other runtime error", ex);
             result.rejectValue("email", "error.teacher", ex.getMessage());
             return "admin/teachers/form";
         }
@@ -260,12 +277,26 @@ public class AdminController {
     @PostMapping("/students/{id}/edit")
     public String updateStudent(@PathVariable Long id,
                               @Valid @ModelAttribute("student") StudentDTO student,
-                              BindingResult result) {
+                              BindingResult result,
+                              @RequestParam(value = "profilePictureFile", required = false) MultipartFile profilePictureFile) {
         if (result.hasErrors()) {
+            logger.error("Failed to process student data: {}", result.getAllErrors());
+            result.rejectValue("student", "error.student", "Failed to parse student data");
             return "admin/students/form";
         }
-        studentService.updateStudent(id, student);
-        return "redirect:/admin/students";
+
+        try {
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                student.setProfilePicture(profilePictureFile.getBytes());
+                student.setProfilePictureContentType(profilePictureFile.getContentType());
+            }
+            studentService.updateStudent(id, student);
+            return "redirect:/admin/students";
+        } catch (IOException e) {
+            logger.error("Failed to process profile picture", e);
+            result.rejectValue("profilePicture", "error.profilePicture", "Failed to process profile picture");
+            return "admin/students/form";
+        }
     }
 
     @PostMapping("/students/{id}/delete")
@@ -284,15 +315,23 @@ public class AdminController {
     public String updateTeacher(@PathVariable Long id,
                               @Valid @ModelAttribute("teacher") TeacherDTO teacher,
                               BindingResult result,
-                              RedirectAttributes redirectAttributes) {
+                              RedirectAttributes redirectAttributes,
+                                @RequestParam(value = "profilePictureFile", required = false) MultipartFile profilePictureFile) {
         if (result.hasErrors()) {
+            logger.error("Failed to process teacher data: {}", result.getAllErrors());
+            result.rejectValue("teacher", "error.teacher", "Failed to parse teacher data");
             return "admin/teachers/form";
         }
         try {
+            if (profilePictureFile != null && !profilePictureFile.isEmpty()) {
+                teacher.setProfilePicture(profilePictureFile.getBytes());
+                teacher.setProfilePictureContentType(profilePictureFile.getContentType());
+            }
             teacherService.updateTeacher(id, teacher);
             redirectAttributes.addFlashAttribute("successMessage", "Teacher updated successfully");
             return "redirect:/admin/teachers";
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException | IOException ex ) {
+            logger.error("Failed to process profile picture or some other runtime error", ex);
             result.rejectValue("email", "error.teacher", ex.getMessage());
             return "admin/teachers/form";
         }

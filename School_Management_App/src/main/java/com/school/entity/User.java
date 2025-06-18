@@ -42,6 +42,13 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Lob
+    @Column(name = "profile_picture", columnDefinition="MEDIUMBLOB")
+    private byte[] profilePicture;
+
+    @Column(name = "profile_picture_content_type")
+    private String profilePictureContentType;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
