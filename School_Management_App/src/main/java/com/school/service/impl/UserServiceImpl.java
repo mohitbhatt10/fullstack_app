@@ -82,4 +82,39 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
+
+    @Override
+    public User findEntityByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public void updateProfilePicture(String username, org.springframework.web.multipart.MultipartFile file) {
+        try {
+            User user = findEntityByUsername(username);
+            // Save file to /static/images/profile/ or another location, set URL
+            /*String fileName = "profile-" + user.getId() + "-" + System.currentTimeMillis() + ".jpg";
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get("src/main/resources/static/images/profile");
+            java.nio.file.Files.createDirectories(uploadPath);
+            java.nio.file.Path filePath = uploadPath.resolve(fileName);
+            file.transferTo(filePath);
+            */
+            user.setProfilePicture(file.getBytes());
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload profile picture", e);
+        }
+    }
+
+    @Override
+    public boolean changePassword(String username, String oldPassword, String newPassword) {
+        User user = findEntityByUsername(username);
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return true;
+    }
 }

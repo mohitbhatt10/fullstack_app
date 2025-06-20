@@ -27,7 +27,7 @@ public class ProfilePictureController {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(user.getProfilePictureContentType()));
+        headers.setContentType(MediaType.parseMediaType(user.getProfilePictureContentType() == null ? MediaType.MULTIPART_FORM_DATA_VALUE : user.getProfilePictureContentType()));
         headers.setContentLength(user.getProfilePicture().length);
 
         return new ResponseEntity<>(user.getProfilePicture(), headers, HttpStatus.OK);
