@@ -12,4 +12,5 @@ public interface TeacherService {
     List<TeacherDTO> getAllTeachers();
     List<TeacherDTO> getTeachersByDepartment(String department);
     Integer getTeacherCount();
+    List<TeacherDTO> importTeachersFromExcel(org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
 }

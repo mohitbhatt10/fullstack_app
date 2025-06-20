@@ -3,6 +3,7 @@ package com.school.controller;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.school.dto.*;
@@ -347,6 +348,94 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/teachers";
+    }
+
+    @GetMapping("/teachers/import")
+    public String showImportTeachersForm() {
+        logger.debug("Displaying import teachers form");
+        return "admin/teachers/import";
+    }
+    
+    @PostMapping("/teachers/import")
+    public String importTeachers(@RequestParam("file") MultipartFile file,
+                                @RequestParam(value = "skipHeader", required = false, defaultValue = "true") boolean skipHeader,
+                                RedirectAttributes redirectAttributes) {
+        logger.info("Importing teachers from file: {}", file.getOriginalFilename());
+        
+        // Check if a file is empty
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select a file to upload");
+            return "redirect:/admin/teachers/import";
+        }
+        
+        // Check if a file is an Excel file
+        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".xlsx") && !file.getOriginalFilename().endsWith(".xls")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please upload an Excel file (.xlsx or .xls)");
+            return "redirect:/admin/teachers/import";
+        }
+        
+        try {
+            // Process the file and import students
+            List<TeacherDTO> importedTeachers =  teacherService.importTeachersFromExcel(file);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                    String.format("Successfully imported %d teachers", importedTeachers.size()));
+            return "redirect:/admin/teachers";
+            
+        } catch (IOException e) {
+            logger.error("Failed to import teachers", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to import teachers: " + e.getMessage());
+            return "redirect:/admin/teachers/import";
+        }
+    }
+
+    @GetMapping("/teachers/template")
+    public void downloadTeachersTemplate(HttpServletResponse response) throws IOException {
+        logger.debug("Downloading Teacher import template");
+
+        // Set response headers
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=teacher_import_template.xlsx");
+
+        // Create workbook
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Teachers");
+
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"First Name", "Last Name", "Email", "Department", "Designation", "Specialization", "Password", "Username"};
+
+            // Create cell style for header
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+
+            // Add headers
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.autoSizeColumn(i);
+            }
+
+            // Add sample data row
+            Row sampleRow = sheet.createRow(1);
+            sampleRow.createCell(0).setCellValue("Charlie");
+            sampleRow.createCell(1).setCellValue("Roots");
+            sampleRow.createCell(2).setCellValue("charlieR@example.com");
+            sampleRow.createCell(3).setCellValue("CSE");
+            sampleRow.createCell(4).setCellValue("Professor");
+            sampleRow.createCell(5).setCellValue("Artificial Intelligence");
+            sampleRow.createCell(6).setCellValue("Password@123");
+            sampleRow.createCell(7).setCellValue("charlieR");
+
+            // Write workbook to response
+            workbook.write(response.getOutputStream());
+        } catch (IOException e) {
+            logger.error("Error creating Excel template", e);
+            throw e;
+        }
     }
 
     @GetMapping("/courses")
