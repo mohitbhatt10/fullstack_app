@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Schedule Management - School Management System</title>
+    <style>
+        .course-card {
+            transition: all 0.3s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="container-fluid py-4">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="mb-4">Schedule Management</h2>
+                </div>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Course Selection -->
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Select Course to Manage Schedule</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="courseSearch" 
+                                               placeholder="Search courses..." onkeyup="filterCourses()">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="courseGrid">
+                                <div th:each="course : ${courses}" class="col-md-4 mb-4">
+                                    <div class="card course-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${course.code}">CSE101</h5>
+                                            <p class="card-text" th:text="${course.name}">Introduction to Computer Science</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-info" th:text="${course.semester + ' Semester'}">1st Semester</span>
+                                                <a th:href="@{/admin/schedules/{id}(id=${course.id})}" 
+                                                   class="btn btn-primary">
+                                                    <i class="fas fa-calendar-alt"></i> Manage Schedule
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classroom Filter -->
+            <div class="row" th:if="${selectedClassroom}">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                Schedules for Classroom: 
+                                <span class="text-primary" th:text="${selectedClassroom}"></span>
+                                <a href="/admin/schedules" class="btn btn-sm btn-outline-secondary float-end">
+                                    <i class="fas fa-times"></i> Clear Filter
+                                </a>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Day</th>
+                                            <th>Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="schedule : ${schedules}">
+                                            <td>
+                                                <span th:text="${schedule.courseCode + ' - ' + schedule.courseName}"></span>
+                                            </td>
+                                            <td th:text="${schedule.dayOfWeek}"></td>
+                                            <td>
+                                                <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></span>
+                                                -
+                                                <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                                            </td>
+                                            <td>
+                                                <a th:href="@{/admin/schedules/{courseId}(courseId=${schedule.courseId})}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-calendar-alt"></i> View Schedule
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function filterCourses() {
+                const searchText = document.getElementById('courseSearch').value.toLowerCase();
+                const courseCards = document.querySelectorAll('.course-card');
+                
+                courseCards.forEach(card => {
+                    const courseCode = card.querySelector('.card-title').textContent.toLowerCase();
+                    const courseName = card.querySelector('.card-text').textContent.toLowerCase();
+                    
+                    if (courseCode.includes(searchText) || courseName.includes(searchText)) {
+                        card.closest('.col-md-4').style.display = '';
+                    } else {
+                        card.closest('.col-md-4').style.display = 'none';
+                    }
+                });
+            }
+        </script>
+    </section>
+</body>
+</html> 
