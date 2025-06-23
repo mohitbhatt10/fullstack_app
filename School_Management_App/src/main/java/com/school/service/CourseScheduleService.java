@@ -13,4 +13,18 @@ public interface CourseScheduleService {
     List<CourseScheduleDTO> getSchedulesByCourseId(Long courseId);
     List<CourseScheduleDTO> getSchedulesByTeacherForDay(Long teacherId, DayOfWeek dayOfWeek);
     boolean isScheduleOverlapping(Long courseId, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime);
+    
+    /**
+     * Get all schedules for a specific classroom
+     * @param classroom The classroom to get schedules for
+     * @return List of schedules for the classroom
+     */
+    List<CourseScheduleDTO> getSchedulesByClassroom(String classroom);
+    
+    /**
+     * Export the schedule for a course to PDF format
+     * @param courseId The ID of the course to export schedule for
+     * @throws RuntimeException if export fails
+     */
+    void exportScheduleToPdf(Long courseId);
 }

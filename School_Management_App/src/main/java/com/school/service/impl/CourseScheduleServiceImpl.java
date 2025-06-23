@@ -10,10 +10,25 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.GrayColor;
 
 @Service
 @Transactional
@@ -77,6 +92,78 @@ public class CourseScheduleServiceImpl implements CourseScheduleService {
     }
 
     @Override
+    public List<CourseScheduleDTO> getSchedulesByClassroom(String classroom) {
+        return courseScheduleRepository.findByClassroom(classroom).stream()
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void exportScheduleToPdf(Long courseId) {
+        List<CourseSchedule> schedules = courseScheduleRepository.findByCourseId(courseId);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream("schedule_" + courseId + ".pdf"));
+            document.open();
+
+            // Add title
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+            Paragraph title = new Paragraph("Course Schedule: " + course.getName() + " (" + course.getCode() + ")", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new Paragraph("\n"));
+
+            // Create schedule table
+            PdfPTable table = new PdfPTable(4); // 4 columns
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            table.setSpacingAfter(10f);
+
+            // Add headers
+            Stream.of("Day", "Time", "Classroom", "Teacher")
+                    .forEach(columnTitle -> {
+                        PdfPCell header = new PdfPCell();
+                        header.setBackgroundColor(new GrayColor(0.8f));
+                        header.setBorderWidth(2);
+                        header.setPhrase(new Phrase(columnTitle));
+                        header.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        header.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        header.setPadding(5f);
+                        table.addCell(header);
+                    });
+
+            // Add schedule data
+            for (CourseSchedule schedule : schedules) {
+                // Day
+                table.addCell(schedule.getDayOfWeek().toString());
+                
+                // Time
+                String time = String.format("%s - %s",
+                        schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                        schedule.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+                table.addCell(time);
+                
+                // Classroom
+                table.addCell(schedule.getClassroom());
+                
+                // Teacher(s)
+                String teachers = schedule.getCourse().getTeachers().stream()
+                        .map(teacher -> teacher.getFirstName() + " " + teacher.getLastName())
+                        .collect(Collectors.joining(", "));
+                table.addCell(teachers);
+            }
+
+            document.add(table);
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export schedule to PDF: " + e.getMessage());
+        }
+    }
+
+    @Override
     public boolean isScheduleOverlapping(Long courseId, DayOfWeek dayOfWeek, 
                                        LocalTime startTime, LocalTime endTime) {
         List<CourseSchedule> overlappingSchedules = courseScheduleRepository
@@ -110,7 +197,7 @@ public class CourseScheduleServiceImpl implements CourseScheduleService {
         dto.setCourseId(entity.getCourse().getId());
         dto.setCourseName(entity.getCourse().getName());
         dto.setCourseCode(entity.getCourse().getCode());
-        // Handle multiple teachers
+        
         if (entity.getCourse().getTeachers() != null && !entity.getCourse().getTeachers().isEmpty()) {
             String teacherNames = entity.getCourse().getTeachers().stream()
                     .map(teacher -> teacher.getFirstName() + " " + teacher.getLastName())

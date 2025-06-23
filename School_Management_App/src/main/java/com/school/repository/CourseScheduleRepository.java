@@ -30,4 +30,11 @@ public interface CourseScheduleRepository extends JpaRepository<CourseSchedule, 
         @Param("dayOfWeek") DayOfWeek dayOfWeek,
         @Param("teacherId") Long teacherId
     );
+
+    /**
+     * Find all schedules for a specific classroom
+     * @param classroom The classroom to search for
+     * @return List of schedules for the classroom
+     */
+    List<CourseSchedule> findByClassroom(String classroom);
 }
