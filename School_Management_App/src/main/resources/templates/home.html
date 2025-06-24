@@ -5,48 +5,135 @@
     <title>Welcome - School Management System</title>
 </head>
 <body>
-    <section>
-        <div class="text-center py-5">
-            <h1 class="display-4 mb-4">Welcome to School Management System</h1>
-            <p class="lead mb-4">A comprehensive solution for managing students, teachers, courses, and more.</p>
-            
-            <div class="row justify-content-center">
-                <div class="col-md-4 mb-4">
-                    <div class="card dashboard-card h-100">
-                        <div class="card-body">
-                            <h3 class="card-title">Students</h3>
-                            <p class="card-text">Access your courses, view marks, and check attendance records.</p>
-                            <a th:href="@{/student/dashboard}" class="btn btn-primary">Student Portal</a>
-                        </div>
-                    </div>
-                </div>
+    <section class="hero-section">
+        <div class="container">
+            <div class="text-center py-5">
+                <h1 class="display-3 fw-bold mb-4">Welcome to School Management System</h1>
+                <p class="lead mb-5 text-muted">Your comprehensive solution for educational management</p>
                 
-                <div class="col-md-4 mb-4">
-                    <div class="card dashboard-card h-100">
-                        <div class="card-body">
-                            <h3 class="card-title">Teachers</h3>
-                            <p class="card-text">Manage courses, record attendance, and update student marks.</p>
-                            <a th:href="@{/teacher/dashboard}" class="btn btn-primary">Teacher Portal</a>
+                <div class="row justify-content-center mb-5">
+                    <div class="col-lg-8">
+                        <div class="d-grid gap-3">
+                            <a th:href="@{/login}" class="btn btn-primary btn-lg shadow-sm">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Your Portal
+                            </a>
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-md-4 mb-4">
-                    <div class="card dashboard-card h-100">
-                        <div class="card-body">
-                            <h3 class="card-title">Administration</h3>
-                            <p class="card-text">Manage users, courses, and oversee school operations.</p>
-                            <a th:href="@{/admin/dashboard}" class="btn btn-primary">Admin Portal</a>
+
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h3 class="h4 card-title">Students</h3>
+                                <p class="card-text text-muted">
+                                    Access your courses, assignments, and academic records. Track your progress and stay updated with your educational journey.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                                <h3 class="h4 card-title">Teachers</h3>
+                                <p class="card-text text-muted">
+                                    Manage your classes, record attendance, and update student assessments. Access teaching resources and track student progress.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm hover-card">
+                            <div class="card-body p-4">
+                                <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <h3 class="h4 card-title">Administration</h3>
+                                <p class="card-text text-muted">
+                                    Oversee school operations, manage users, and handle administrative tasks. Access comprehensive reporting and analytics.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="mt-5">
-                <p class="text-muted">Please login to access your respective portal.</p>
-                <a th:href="@{/login}" class="btn btn-lg btn-outline-primary">Login</a>
+
+                <div class="row mt-5">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-4">
+                                <h4 class="text-center mb-3">Why Choose Our System?</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <div class="feature-icon-small bg-primary bg-gradient text-white rounded-circle me-3">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="fw-bold">24/7 Access</h5>
+                                                <p class="text-muted small mb-0">Access your portal anytime, anywhere</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <div class="feature-icon-small bg-primary bg-gradient text-white rounded-circle me-3">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="fw-bold">Secure</h5>
+                                                <p class="text-muted small mb-0">Enhanced security for your data</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
+
+    <style>
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .feature-icon-small {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .hover-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .hover-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .hero-section {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+    </style>
 </body>
 </html>
