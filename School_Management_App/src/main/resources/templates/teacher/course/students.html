@@ -7,37 +7,66 @@
 <body>
     <section>
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">Students in Course: <span th:text="${course.name + ' (' + course.code + ')'}"></span></h3>
-                <a th:href="@{/teacher/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0" th:text="${course.name}">Course Name</h4>
+                    <small class="text-muted" th:text="${'Code: ' + course.code + ' | Semester: ' + course.semester}">Course Details</small>
+                </div>
+                <span class="badge bg-primary" th:text="${#lists.size(students) + ' students'}">0 students</span>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
+                <div th:if="${#lists.isEmpty(students)}" class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="mb-0">No students enrolled in this course</p>
+                </div>
+                <div th:unless="${#lists.isEmpty(students)}" class="table-responsive">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Roll Number</th>
+                                <th>ID</th>
                                 <th>Name</th>
+                                <th>Roll Number</th>
                                 <th>Department</th>
+                                <th>Semester</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="student : ${students}">
-                                <td th:text="${student.rollNumber}"></td>
-                                <td th:text="${student.firstName + ' ' + student.lastName}"></td>
-                                <td th:text="${student.department}"></td>
+                                <td th:text="${student.id}">1</td>
                                 <td>
-                                    <div class="btn-group">
-                                        <a th:href="@{/teacher/courses/{courseId}/marks/{studentId}(courseId=${course.id},studentId=${student.id})}" 
-                                           class="btn btn-sm btn-success">View Marks</a>
-                                        <a th:href="@{/teacher/courses/{courseId}/attendance/{studentId}(courseId=${course.id},studentId=${student.id})}" 
-                                           class="btn btn-sm btn-primary">View Attendance</a>
+                                    <div class="d-flex align-items-center">
+                                        <img th:if="${student.profilePicture}" 
+                                             th:src="@{'/profile-picture/' + ${student.id}}"
+                                             class="rounded-circle me-2" 
+                                             width="32" height="32" 
+                                             alt="Profile Picture">
+                                        <img th:unless="${student.profilePicture}"
+                                             th:src="@{/images/default-profile.jpg}"
+                                             class="rounded-circle me-2" 
+                                             width="32" height="32" 
+                                             alt="Default Profile Picture">     
+                                        <div>
+                                            <span th:text="${student.firstName + ' ' + student.lastName}">Student Name</span><br>
+                                            <small class="text-muted" th:text="${student.email}">student@email.com</small>
+                                        </div>
                                     </div>
                                 </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(students)}">
-                                <td colspan="4" class="text-center">No students enrolled in this course</td>
+                                <td th:text="${student.rollNumber}">12345</td>
+                                <td th:text="${student.department}">Computer Science</td>
+                                <td th:text="${student.semester}">1</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/teacher/courses/{courseId}/students/{studentId}/attendance(courseId=${course.id},studentId=${student.id})}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-clipboard-check me-1"></i>Attendance
+                                        </a>
+                                        <a th:href="@{/teacher/courses/{courseId}/students/{studentId}/marks(courseId=${course.id},studentId=${student.id})}" 
+                                           class="btn btn-sm btn-success">
+                                            <i class="fas fa-chart-line me-1"></i>Marks
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

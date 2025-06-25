@@ -2,6 +2,7 @@ package com.school.controller;
 
 import com.school.dto.AttendanceDTO;
 import com.school.dto.AttendanceSummaryDTO;
+import com.school.dto.CourseDTO;
 import com.school.dto.MarkDTO;
 import com.school.dto.StudentDTO;
 import com.school.dto.TeacherDTO;
@@ -52,14 +53,17 @@ public class TeacherController {
 
     @GetMapping("/dashboard")
     public String teacherDashboard(Model model, Principal principal) {
-        model.addAttribute("courses", courseService.getCoursesByTeacherUsername(principal.getName()));
+        List<CourseDTO> courses = courseService.getCoursesByTeacherUsername(principal.getName());
+        model.addAttribute("courses", courses);
         return "teacher/dashboard";
     }
 
     @GetMapping("/courses/{courseId}/students")
-    public String listStudentsInCourse(@PathVariable Long courseId, Model model) {
-        model.addAttribute("course", courseService.getCourseById(courseId));
-        model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
+    public String viewCourseStudents(@PathVariable Long courseId, Model model) {
+        CourseDTO course = courseService.getCourseById(courseId);
+        List<StudentDTO> students = studentService.getStudentsByCourseId(courseId);
+        model.addAttribute("course", course);
+        model.addAttribute("students", students);
         return "teacher/course/students";
     }
 
