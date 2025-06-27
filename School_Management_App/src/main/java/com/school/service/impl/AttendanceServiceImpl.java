@@ -7,11 +7,13 @@ import com.school.entity.Course;
 import com.school.entity.Student;
 import com.school.entity.Teacher;
 import com.school.entity.CourseSchedule;
+import com.school.entity.AttendanceSummary;
 import com.school.repository.AttendanceRepository;
 import com.school.repository.CourseRepository;
 import com.school.repository.StudentRepository;
 import com.school.repository.TeacherRepository;
 import com.school.repository.CourseScheduleRepository;
+import com.school.repository.AttendanceSummaryRepository;
 import com.school.service.AttendanceService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -33,43 +35,94 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final CourseScheduleRepository courseScheduleRepository;
+    private final AttendanceSummaryRepository attendanceSummaryRepository;
 
     public AttendanceServiceImpl(AttendanceRepository attendanceRepository,
                                  StudentRepository studentRepository,
                                  CourseRepository courseRepository,
                                  TeacherRepository teacherRepository,
-                                 CourseScheduleRepository courseScheduleRepository) {
+                                 CourseScheduleRepository courseScheduleRepository,
+                                 AttendanceSummaryRepository attendanceSummaryRepository) {
         this.attendanceRepository = attendanceRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.courseScheduleRepository = courseScheduleRepository;
+        this.attendanceSummaryRepository = attendanceSummaryRepository;
     }
 
     @Override
+    @Transactional
     public AttendanceDTO createAttendance(AttendanceDTO attendanceDTO) {
-        //validateAttendanceSchedule(attendanceDTO);
-
         Attendance attendance = new Attendance();
         mapDTOToEntity(attendanceDTO, attendance);
         Attendance savedAttendance = attendanceRepository.save(attendance);
+        
+        // Update attendance summary
+        updateAttendanceSummary(attendance.getSchedule(), attendance.getDate(), attendance.getMarkedByTeacher());
+        
         return mapEntityToDTO(savedAttendance);
     }
 
     @Override
+    @Transactional
     public List<AttendanceDTO> updateAttendance(List<AttendanceDTO> attendanceDTOs) {
         List<Long> attendanceIds = attendanceDTOs.stream().map(AttendanceDTO::getId).toList();
         List<Attendance> attendances = attendanceRepository.findAllById(attendanceIds);
+        
+        // Group attendances by schedule and date for summary updates
+        Map<String, List<Attendance>> groupedAttendances = new HashMap<>();
+        
         for(int i=0; i<attendanceDTOs.size(); i++) {
             mapDTOToEntity(attendanceDTOs.get(i), attendances.get(i));
+            
+            // Group for summary update
+            String key = attendances.get(i).getSchedule().getId() + "_" + attendances.get(i).getDate();
+            groupedAttendances.computeIfAbsent(key, k -> new ArrayList<>()).add(attendances.get(i));
         }
+        
         List<Attendance> updatedAttendances = attendanceRepository.saveAll(attendances);
+        
+        // Update attendance summaries for each group
+        for (List<Attendance> group : groupedAttendances.values()) {
+            if (!group.isEmpty()) {
+                Attendance first = group.get(0);
+                updateAttendanceSummary(first.getSchedule(), first.getDate(), first.getMarkedByTeacher());
+            }
+        }
+        
         List<AttendanceDTO> updatedAttendanceDTOs = new ArrayList<>();
-
-        for( Attendance updatedAttendance : updatedAttendances ) {
+        for(Attendance updatedAttendance : updatedAttendances) {
             updatedAttendanceDTOs.add(mapEntityToDTO(updatedAttendance));
         }
         return updatedAttendanceDTOs;
+    }
+
+    private void updateAttendanceSummary(CourseSchedule schedule, LocalDate date, Teacher teacher) {
+        // Get all attendance records for this schedule and date
+        List<Attendance> attendances = attendanceRepository.findByCourseScheduleAndDate(
+            schedule.getCourse().getId(), schedule.getId(), date);
+        
+        // Calculate summary statistics
+        long presentCount = attendances.stream()
+                .filter(Attendance::getPresent)
+                .count();
+        
+        // Find existing summary or create new one
+        AttendanceSummary summary = attendanceSummaryRepository
+                .findByScheduleAndDate(schedule.getId(), date)
+                .orElse(AttendanceSummary.builder()
+                        .schedule(schedule)
+                        .date(date)
+                        .teacher(teacher)
+                        .build());
+        
+        // Update summary
+        summary.setPresentCount((int) presentCount);
+        summary.setTotalCount(attendances.size());
+        
+        // Save summary
+        attendanceSummaryRepository.save(summary);
     }
 
     @Override
@@ -107,48 +160,46 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public List<AttendanceSummaryDTO> getAttendanceSummaryByCourseId(Long courseId) {
-        // Get all attendance records for the course
-        List<Attendance> attendances = attendanceRepository.findByCourseId(courseId);
+        // Get all schedules for the course
+        List<CourseSchedule> schedules = courseScheduleRepository.findByCourseId(courseId);
+        
+        // Get all summaries for these schedules
+        List<AttendanceSummary> summaries = schedules.stream()
+            .flatMap(schedule -> attendanceSummaryRepository.findByScheduleId(schedule.getId()).stream())
+            .sorted(Comparator.comparing(AttendanceSummary::getDate).reversed())
+            .collect(Collectors.toList());
 
-        // Group by schedule and date combination
-        Map<String, List<Attendance>> groupedAttendance = attendances.stream()
-                .collect(Collectors.groupingBy(att ->
-                        att.getSchedule().getId() + "_" + att.getDate().toString()));
+        //List<AttendanceSummary> summaries = attendanceSummaryRepository.findByCourseId(courseId);
 
-        // Create summary DTOs
-        List<AttendanceSummaryDTO> summaryList = new ArrayList<>();
+        return summaries.stream()
+            .map(this::mapSummaryToDTO)
+            .collect(Collectors.toList());
+    }
 
-        for (Map.Entry<String, List<Attendance>> entry : groupedAttendance.entrySet()) {
-            List<Attendance> recordsGroup = entry.getValue();
-            if (!recordsGroup.isEmpty()) {
-                Attendance first = recordsGroup.get(0);
+    @Override
+    public List<AttendanceSummaryDTO> getAttendanceSummaryByTeacher(String username) {
+        Teacher teacher = teacherRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Teacher not found"));
+            
+        return attendanceSummaryRepository.findByTeacherId(teacher.getId()).stream()
+            .sorted(Comparator.comparing(AttendanceSummary::getDate).reversed())
+            .map(this::mapSummaryToDTO)
+            .collect(Collectors.toList());
+    }
 
-                // Count present students
-                long presentCount = recordsGroup.stream()
-                        .filter(Attendance::getPresent)
-                        .count();
+    @Override
+    public List<AttendanceSummaryDTO> getAttendanceSummaryByDateRange(LocalDate startDate, LocalDate endDate) {
+        return attendanceSummaryRepository.findByDateBetween(startDate, endDate).stream()
+            .sorted(Comparator.comparing(AttendanceSummary::getDate).reversed())
+            .map(this::mapSummaryToDTO)
+            .collect(Collectors.toList());
+    }
 
-                // Format schedule info
-                String scheduleInfo = formatScheduleInfo(first.getSchedule());
-
-                // Create summary DTO
-                AttendanceSummaryDTO summary = AttendanceSummaryDTO.builder()
-                        .scheduleId(first.getSchedule().getId())
-                        .date(first.getDate())
-                        .scheduleInfo(scheduleInfo)
-                        .presentCount((int) presentCount)
-                        .totalCount(recordsGroup.size())
-                        .build();
-
-                summaryList.add(summary);
-            }
-        }
-
-        // Sort by date (most recent first) and then by schedule
-        summaryList.sort(Comparator.comparing(AttendanceSummaryDTO::getDate).reversed()
-                .thenComparing(AttendanceSummaryDTO::getScheduleInfo));
-
-        return summaryList;
+    @Override
+    public AttendanceSummaryDTO getAttendanceSummaryByScheduleAndDate(Long scheduleId, LocalDate date) {
+        return attendanceSummaryRepository.findByScheduleAndDate(scheduleId, date)
+            .map(this::mapSummaryToDTO)
+            .orElse(null);
     }
 
     private String formatScheduleInfo(CourseSchedule schedule) {
@@ -337,5 +388,34 @@ public class AttendanceServiceImpl implements AttendanceService {
         dto.setScheduleId(entity.getSchedule() == null ? null : entity.getSchedule().getId());
         dto.setScheduleInfo(entity.getSchedule() == null? null : entity.getSchedule().getDayOfWeek()+": "+entity.getSchedule().getStartTime()+"-"+entity.getSchedule().getEndTime());
         return dto;
+    }
+
+    private AttendanceSummaryDTO mapSummaryToDTO(AttendanceSummary summary) {
+        if (summary == null) {
+            return null;
+        }
+
+        return AttendanceSummaryDTO.builder()
+                .id(summary.getId())
+                .scheduleId(summary.getSchedule().getId())
+                .scheduleInfo(formatScheduleInfo(summary.getSchedule()))
+                .courseName(summary.getSchedule().getCourse().getName())
+                .courseCode(summary.getSchedule().getCourse().getCode())
+                .date(summary.getDate())
+                .presentCount(summary.getPresentCount())
+                .totalCount(summary.getTotalCount())
+                .attendancePercentage(calculateAttendancePercentage(summary.getPresentCount(), summary.getTotalCount()))
+                .createdDate(summary.getCreatedDate())
+                .updatedDate(summary.getUpdatedDate())
+                .teacherId(summary.getTeacher().getId())
+                .teacherName(summary.getTeacher().getFirstName() + " " + summary.getTeacher().getLastName())
+                .build();
+    }
+
+    private Double calculateAttendancePercentage(Integer presentCount, Integer totalCount) {
+        if (totalCount == null || totalCount == 0) {
+            return 0.0;
+        }
+        return (double) presentCount / totalCount * 100;
     }
 }

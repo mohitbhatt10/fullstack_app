@@ -23,6 +23,12 @@ public interface AttendanceService {
     List<AttendanceDTO> getAttendanceBySemester(Integer semester);
     List<AttendanceDTO> getRecentAttendanceByTeacher(String username);
 
+    // New methods for attendance summary
+    List<AttendanceSummaryDTO> getAttendanceSummaryByCourseId(Long courseId);
+    List<AttendanceSummaryDTO> getAttendanceSummaryByTeacher(String username);
+    List<AttendanceSummaryDTO> getAttendanceSummaryByDateRange(LocalDate startDate, LocalDate endDate);
+    AttendanceSummaryDTO getAttendanceSummaryByScheduleAndDate(Long scheduleId, LocalDate date);
+
     /**
      * Get the valid time window for marking attendance for a course on a specific date.
      * @param courseId The course ID
@@ -50,5 +56,4 @@ public interface AttendanceService {
      * @return List of attendance records
      */
     List<AttendanceDTO> getAttendanceByCourseScheduleAndDate(Long courseId, Long scheduleId, LocalDate date);
-    List<AttendanceSummaryDTO> getAttendanceSummaryByCourseId(Long courseId);
 }
