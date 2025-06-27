@@ -120,11 +120,21 @@
                                  class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-1" th:text="${record.courseName}">Course Name</h6>
-                                        <small th:text="${#temporals.format(record.date, 'dd-MM-yyyy')}">Date</small>
+                                        <h6 class="mb-1">
+                                            <span th:text="${record.courseName}">Course Name</span>
+                                            <small class="text-muted" th:text="${'(' + record.courseCode + ')'}">Code</small>
+                                        </h6>
+                                        <small>
+                                            <span th:text="${record.scheduleInfo}">Schedule Info</span><br>
+                                            <span th:text="${#temporals.format(record.date, 'dd-MM-yyyy')}">Date</span>
+                                        </small>
                                     </div>
-                                    <span class="badge bg-primary" 
-                                          th:text="${record.presentCount + ' present'}">0 present</span>
+                                    <div class="text-end">
+                                        <span class="badge bg-success" 
+                                              th:text="${record.presentCount + '/' + record.totalCount}">Attendance</span><br>
+                                        <small class="text-muted" 
+                                               th:text="${#numbers.formatDecimal(record.attendancePercentage, 1, 1) + '%'}">Percentage</small>
+                                    </div>
                                 </div>
                             </div>
                             <div th:if="${#lists.isEmpty(recentAttendance)}" 

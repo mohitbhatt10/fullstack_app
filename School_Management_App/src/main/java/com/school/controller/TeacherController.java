@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/teacher")
@@ -53,8 +54,17 @@ public class TeacherController {
 
     @GetMapping("/dashboard")
     public String teacherDashboard(Model model, Principal principal) {
-        List<CourseDTO> courses = courseService.getCoursesByTeacherUsername(principal.getName());
+        String username = principal.getName();
+        List<CourseDTO> courses = courseService.getCoursesByTeacherUsername(username);
         model.addAttribute("courses", courses);
+
+        // Get recent attendance summaries (last 3)
+        List<AttendanceSummaryDTO> recentAttendance = attendanceService.getAttendanceSummaryByTeacher(username)
+                .stream()
+                .limit(3)
+                .collect(Collectors.toList());
+        model.addAttribute("recentAttendance", recentAttendance);
+        
         return "teacher/dashboard";
     }
 

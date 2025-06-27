@@ -14,9 +14,11 @@ public interface AttendanceSummaryRepository extends JpaRepository<AttendanceSum
     @Query("SELECT a FROM AttendanceSummary a WHERE a.schedule.id = :scheduleId AND a.date = :date")
     Optional<AttendanceSummary> findByScheduleAndDate(@Param("scheduleId") Long scheduleId, @Param("date") LocalDate date);
 
-    List<AttendanceSummary> findByTeacherId(Long teacherId);
+    @Query("SELECT a FROM AttendanceSummary a WHERE a.teacher.id = :teacherId ORDER BY a.updatedDate DESC")
+    List<AttendanceSummary> findByTeacherId(@Param("teacherId") Long teacherId);
 
     List<AttendanceSummary> findByScheduleId(Long scheduleId);
 
-    List<AttendanceSummary> findByDateBetween(LocalDate startDate, LocalDate endDate);
+    @Query("SELECT a FROM AttendanceSummary a WHERE a.date BETWEEN :startDate AND :endDate ORDER BY a.updatedDate DESC")
+    List<AttendanceSummary> findByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 } 
