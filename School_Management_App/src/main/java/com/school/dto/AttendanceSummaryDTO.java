@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class AttendanceSummaryDTO {
     private Long id;
     private Long scheduleId;
+    private Long courseId;  // Added for edit link
     private String scheduleInfo;  // Display field: e.g., "Monday 09:00-10:30 (Room 101)"
     private String courseName;    // Display field: Course name from schedule
     private String courseCode;    // Display field: Course code from schedule

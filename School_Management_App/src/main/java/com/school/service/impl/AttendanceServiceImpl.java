@@ -120,7 +120,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Update summary
         summary.setPresentCount((int) presentCount);
         summary.setTotalCount(attendances.size());
-        
+        summary.setTeacher(teacher);
+
         // Save summary
         attendanceSummaryRepository.save(summary);
     }
@@ -398,6 +399,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         return AttendanceSummaryDTO.builder()
                 .id(summary.getId())
                 .scheduleId(summary.getSchedule().getId())
+                .courseId(summary.getSchedule().getCourse().getId())
                 .scheduleInfo(formatScheduleInfo(summary.getSchedule()))
                 .courseName(summary.getSchedule().getCourse().getName())
                 .courseCode(summary.getSchedule().getCourse().getCode())
