@@ -228,7 +228,7 @@
                                  th:src="@{/images/default-profile.jpg}"
                                  alt="Default Profile Picture"
                                  class="rounded-circle profile-picture" width="32" height="32" />
-                            <span class="ms-2" th:text="${#authentication.principal.firstName}">User</span>
+                            <span class="ms-2" th:text="${#authentication.principal.firstName + ' ' + #authentication.principal.lastName + ' (' + #authentication.authorities[0].authority.replace('ROLE_', '') + ')'}">User</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <li><a class="dropdown-item" th:href="@{/profile}">
