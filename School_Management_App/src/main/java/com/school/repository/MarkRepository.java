@@ -25,4 +25,7 @@ public interface MarkRepository extends JpaRepository<Mark, Long> {
     
     @Query("SELECT m FROM Mark m WHERE m.enteredByTeacher.username = :username ORDER BY m.semester DESC")
     List<Mark> findByEnteredByTeacherUsername(@Param("username") String username);
+
+    @Query("SELECT m FROM Mark m WHERE m.course.id = :courseId AND m.examType.id = :examTypeId")
+    List<Mark> findByCourseIdAndExamTypeId(@Param("courseId") Long courseId, @Param("examTypeId") Long examTypeId);
 }

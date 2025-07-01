@@ -165,14 +165,40 @@
                     </div>
                     <div class="card-body">
                         <div class="list-group">
-                            <div th:each="entry : ${recentMarks}" 
+                            <div th:each="summary : ${recentMarks}" 
                                  class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1" th:text="${entry.courseName}">Course Name</h6>
-                                        <small th:text="${entry.examTypeName}">Exam Type</small>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <h6 class="mb-0">
+                                                <span th:text="${summary.courseName}">Course Name</span>
+                                                <small class="text-muted" th:text="${'(' + summary.courseCode + ')'}">Code</small>
+                                            </h6>
+                                            <div class="text-end">
+                                                <span class="badge bg-success" 
+                                                      th:text="${summary.passedStudents + '/' + summary.totalStudents}">Pass Rate</span>
+                                                <small class="text-muted ms-1" 
+                                                       th:text="${#numbers.formatDecimal(summary.passPercentage, 1, 1) + '%'}">Percentage</small>
+                                            </div>
+                                        </div>
+                                        <small class="d-block">
+                                            <span th:text="${summary.examTypeName}">Exam Type</span><br>
+                                            <span>Average: </span>
+                                            <span th:text="${#numbers.formatDecimal(summary.averageMarks, 1, 1)}">Average</span>
+                                            <span> / </span>
+                                            <span th:text="${#numbers.formatDecimal(summary.maxMarks, 1, 1)}">Max</span>
+                                        </small>
+                                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                Last updated: 
+                                                <span th:text="${#temporals.format(summary.updatedDate, 'dd-MM-yyyy HH:mm')}">Update Time</span>
+                                            </small>
+                                            <a th:href="@{/teacher/courses/{courseId}/marks/{examTypeId}/edit(courseId=${summary.courseId},examTypeId=${summary.examTypeId})}"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit me-1"></i>View/Edit
+                                            </a>
+                                        </div>
                                     </div>
-                                    <small th:text="${#temporals.format(entry.createdAt, 'dd-MM-yyyy')}">Date</small>
                                 </div>
                             </div>
                             <div th:if="${#lists.isEmpty(recentMarks)}" 

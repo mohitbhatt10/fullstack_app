@@ -129,4 +129,10 @@ public class TeacherServiceImpl implements TeacherService {
         cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
         return cell.getStringCellValue().trim();
     }
+
+    @Override
+    public Teacher findByUsername(String username) {
+        return teacherRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+    }
 }

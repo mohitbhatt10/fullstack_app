@@ -1,11 +1,6 @@
 package com.school.controller;
 
-import com.school.dto.AttendanceDTO;
-import com.school.dto.AttendanceSummaryDTO;
-import com.school.dto.CourseDTO;
-import com.school.dto.MarkDTO;
-import com.school.dto.StudentDTO;
-import com.school.dto.TeacherDTO;
+import com.school.dto.*;
 import com.school.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,7 +37,8 @@ public class TeacherController {
                            AttendanceService attendanceService,
                            TeacherService teacherService, 
                            CourseScheduleService courseScheduleService,
-                           ExamTypeService examTypeService) {
+                           ExamTypeService examTypeService
+                           ) {
         this.courseService = courseService;
         this.studentService = studentService;
         this.markService = markService;
@@ -63,7 +59,16 @@ public class TeacherController {
                 .stream()
                 .limit(3)
                 .collect(Collectors.toList());
+
+        // Get recent marks (last 3)
+        List<MarksSummaryDTO> recentMarks = markService.getMarksSummaryByTeacher(username)
+                .stream()
+                .limit(3)
+                .collect(Collectors.toList());
+
+        model.addAttribute("courses", courses);
         model.addAttribute("recentAttendance", recentAttendance);
+        model.addAttribute("recentMarks", recentMarks);
         
         return "teacher/dashboard";
     }

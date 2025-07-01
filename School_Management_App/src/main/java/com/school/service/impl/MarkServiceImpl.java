@@ -1,22 +1,16 @@
 package com.school.service.impl;
 
 import com.school.dto.MarkDTO;
-import com.school.entity.Mark;
-import com.school.entity.Course;
-import com.school.entity.Student;
-import com.school.entity.Teacher;
-import com.school.entity.ExamType;
-import com.school.repository.MarkRepository;
-import com.school.repository.CourseRepository;
-import com.school.repository.StudentRepository;
-import com.school.repository.TeacherRepository;
-import com.school.repository.ExamTypeRepository;
+import com.school.dto.MarksSummaryDTO;
+import com.school.entity.*;
+import com.school.repository.*;
 import com.school.service.MarkService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.DoubleSummaryStatistics;
 
 @Service
 @Transactional
@@ -26,21 +20,25 @@ public class MarkServiceImpl implements MarkService {
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final ExamTypeRepository examTypeRepository;
+    private final MarksSummaryRepository marksSummaryRepository;
 
     public MarkServiceImpl(
             MarkRepository markRepository,
             StudentRepository studentRepository,
             CourseRepository courseRepository,
             TeacherRepository teacherRepository,
-            ExamTypeRepository examTypeRepository) {
+            ExamTypeRepository examTypeRepository,
+            MarksSummaryRepository marksSummaryRepository) {
         this.markRepository = markRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.examTypeRepository = examTypeRepository;
+        this.marksSummaryRepository = marksSummaryRepository;
     }
 
     @Override
+    @Transactional
     public MarkDTO createMark(MarkDTO markDTO) {
         Mark mark = new Mark();
         Course course = courseRepository.findById(markDTO.getCourseId())
@@ -62,7 +60,51 @@ public class MarkServiceImpl implements MarkService {
         mark.setRemarks(markDTO.getRemarks());
         
         Mark savedMark = markRepository.save(mark);
+        
+        // Update marks summary
+        updateMarksSummary(course, examType, teacher);
+        
         return mapEntityToDTO(savedMark);
+    }
+
+    private void updateMarksSummary(Course course, ExamType examType, Teacher teacher) {
+        // Get all marks for this course and exam type
+        List<Mark> marks = markRepository.findByCourseIdAndExamTypeId(course.getId(), examType.getId());
+        
+        if (marks.isEmpty()) {
+            return;
+        }
+
+        // Calculate statistics
+        DoubleSummaryStatistics stats = marks.stream()
+                .mapToDouble(Mark::getMarks)
+                .summaryStatistics();
+
+        double maxMarks = marks.get(0).getMaxMarks(); // All marks should have same max marks
+        long passedCount = marks.stream()
+                .filter(m -> m.getMarks() >= (maxMarks * 0.4)) // Assuming 40% is pass marks
+                .count();
+
+        // Find existing summary or create new one
+        MarksSummary summary = marksSummaryRepository
+                .findByCourseAndExamType(course.getId(), examType.getId())
+                .orElse(MarksSummary.builder()
+                        .course(course)
+                        .examType(examType)
+                        .teacher(teacher)
+                        .build());
+
+        // Update summary
+        summary.setMaxMarks(maxMarks);
+        summary.setAverageMarks(stats.getAverage());
+        summary.setTotalStudents((int) stats.getCount());
+        summary.setPassedStudents((int) passedCount);
+        summary.setPassPercentage((double) passedCount / stats.getCount() * 100);
+        summary.setHighestMarks(stats.getMax());
+        summary.setLowestMarks(stats.getMin());
+
+        // Save summary
+        marksSummaryRepository.save(summary);
     }
 
     @Override
@@ -188,6 +230,24 @@ public class MarkServiceImpl implements MarkService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<MarksSummaryDTO> getMarksSummaryByCourseId(Long courseId) {
+        return marksSummaryRepository.findByCourseId(courseId).stream()
+                .map(this::mapSummaryToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarksSummaryDTO> getMarksSummaryByTeacher(String username) {
+        Teacher teacher = teacherRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        return marksSummaryRepository.findByTeacherId(teacher.getId())
+                .stream()
+                .map(this::mapSummaryToDTO)
+                .collect(Collectors.toList());
+    }
+
     private MarkDTO mapEntityToDTO(Mark mark) {
         MarkDTO dto = new MarkDTO();
         BeanUtils.copyProperties(mark, dto);
@@ -210,5 +270,31 @@ public class MarkServiceImpl implements MarkService {
         }
         
         return dto;
+    }
+
+    public MarksSummaryDTO mapSummaryToDTO(MarksSummary summary) {
+        if (summary == null) {
+            return null;
+        }
+
+        return MarksSummaryDTO.builder()
+                .id(summary.getId())
+                .courseId(summary.getCourse().getId())
+                .courseName(summary.getCourse().getName())
+                .courseCode(summary.getCourse().getCode())
+                .examTypeId(summary.getExamType().getId())
+                .examTypeName(summary.getExamType().getName())
+                .teacherId(summary.getTeacher().getId())
+                .teacherName(summary.getTeacher().getFirstName() + " " + summary.getTeacher().getLastName())
+                .maxMarks(summary.getMaxMarks())
+                .averageMarks(summary.getAverageMarks())
+                .totalStudents(summary.getTotalStudents())
+                .passedStudents(summary.getPassedStudents())
+                .passPercentage(summary.getPassPercentage())
+                .highestMarks(summary.getHighestMarks())
+                .lowestMarks(summary.getLowestMarks())
+                .createdDate(summary.getCreatedDate())
+                .updatedDate(summary.getUpdatedDate())
+                .build();
     }
 }

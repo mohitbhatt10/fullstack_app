@@ -1,6 +1,7 @@
 package com.school.service;
 
 import com.school.dto.TeacherDTO;
+import com.school.entity.Teacher;
 import java.util.List;
 
 public interface TeacherService {
@@ -13,4 +14,5 @@ public interface TeacherService {
     List<TeacherDTO> getTeachersByDepartment(String department);
     Integer getTeacherCount();
     List<TeacherDTO> importTeachersFromExcel(org.springframework.web.multipart.MultipartFile file) throws java.io.IOException;
+    Teacher findByUsername(String username);
 }

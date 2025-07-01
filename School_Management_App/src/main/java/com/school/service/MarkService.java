@@ -1,6 +1,8 @@
 package com.school.service;
 
 import com.school.dto.MarkDTO;
+import com.school.dto.MarksSummaryDTO;
+
 import java.util.List;
 
 public interface MarkService {
@@ -19,4 +21,6 @@ public interface MarkService {
     List<MarkDTO> getMarksByStudent(Long studentId);
     List<MarkDTO> getMarksBySemester(Integer semester);
     List<MarkDTO> getRecentMarksByTeacher(String username);
+    List<MarksSummaryDTO> getMarksSummaryByCourseId(Long courseId);
+    List<MarksSummaryDTO> getMarksSummaryByTeacher(String username);
 }
