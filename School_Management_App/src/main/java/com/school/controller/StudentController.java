@@ -2,6 +2,7 @@ package com.school.controller;
 
 import com.school.dto.StudentDTO;
 import com.school.service.AttendanceService;
+import com.school.service.CourseScheduleService;
 import com.school.service.CourseService;
 import com.school.service.MarkService;
 import com.school.service.StudentService;
@@ -23,15 +24,18 @@ public class StudentController {
     private final CourseService courseService;
     private final MarkService markService;
     private final AttendanceService attendanceService;
+    private final CourseScheduleService courseScheduleService;
 
     public StudentController(StudentService studentService,
                            CourseService courseService,
                            MarkService markService,
-                           AttendanceService attendanceService) {
+                           AttendanceService attendanceService,
+                           CourseScheduleService courseScheduleService) {
         this.studentService = studentService;
         this.courseService = courseService;
         this.markService = markService;
         this.attendanceService = attendanceService;
+        this.courseScheduleService = courseScheduleService;
     }
 
     @GetMapping("/dashboard")
@@ -124,6 +128,7 @@ public class StudentController {
         model.addAttribute("marks", markService.getMarksByStudentIdAndCourseId(studentId, courseId));
         model.addAttribute("attendance", attendanceService.getAttendanceByStudentIdAndCourseId(studentId, courseId));
         model.addAttribute("attendancePercentage", attendanceService.getAttendancePercentage(studentId, courseId));
+        model.addAttribute("schedules", courseScheduleService.getSchedulesByCourseId(courseId));
         return "student/course-details";
     }
 }

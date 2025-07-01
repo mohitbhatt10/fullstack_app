@@ -23,7 +23,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Teacher:</strong> <span th:text="${course.teacherNames}"></span></p>
-                                <p><strong>Credits:</strong> <span th:text="${course.credits}"></span></p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Session:</strong> <span th:text="${course.sessionName}"></span></p>
@@ -119,6 +118,47 @@
                 </div>
             </div>
 
+            <!-- Schedules Section -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Course Schedules
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(schedules)}">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Classroom</th>
+                                            <th>Teacher</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="schedule : ${schedules}">
+                                            <td th:text="${schedule.dayOfWeek}"></td>
+                                            <td th:text="${schedule.startTime}"></td>
+                                            <td th:text="${schedule.endTime}"></td>
+                                            <td th:text="${schedule.classroom}"></td>
+                                            <td th:text="${schedule.teacherName}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(schedules)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No schedules available for this course yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="col-md-12">
                 <div class="card">
@@ -127,14 +167,7 @@
                             <a href="/student/dashboard" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
                             </a>
-                            <div>
-                                <a th:href="@{/student/marks/{courseId}(courseId=${course.id})}" class="btn btn-primary me-2">
-                                    <i class="fas fa-chart-line me-2"></i>View All Marks
-                                </a>
-                                <a th:href="@{/student/attendance/{courseId}(courseId=${course.id})}" class="btn btn-success">
-                                    <i class="fas fa-calendar-check me-2"></i>View All Attendance
-                                </a>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
