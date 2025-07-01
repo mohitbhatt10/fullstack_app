@@ -66,4 +66,9 @@ public interface AttendanceService {
      * Get the last N attendance records for a teacher by username
      */
     List<AttendanceDTO> getRecentAttendanceForTeacher(String username, int limit);
+
+      /**
+     * Get attendance records for a student, optionally filtered by course and month (yyyy-MM)
+     */
+    List<AttendanceDTO> getAttendanceForStudent(Long studentId, Long courseId, String month);
 }

@@ -438,4 +438,29 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Get attendance records for a student, optionally filtered by course and month (yyyy-MM)
+     */
+    @Override
+    public List<AttendanceDTO> getAttendanceForStudent(Long studentId, Long courseId, String month) {
+        List<Attendance> attendances;
+        if (courseId != null) {
+            attendances = attendanceRepository.findByStudentIdAndCourseId(studentId, courseId);
+        } else {
+            attendances = attendanceRepository.findByStudentId(studentId);
+        }
+        
+        // Filter by month if provided (month format: yyyy-MM)
+        if (month != null && !month.isEmpty()) {
+            attendances = attendances.stream()
+                .filter(a -> a.getDate() != null && a.getDate().toString().startsWith(month))
+                .collect(Collectors.toList());
+        }
+        
+        return attendances.stream()
+                .sorted(Comparator.comparing(Attendance::getDate))
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
 }

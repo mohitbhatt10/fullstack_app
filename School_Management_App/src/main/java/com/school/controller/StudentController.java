@@ -1,5 +1,6 @@
 package com.school.controller;
 
+import com.school.dto.AttendanceDTO;
 import com.school.dto.StudentDTO;
 import com.school.service.AttendanceService;
 import com.school.service.CourseScheduleService;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/student")
@@ -70,10 +72,23 @@ public class StudentController {
     }
 
     @GetMapping("/attendance")
-    public String viewAttendance(Model model, Principal principal) {
+    public String viewAttendance(
+            @RequestParam(value = "courseId", required = false) Long courseId,
+            @RequestParam(value = "month", required = false) String month,
+            Model model, Principal principal) {
         Long studentId = studentService.getStudentByUsername(principal.getName()).getId();
         model.addAttribute("courses", courseService.getCoursesByStudentId(studentId));
-        model.addAttribute("attendance", attendanceService.getAttendanceByStudentId(studentId));
+
+        // Fetch filtered attendance list
+        List<AttendanceDTO> attendanceList = attendanceService.getAttendanceForStudent(studentId, courseId, month);
+        model.addAttribute("attendanceList", attendanceList);
+
+        // Calculate summary
+        int totalClasses = attendanceList.size();
+        int presentCount = (int) attendanceList.stream().filter(AttendanceDTO::getPresent).count();
+        model.addAttribute("totalClasses", totalClasses);
+        model.addAttribute("presentCount", presentCount);
+
         return "student/attendance";
     }
 

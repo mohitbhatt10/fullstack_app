@@ -52,7 +52,7 @@
                         <div class="card bg-danger text-white">
                             <div class="card-body text-center">
                                 <h5 class="card-title">Absent</h5>
-                                <p class="h3" id="absentCount" th:text="${totalClasses - presentCount}">0</p>
+                                <p class="h3" id="absentCount" th:text="${(totalClasses ?: 0) - (presentCount ?: 0)}">0</p>
                             </div>
                         </div>
                     </div>
