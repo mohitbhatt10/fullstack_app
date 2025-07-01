@@ -23,4 +23,14 @@ public interface MarkService {
     List<MarkDTO> getRecentMarksByTeacher(String username);
     List<MarksSummaryDTO> getMarksSummaryByCourseId(Long courseId);
     List<MarksSummaryDTO> getMarksSummaryByTeacher(String username);
+
+    /**
+     * Get the last N marks records for a student
+     */
+    List<MarkDTO> getRecentMarksForStudent(Long studentId, int limit);
+
+    /**
+     * Get the last N marks records for a teacher by username
+     */
+    List<MarkDTO> getRecentMarksForTeacher(String username, int limit);
 }

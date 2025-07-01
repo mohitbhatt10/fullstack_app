@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -45,4 +49,13 @@ public class Mark {
 
     @Column(length = 500)
     private String remarks;
+
+    @CreationTimestamp
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name="updated_at")
+    private LocalDateTime updatedAt;
+
 }

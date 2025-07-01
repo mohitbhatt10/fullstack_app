@@ -38,6 +38,13 @@ public class StudentController {
     public String studentDashboard(Model model, Principal principal) {
         Long studentId = studentService.getStudentByUsername(principal.getName()).getId();
         model.addAttribute("courses", courseService.getCoursesByStudentId(studentId));
+        
+        // Get recent attendance (last 5 records)
+        model.addAttribute("recentAttendance", attendanceService.getRecentAttendanceForStudent(studentId, 5));
+        
+        // Get recent marks (last 5 records)
+        model.addAttribute("recentMarks", markService.getRecentMarksForStudent(studentId, 5));
+        
         return "student/dashboard";
     }
 
@@ -107,5 +114,16 @@ public class StudentController {
         StudentDTO student = studentService.getStudentByUsername(username);
         model.addAttribute("student", student);
         return "student/profile";
+    }
+
+    @GetMapping("/courses/{courseId}")
+    public String viewCourseDetails(@PathVariable Long courseId,
+                                  Model model, Principal principal) {
+        Long studentId = studentService.getStudentByUsername(principal.getName()).getId();
+        model.addAttribute("course", courseService.getCourseById(courseId));
+        model.addAttribute("marks", markService.getMarksByStudentIdAndCourseId(studentId, courseId));
+        model.addAttribute("attendance", attendanceService.getAttendanceByStudentIdAndCourseId(studentId, courseId));
+        model.addAttribute("attendancePercentage", attendanceService.getAttendancePercentage(studentId, courseId));
+        return "student/course-details";
     }
 }

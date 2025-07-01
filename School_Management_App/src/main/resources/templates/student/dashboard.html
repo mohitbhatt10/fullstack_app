@@ -7,25 +7,71 @@
 <body>
     <section>
         <div class="row">
+            <!-- Welcome Card -->
             <div class="col-md-12 mb-4">
-                <div class="card">
+                <div class="card bg-gradient-primary text-white">
                     <div class="card-body">
-                        <h4 class="card-title">Welcome, <span th:text="${#authentication.principal.firstName}"></span>!</h4>
-                        <p class="card-text">
-                            Roll Number: <strong th:text="${#authentication.principal.rollNumber}"></strong><br>
-                            Department: <strong th:text="${#authentication.principal.department}"></strong><br>
-                            Semester: <strong th:text="${#authentication.principal.semester}"></strong>
-                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="card-title mb-1">Welcome back, <span th:text="${#authentication.principal.firstName}"></span>!</h4>
+                                <p class="card-text mb-0">
+                                    Roll Number: <strong th:text="${#authentication.principal.rollNumber}"></strong> | 
+                                    Department: <strong th:text="${#authentication.principal.department}"></strong> | 
+                                    Semester: <strong th:text="${#authentication.principal.semester}"></strong>
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <i class="fas fa-user-graduate fa-3x opacity-75"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Quick Stats Cards -->
+            <div class="col-md-12 mb-4">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <i class="fas fa-book-open fa-2x text-primary mb-2"></i>
+                                <h5 class="card-title" th:text="${#lists.size(courses)}">0</h5>
+                                <p class="card-text">Enrolled Courses</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                                <h5 class="card-title" th:text="${#lists.size(recentAttendance)}">0</h5>
+                                <p class="card-text">Recent Attendance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                <h5 class="card-title" th:text="${#lists.size(recentMarks)}">0</h5>
+                                <p class="card-text">Recent Marks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Courses -->
             <div class="col-md-6 mb-4">
                 <div class="card dashboard-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-book me-2"></i>My Courses
+                        </h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">My Courses</h5>
                         <div class="table-responsive" th:if="${not #lists.isEmpty(courses)}">
-                            <table class="table">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Course Name</th>
@@ -37,29 +83,40 @@
                                 <tbody>
                                     <tr th:each="course : ${courses}">
                                         <td th:text="${course.name}"></td>
-                                        <td th:text="${course.code}"></td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${course.code}"></span>
+                                        </td>
                                         <td th:text="${course.teacherNames}"></td>
                                         <td>
                                             <a th:href="@{/student/courses/{id}(id=${course.id})}" 
-                                               class="btn btn-sm btn-primary">View Details</a>
+                                               class="btn btn-sm btn-primary">
+                                               <i class="fas fa-eye me-1"></i>View Details
+                                            </a>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p th:if="${#lists.isEmpty(courses)}" class="text-muted">
-                            No courses enrolled yet.
-                        </p>
+                        <div th:if="${#lists.isEmpty(courses)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No courses enrolled yet.</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Recent Attendance -->
             <div class="col-md-6 mb-4">
                 <div class="card dashboard-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Recent Attendance
+                        </h5>
+                        <small class="text-muted">Last 5 records</small>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Recent Attendance</h5>
                         <div class="table-responsive" th:if="${not #lists.isEmpty(recentAttendance)}">
-                            <table class="table">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Date</th>
@@ -70,31 +127,46 @@
                                 <tbody>
                                     <tr th:each="attendance : ${recentAttendance}">
                                         <td th:text="${#temporals.format(attendance.date, 'dd-MM-yyyy')}"></td>
-                                        <td th:text="${attendance.courseName}"></td>
                                         <td>
-                                            <span th:if="${attendance.present}" class="badge bg-success">Present</span>
-                                            <span th:unless="${attendance.present}" class="badge bg-danger">Absent</span>
+                                            <small th:text="${attendance.courseName}"></small>
+                                        </td>
+                                        <td>
+                                            <span th:if="${attendance.present}" class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Present
+                                            </span>
+                                            <span th:unless="${attendance.present}" class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Absent
+                                            </span>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p th:if="${#lists.isEmpty(recentAttendance)}" class="text-muted">
-                            No recent attendance records.
-                        </p>
+                        <div th:if="${#lists.isEmpty(recentAttendance)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No recent attendance records.</p>
+                        </div>
                         <div class="text-end mt-3">
-                            <a th:href="@{/student/attendance}" class="btn btn-outline-primary">View All Attendance</a>
+                            <a th:href="@{/student/attendance}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View All Attendance
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Recent Marks -->
             <div class="col-md-12 mb-4">
                 <div class="card dashboard-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Recent Marks
+                        </h5>
+                        <small class="text-muted">Last 5 records</small>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Recent Marks</h5>
                         <div class="table-responsive" th:if="${not #lists.isEmpty(recentMarks)}">
-                            <table class="table">
+                            <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Course</th>
@@ -102,29 +174,63 @@
                                         <th>Marks Obtained</th>
                                         <th>Total Marks</th>
                                         <th>Percentage</th>
+                                        <th>Grade</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="mark : ${recentMarks}">
                                         <td th:text="${mark.courseName}"></td>
-                                        <td th:text="${mark.examTypeName}"></td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${mark.examTypeName}"></span>
+                                        </td>
                                         <td th:text="${mark.marks}"></td>
                                         <td th:text="${mark.maxMarks}"></td>
-                                        <td th:text="${#numbers.formatDecimal((mark.marks / mark.maxMarks * 100), 1, 2) + '%'}"></td>
+                                        <td>
+                                            <span th:text="${#numbers.formatDecimal((mark.marks / mark.maxMarks * 100), 1, 2) + '%'}"
+                                                  th:class="${(mark.marks / mark.maxMarks * 100) >= 60 ? 'text-success fw-bold' : 'text-danger fw-bold'}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${(mark.marks / mark.maxMarks * 100) >= 90}" class="badge bg-success">A+</span>
+                                            <span th:if="${(mark.marks / mark.maxMarks * 100) >= 80 and (mark.marks / mark.maxMarks * 100) < 90}" class="badge bg-primary">A</span>
+                                            <span th:if="${(mark.marks / mark.maxMarks * 100) >= 70 and (mark.marks / mark.maxMarks * 100) < 80}" class="badge bg-info">B+</span>
+                                            <span th:if="${(mark.marks / mark.maxMarks * 100) >= 60 and (mark.marks / mark.maxMarks * 100) < 70}" class="badge bg-warning">B</span>
+                                            <span th:if="${(mark.marks / mark.maxMarks * 100) < 60}" class="badge bg-danger">F</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p th:if="${#lists.isEmpty(recentMarks)}" class="text-muted">
-                            No recent marks available.
-                        </p>
+                        <div th:if="${#lists.isEmpty(recentMarks)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No recent marks available.</p>
+                        </div>
                         <div class="text-end mt-3">
-                            <a th:href="@{/student/marks}" class="btn btn-outline-primary">View All Marks</a>
+                            <a th:href="@{/student/marks}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>View All Marks
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <style>
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            }
+            .dashboard-card {
+                transition: transform 0.2s ease-in-out;
+                border: none;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .dashboard-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            .table-hover tbody tr:hover {
+                background-color: rgba(0,123,255,0.1);
+            }
+        </style>
     </section>
 </body>
 </html>

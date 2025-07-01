@@ -420,4 +420,22 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         return (double) presentCount / totalCount * 100;
     }
+
+    @Override
+    public List<AttendanceDTO> getRecentAttendanceForStudent(Long studentId, int limit) {
+        return attendanceRepository.findByStudentId(studentId).stream()
+                .sorted(Comparator.comparing(Attendance::getDate).reversed())
+                .limit(limit)
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttendanceDTO> getRecentAttendanceForTeacher(String username, int limit) {
+        return attendanceRepository.findByCourseTeacherUsername(username).stream()
+                .sorted(Comparator.comparing(Attendance::getDate).reversed())
+                .limit(limit)
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
 }

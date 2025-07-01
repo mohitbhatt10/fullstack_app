@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Course Details - School Management System</title>
+</head>
+<body>
+    <section>
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-book me-2"></i>
+                            Course Details: <span th:text="${course.name}"></span>
+                        </h4>
+                        <small class="text-muted">
+                            Code: <span th:text="${course.code}"></span> | 
+                            Semester: <span th:text="${course.semester}"></span>
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Teacher:</strong> <span th:text="${course.teacherNames}"></span></p>
+                                <p><strong>Credits:</strong> <span th:text="${course.credits}"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Session:</strong> <span th:text="${course.sessionName}"></span></p>
+                                <p><strong>Attendance Percentage:</strong> 
+                                    <span th:text="${#numbers.formatDecimal(attendancePercentage, 1, 2) + '%'}" 
+                                          th:class="${attendancePercentage >= 75 ? 'text-success fw-bold' : 'text-danger fw-bold'}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marks Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>My Marks
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(marks)}">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Exam Type</th>
+                                            <th>Marks</th>
+                                            <th>Max Marks</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="mark : ${marks}">
+                                            <td th:text="${mark.examTypeName}"></td>
+                                            <td th:text="${mark.marks}"></td>
+                                            <td th:text="${mark.maxMarks}"></td>
+                                            <td>
+                                                <span th:text="${#numbers.formatDecimal((mark.marks / mark.maxMarks * 100), 1, 2) + '%'}"
+                                                      th:class="${(mark.marks / mark.maxMarks * 100) >= 60 ? 'text-success fw-bold' : 'text-danger fw-bold'}"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(marks)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No marks available for this course yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>My Attendance
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(attendance)}">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="record : ${attendance}">
+                                            <td th:text="${#temporals.format(record.date, 'dd-MM-yyyy')}"></td>
+                                            <td>
+                                                <span th:if="${record.present}" class="badge bg-success">Present</span>
+                                                <span th:unless="${record.present}" class="badge bg-danger">Absent</span>
+                                            </td>
+                                            <td th:text="${record.comments ?: '-'}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(attendance)}" class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>No attendance records available for this course yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <a href="/student/dashboard" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <div>
+                                <a th:href="@{/student/marks/{courseId}(courseId=${course.id})}" class="btn btn-primary me-2">
+                                    <i class="fas fa-chart-line me-2"></i>View All Marks
+                                </a>
+                                <a th:href="@{/student/attendance/{courseId}(courseId=${course.id})}" class="btn btn-success">
+                                    <i class="fas fa-calendar-check me-2"></i>View All Attendance
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

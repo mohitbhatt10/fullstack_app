@@ -56,4 +56,14 @@ public interface AttendanceService {
      * @return List of attendance records
      */
     List<AttendanceDTO> getAttendanceByCourseScheduleAndDate(Long courseId, Long scheduleId, LocalDate date);
+
+    /**
+     * Get the last N attendance records for a student
+     */
+    List<AttendanceDTO> getRecentAttendanceForStudent(Long studentId, int limit);
+    
+    /**
+     * Get the last N attendance records for a teacher by username
+     */
+    List<AttendanceDTO> getRecentAttendanceForTeacher(String username, int limit);
 }

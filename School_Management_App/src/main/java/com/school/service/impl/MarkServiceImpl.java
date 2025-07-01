@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.DoubleSummaryStatistics;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -245,6 +246,24 @@ public class MarkServiceImpl implements MarkService {
         return marksSummaryRepository.findByTeacherId(teacher.getId())
                 .stream()
                 .map(this::mapSummaryToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarkDTO> getRecentMarksForStudent(Long studentId, int limit) {
+        return markRepository.findByStudentId(studentId).stream()
+                .sorted(Comparator.comparing(Mark::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(limit)
+                .map(this::mapEntityToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarkDTO> getRecentMarksForTeacher(String username, int limit) {
+        return markRepository.findByEnteredByTeacherUsername(username).stream()
+                .sorted(Comparator.comparing(Mark::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(limit)
+                .map(this::mapEntityToDTO)
                 .collect(Collectors.toList());
     }
 
