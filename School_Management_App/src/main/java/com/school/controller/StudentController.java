@@ -162,21 +162,46 @@ public class StudentController {
             .collect(Collectors.groupingBy(CourseScheduleDTO::getDayOfWeek));
         
         // Get all unique time slots for the grid
-        Set<LocalTime> timeSlots = schedules.stream()
-            .flatMap(s -> Stream.of(s.getStartTime(), s.getEndTime()))
-            .collect(Collectors.toSet());
+        Set<String> timeSlotSet = new HashSet<>();
+        for (CourseScheduleDTO schedule : schedules) {
+            String timeSlot = schedule.getStartTime().toString() + "-" + schedule.getEndTime().toString();
+            timeSlotSet.add(timeSlot);
+        }
         
-        List<LocalTime> sortedTimeSlots = timeSlots.stream()
-            .sorted()
-            .collect(Collectors.toList());
+        // Convert to sorted list of time slots
+        List<String> timeSlots = new ArrayList<>(timeSlotSet);
+        timeSlots.sort((a, b) -> {
+            LocalTime timeA = LocalTime.parse(a.split("-")[0]);
+            LocalTime timeB = LocalTime.parse(b.split("-")[0]);
+            return timeA.compareTo(timeB);
+        });
+        
+        // Create a 2D grid for the timetable: Map<Day, Map<TimeSlot, Schedule>>
+        Map<String, Map<String, CourseScheduleDTO>> timetableGrid = new HashMap<>();
+        List<String> weekdays = Arrays.asList("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY");
+        
+        // Initialize grid with empty slots
+        for (String day : weekdays) {
+            timetableGrid.put(day, new HashMap<>());
+            for (String timeSlot : timeSlots) {
+                timetableGrid.get(day).put(timeSlot, null);
+            }
+        }
+        
+        // Populate grid with actual schedules
+        for (CourseScheduleDTO schedule : schedules) {
+            String day = schedule.getDayOfWeek().toString();
+            String timeSlot = schedule.getStartTime().toString() + "-" + schedule.getEndTime().toString();
+            if (timetableGrid.containsKey(day)) {
+                timetableGrid.get(day).put(timeSlot, schedule);
+            }
+        }
         
         model.addAttribute("timetableByDay", timetableByDay);
-        model.addAttribute("timeSlots", sortedTimeSlots);
+        model.addAttribute("timetableGrid", timetableGrid);
+        model.addAttribute("timeSlots", timeSlots);
         model.addAttribute("schedules", schedules);
-        model.addAttribute("dayNames", Arrays.asList(
-            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, 
-            DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
-        ));
+        model.addAttribute("weekdays", weekdays);
         
         return "student/timetable";
     }

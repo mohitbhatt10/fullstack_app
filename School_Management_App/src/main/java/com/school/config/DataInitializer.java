@@ -22,6 +22,7 @@ public class DataInitializer {
             TeacherRepository teacherRepository,
             SessionRepository sessionRepository,
             CourseRepository courseRepository,
+            CourseScheduleRepository courseScheduleRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
             // Create admin user if not exists
@@ -117,7 +118,67 @@ public class DataInitializer {
                 course.setStudents(new HashSet<>());
                 course.getStudents().add(student);
                 courseRepository.save(course);
+                
+                // Create additional courses for better timetable demonstration
+                Course course2 = new Course();
+                course2.setName("Data Structures");
+                course2.setCode("CS201");
+                course2.setSemester(1);
+                course2.setDepartment("Computer Science");
+                course2.setSyllabus("Advanced data structures and algorithms");
+                course2.setTeachers(new HashSet<>());
+                course2.getTeachers().add(teacher);
+                course2.setSession(session);
+                course2.setStudents(new HashSet<>());
+                course2.getStudents().add(student);
+                courseRepository.save(course2);
+                
+                Course course3 = new Course();
+                course3.setName("Database Systems");
+                course3.setCode("CS301");
+                course3.setSemester(1);
+                course3.setDepartment("Computer Science");
+                course3.setSyllabus("Database design and management systems");
+                course3.setTeachers(new HashSet<>());
+                course3.getTeachers().add(teacher);
+                course3.setSession(session);
+                course3.setStudents(new HashSet<>());
+                course3.getStudents().add(student);
+                courseRepository.save(course3);
+                
+                // Create course schedules for better timetable demonstration
+                createCourseSchedule(courseScheduleRepository, course, java.time.DayOfWeek.MONDAY, 
+                    java.time.LocalTime.of(9, 0), java.time.LocalTime.of(10, 30), "Room A101");
+                createCourseSchedule(courseScheduleRepository, course, java.time.DayOfWeek.WEDNESDAY, 
+                    java.time.LocalTime.of(9, 0), java.time.LocalTime.of(10, 30), "Room A101");
+                createCourseSchedule(courseScheduleRepository, course, java.time.DayOfWeek.FRIDAY, 
+                    java.time.LocalTime.of(9, 0), java.time.LocalTime.of(10, 30), "Room A101");
+                    
+                createCourseSchedule(courseScheduleRepository, course2, java.time.DayOfWeek.TUESDAY, 
+                    java.time.LocalTime.of(11, 0), java.time.LocalTime.of(12, 30), "Room B201");
+                createCourseSchedule(courseScheduleRepository, course2, java.time.DayOfWeek.THURSDAY, 
+                    java.time.LocalTime.of(11, 0), java.time.LocalTime.of(12, 30), "Room B201");
+                    
+                createCourseSchedule(courseScheduleRepository, course3, java.time.DayOfWeek.MONDAY, 
+                    java.time.LocalTime.of(14, 0), java.time.LocalTime.of(15, 30), "Lab C301");
+                createCourseSchedule(courseScheduleRepository, course3, java.time.DayOfWeek.WEDNESDAY, 
+                    java.time.LocalTime.of(14, 0), java.time.LocalTime.of(15, 30), "Lab C301");
+                createCourseSchedule(courseScheduleRepository, course3, java.time.DayOfWeek.FRIDAY, 
+                    java.time.LocalTime.of(14, 0), java.time.LocalTime.of(15, 30), "Lab C301");
             }
         };
+    }
+    
+    private void createCourseSchedule(CourseScheduleRepository courseScheduleRepository, 
+                                    Course course, java.time.DayOfWeek dayOfWeek, 
+                                    java.time.LocalTime startTime, java.time.LocalTime endTime, 
+                                    String classroom) {
+        com.school.entity.CourseSchedule schedule = new com.school.entity.CourseSchedule();
+        schedule.setCourse(course);
+        schedule.setDayOfWeek(dayOfWeek);
+        schedule.setStartTime(startTime);
+        schedule.setEndTime(endTime);
+        schedule.setClassroom(classroom);
+        courseScheduleRepository.save(schedule);
     }
 }

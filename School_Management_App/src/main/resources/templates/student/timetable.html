@@ -7,36 +7,84 @@
 <body>
     <section>
         <style>
+        .timetable-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .timetable-grid {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+            font-size: 0.9rem;
+        }
+        
+        .timetable-grid th,
+        .timetable-grid td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .timetable-grid th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .timetable-grid th.day-header {
+            background-color: #0056b3;
+            min-width: 120px;
+        }
+        
+        .timetable-grid th.time-header {
+            background-color: #007bff;
+            min-width: 140px;
+        }
+        
         .schedule-cell {
             background-color: #e3f2fd;
             border: 2px solid #2196f3;
             border-radius: 4px;
             padding: 8px;
-            font-size: 0.85rem;
-            line-height: 1.3;
-            height: auto;
-            min-height: 70px;
+            min-height: 80px;
+            position: relative;
         }
         
         .course-name {
             font-weight: 600;
             color: #1976d2;
             margin-bottom: 4px;
+            font-size: 0.85rem;
         }
         
-        .course-details {
-            color: #555;
-            font-size: 0.8rem;
+        .course-code {
+            color: #666;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
         }
         
         .classroom {
             color: #666;
             font-style: italic;
+            font-size: 0.75rem;
+        }
+        
+        .teacher-name {
+            color: #555;
+            font-size: 0.7rem;
+            margin-top: 2px;
         }
         
         .empty-cell {
-            background-color: #fafafa;
-            color: #999;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-style: italic;
+            min-height: 80px;
         }
         
         .legend {
@@ -67,8 +115,34 @@
         }
         
         .empty-color {
-            background-color: #fafafa;
+            background-color: #f8f9fa;
             border: 1px solid #ddd;
+        }
+        
+        .time-slot {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 768px) {
+            .timetable-grid {
+                font-size: 0.8rem;
+            }
+            
+            .timetable-grid th,
+            .timetable-grid td {
+                padding: 6px;
+            }
+            
+            .course-name {
+                font-size: 0.8rem;
+            }
+            
+            .course-code,
+            .classroom,
+            .teacher-name {
+                font-size: 0.7rem;
+            }
         }
         </style>
 
@@ -99,177 +173,38 @@
                             </div>
                         </div>
 
-                        <!-- Debug Information -->
-                        <div th:if="${not #lists.isEmpty(schedules)}" class="alert alert-info mb-3">
-                            <strong>Debug Info:</strong> Found <span th:text="${#lists.size(schedules)}">0</span> schedules
-                        </div>
+                        
 
-                        <!-- Simple Schedule List -->
-                        <div th:if="${not #lists.isEmpty(schedules)}">
-                            <h5 class="mb-3">My Classes</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th>Course</th>
-                                            <th>Day</th>
-                                            <th>Time</th>
-                                            <th>Classroom</th>
-                                            <th>Teacher</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="schedule : ${schedules}">
-                                            <td>
-                                                <strong th:text="${schedule.courseName}">Course Name</strong><br/>
-                                                <small class="text-muted" th:text="${schedule.courseCode}">Code</small>
-                                            </td>
-                                            <td th:text="${schedule.dayOfWeek.name()}">Day</td>
-                                            <td th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}">Time</td>
-                                            <td th:text="${schedule.classroom}">Room</td>
-                                            <td th:text="${schedule.teacherName}">Teacher</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Weekly Schedule View -->
-                        <div th:if="${not #lists.isEmpty(schedules)}" class="mt-4">
-                            <h5 class="mb-3">Weekly View</h5>
-                            <div class="row">
-                                <!-- Monday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Monday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'MONDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
+                        <!-- Timetable Grid -->
+                        <div th:if="${not #lists.isEmpty(schedules)}" class="timetable-container">
+                            <table class="table timetable-grid">
+                                <thead>
+                                    <tr>
+                                        <th class="day-header">Day / Time</th>
+                                        <th th:each="timeSlot : ${timeSlots}" class="time-header time-slot" th:text="${timeSlot}">Time Slot</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="day : ${weekdays}">
+                                        <th class="day-header" th:text="${day}">Day</th>
+                                        <td th:each="timeSlot : ${timeSlots}">
+                                            <!-- Check if there's a schedule for this day and time slot -->
+                                            <div th:if="${timetableGrid.get(day).get(timeSlot) != null}">
+                                                <div class="schedule-cell">
+                                                    <div class="course-name" th:text="${timetableGrid.get(day).get(timeSlot).courseName}">Course Name</div>
+                                                    <div class="course-code" th:text="${timetableGrid.get(day).get(timeSlot).courseCode}">CS001</div>
+                                                    <div class="classroom" th:text="'Room: ' + ${timetableGrid.get(day).get(timeSlot).classroom}">Room: A101</div>
+                                                    <div class="teacher-name" th:text="${timetableGrid.get(day).get(timeSlot).teacherName}">Teacher</div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Tuesday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Tuesday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'TUESDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
-                                                </div>
+                                            <!-- Empty cell if no schedule -->
+                                            <div th:if="${timetableGrid.get(day).get(timeSlot) == null}" class="empty-cell">
+                                                <small>Free</small>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Wednesday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Wednesday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'WEDNESDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thursday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Thursday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'THURSDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Friday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Friday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'FRIDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Saturday -->
-                                <div class="col-md-6 mb-3">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6 class="mb-0">Saturday</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div th:if="${not #lists.isEmpty(schedules)}">
-                                                <div th:each="schedule : ${schedules}" th:if="${schedule.dayOfWeek.name() == 'SATURDAY'}" class="schedule-cell mb-2">
-                                                    <div class="course-name" th:text="${schedule.courseName}"></div>
-                                                    <div class="course-details">
-                                                        <strong th:text="${schedule.courseCode}"></strong><br/>
-                                                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br/>
-                                                        <span class="classroom" th:text="'Room: ' + ${schedule.classroom}"></span><br/>
-                                                        <small th:text="'Teacher: ' + ${schedule.teacherName}"></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <!-- No schedules message -->

@@ -5,6 +5,7 @@ import com.school.entity.Course;
 import com.school.entity.Student;
 import com.school.entity.Teacher;
 import com.school.repository.CourseRepository;
+import com.school.repository.SessionRepository;
 import com.school.repository.StudentRepository;
 import com.school.repository.TeacherRepository;
 import com.school.service.CourseService;
@@ -24,13 +25,16 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
+    private final SessionRepository sessionRepository;
 
     public CourseServiceImpl(CourseRepository courseRepository,
                            TeacherRepository teacherRepository,
-                           StudentRepository studentRepository) {
+                           StudentRepository studentRepository,
+                             SessionRepository sessionRepository) {
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
@@ -202,6 +206,14 @@ public class CourseServiceImpl implements CourseService {
                             .orElseThrow(() -> new RuntimeException("Student not found")))
                     .collect(Collectors.toSet());
             entity.setStudents(students);
+        }
+
+        // Handle session
+        if (dto.getSessionId() != null) {
+            entity.setSession(sessionRepository.findById(dto.getSessionId())
+                    .orElseThrow(() -> new RuntimeException("Session not found with id: " + dto.getSessionId())));
+        } else {
+            entity.setSession(null);
         }
     }    
     private CourseDTO mapEntityToDTO(Course entity) {
