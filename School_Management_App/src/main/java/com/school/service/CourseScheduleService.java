@@ -27,4 +27,11 @@ public interface CourseScheduleService {
      * @throws RuntimeException if export fails
      */
     void exportScheduleToPdf(Long courseId);
+    
+    /**
+     * Get timetable for a student based on their enrolled courses
+     * @param studentId The ID of the student
+     * @return List of all schedules for the student's courses
+     */
+    List<CourseScheduleDTO> getTimetableForStudent(Long studentId);
 }

@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -208,5 +207,24 @@ public class CourseScheduleServiceImpl implements CourseScheduleService {
         }
         
         return dto;
+    }
+    
+    @Override
+    public List<CourseScheduleDTO> getTimetableForStudent(Long studentId) {
+        // Get all schedules for courses the student is enrolled in
+        List<CourseSchedule> schedules = courseScheduleRepository.findByStudentId(studentId);
+        
+        return schedules.stream()
+                .map(this::mapEntityToDTO)
+                .sorted((s1, s2) -> {
+                    // First sort by day of week
+                    int dayComparison = s1.getDayOfWeek().compareTo(s2.getDayOfWeek());
+                    if (dayComparison != 0) {
+                        return dayComparison;
+                    }
+                    // Then sort by start time
+                    return s1.getStartTime().compareTo(s2.getStartTime());
+                })
+                .collect(Collectors.toList());
     }
 }

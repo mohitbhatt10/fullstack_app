@@ -1,6 +1,7 @@
 package com.school.controller;
 
 import com.school.dto.AttendanceDTO;
+import com.school.dto.CourseScheduleDTO;
 import com.school.dto.StudentDTO;
 import com.school.service.AttendanceService;
 import com.school.service.CourseScheduleService;
@@ -16,7 +17,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import java.security.Principal;
-import java.util.List;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/student")
@@ -145,5 +150,34 @@ public class StudentController {
         model.addAttribute("attendancePercentage", attendanceService.getAttendancePercentage(studentId, courseId));
         model.addAttribute("schedules", courseScheduleService.getSchedulesByCourseId(courseId));
         return "student/course-details";
+    }
+
+    @GetMapping("/timetable")
+    public String viewTimetable(Model model, Principal principal) {
+        Long studentId = studentService.getStudentByUsername(principal.getName()).getId();
+        List<CourseScheduleDTO> schedules = courseScheduleService.getTimetableForStudent(studentId);
+        
+        // Group schedules by day of week for easier template processing
+        Map<DayOfWeek, List<CourseScheduleDTO>> timetableByDay = schedules.stream()
+            .collect(Collectors.groupingBy(CourseScheduleDTO::getDayOfWeek));
+        
+        // Get all unique time slots for the grid
+        Set<LocalTime> timeSlots = schedules.stream()
+            .flatMap(s -> Stream.of(s.getStartTime(), s.getEndTime()))
+            .collect(Collectors.toSet());
+        
+        List<LocalTime> sortedTimeSlots = timeSlots.stream()
+            .sorted()
+            .collect(Collectors.toList());
+        
+        model.addAttribute("timetableByDay", timetableByDay);
+        model.addAttribute("timeSlots", sortedTimeSlots);
+        model.addAttribute("schedules", schedules);
+        model.addAttribute("dayNames", Arrays.asList(
+            DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, 
+            DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
+        ));
+        
+        return "student/timetable";
     }
 }
