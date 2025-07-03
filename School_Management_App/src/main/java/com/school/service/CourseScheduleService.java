@@ -15,6 +15,20 @@ public interface CourseScheduleService {
     boolean isScheduleOverlapping(Long courseId, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime);
     
     /**
+     * Check if a schedule would overlap with existing schedules considering semester and session
+     * @param semester The semester to check
+     * @param sessionId The session ID to check  
+     * @param dayOfWeek The day of week
+     * @param startTime The start time
+     * @param endTime The end time
+     * @param excludeScheduleId The schedule ID to exclude from the check (for updates)
+     * @return true if there's an overlap, false otherwise
+     */
+    boolean isScheduleOverlappingBySemesterAndSession(Integer semester, Long sessionId, 
+                                                     DayOfWeek dayOfWeek, LocalTime startTime, 
+                                                     LocalTime endTime, Long excludeScheduleId);
+    
+    /**
      * Get all schedules for a specific classroom
      * @param classroom The classroom to get schedules for
      * @return List of schedules for the classroom

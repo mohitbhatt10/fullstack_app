@@ -170,14 +170,30 @@ public class CourseScheduleServiceImpl implements CourseScheduleService {
         return !overlappingSchedules.isEmpty();
     }
 
+    @Override
+    public boolean isScheduleOverlappingBySemesterAndSession(Integer semester, Long sessionId, 
+                                                           DayOfWeek dayOfWeek, LocalTime startTime, 
+                                                           LocalTime endTime, Long excludeScheduleId) {
+        List<CourseSchedule> overlappingSchedules = courseScheduleRepository
+                .findOverlappingSchedulesBySemesterAndSession(semester, sessionId, dayOfWeek, 
+                                                             startTime, endTime, excludeScheduleId);
+        return !overlappingSchedules.isEmpty();
+    }
+
     private void validateScheduleTime(CourseScheduleDTO scheduleDTO) {
         if (scheduleDTO.getStartTime().isAfter(scheduleDTO.getEndTime())) {
             throw new RuntimeException("Start time must be before end time");
         }
         
-        if (isScheduleOverlapping(scheduleDTO.getCourseId(), scheduleDTO.getDayOfWeek(),
-                                scheduleDTO.getStartTime(), scheduleDTO.getEndTime())) {
-            throw new RuntimeException("Schedule overlaps with existing schedule");
+        // Get the course to check semester and session
+        Course course = courseRepository.findById(scheduleDTO.getCourseId())
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        // Check for overlapping schedules considering semester and session
+        if (isScheduleOverlappingBySemesterAndSession(course.getSemester(), course.getSession().getId(),
+                                                    scheduleDTO.getDayOfWeek(), scheduleDTO.getStartTime(),
+                                                    scheduleDTO.getEndTime(), scheduleDTO.getId())) {
+            throw new RuntimeException("A schedule already exists in the given combination. Please try another combination.");
         }
     }
 
