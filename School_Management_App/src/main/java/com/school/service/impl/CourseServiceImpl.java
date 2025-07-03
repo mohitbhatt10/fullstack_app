@@ -2,8 +2,10 @@ package com.school.service.impl;
 
 import com.school.dto.CourseDTO;
 import com.school.entity.Course;
+import com.school.entity.CourseEnrollment;
 import com.school.entity.Student;
 import com.school.entity.Teacher;
+import com.school.repository.CourseEnrollmentRepository;
 import com.school.repository.CourseRepository;
 import com.school.repository.SessionRepository;
 import com.school.repository.StudentRepository;
@@ -13,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,15 +29,18 @@ public class CourseServiceImpl implements CourseService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final SessionRepository sessionRepository;
+    private final CourseEnrollmentRepository courseEnrollmentRepository;
 
     public CourseServiceImpl(CourseRepository courseRepository,
                            TeacherRepository teacherRepository,
                            StudentRepository studentRepository,
-                             SessionRepository sessionRepository) {
+                             SessionRepository sessionRepository,
+                             CourseEnrollmentRepository courseEnrollmentRepository) {
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
         this.sessionRepository = sessionRepository;
+        this.courseEnrollmentRepository = courseEnrollmentRepository;
     }
 
     @Override
@@ -153,6 +159,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
+        CourseEnrollment enrollment = new CourseEnrollment();        
           // Validate semester and department match
         if (!student.getSemester().equals(course.getSemester())) {
             throw new RuntimeException("Student's semester (" + student.getSemester() 
@@ -167,6 +174,16 @@ public class CourseServiceImpl implements CourseService {
         if (course.getStudents() == null) {
             course.setStudents(new HashSet<>());
         }
+
+        // Add the CourseEnrollment for the student
+        enrollment.setCourse(course);
+        enrollment.setStudent(student);
+        enrollment.setEnrollmentDate(LocalDate.now());
+        enrollment.setActive(true);
+        enrollment.setSession(course.getSession());
+        
+        courseEnrollmentRepository.save(enrollment);
+        
         course.getStudents().add(student);
         courseRepository.save(course);
     }
@@ -178,7 +195,12 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-        
+        List<CourseEnrollment> enrollments = courseEnrollmentRepository.
+                findByStudentIdAndCourseIdAndActive(studentId, courseId, true);
+        if (enrollments != null && !enrollments.isEmpty()) {
+            courseEnrollmentRepository.deleteAll(enrollments);
+        }
+
         if (course.getStudents() != null) {
             course.getStudents().remove(student);
             courseRepository.save(course);
