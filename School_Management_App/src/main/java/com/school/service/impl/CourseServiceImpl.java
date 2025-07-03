@@ -190,6 +190,79 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    public void addStudentsToCourse(Long courseId, List<Long> studentIds) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (course.getStudents() == null) {
+            course.setStudents(new HashSet<>());
+        }
+        
+        StringBuilder errorMessages = new StringBuilder();
+        int successCount = 0;
+        
+        for (Long studentId : studentIds) {
+            try {
+                Student student = studentRepository.findById(studentId)
+                        .orElseThrow(() -> new RuntimeException("Student not found"));
+                
+                // Check if student is already enrolled
+                boolean alreadyEnrolled = courseEnrollmentRepository
+                        .findByStudentIdAndCourseIdAndActive(studentId, courseId, true)
+                        .stream()
+                        .findAny()
+                        .isPresent();
+                
+                if (alreadyEnrolled) {
+                    errorMessages.append("Student ").append(student.getFirstName())
+                            .append(" ").append(student.getLastName())
+                            .append(" is already enrolled in this course. ");
+                    continue;
+                }
+                
+                // Validate semester and department match
+                if (!student.getSemester().equals(course.getSemester())) {
+                    errorMessages.append("Student ").append(student.getFirstName())
+                            .append(" ").append(student.getLastName())
+                            .append("'s semester does not match course semester. ");
+                    continue;
+                }
+
+                if (!student.getDepartment().equals(course.getDepartment())) {
+                    errorMessages.append("Student ").append(student.getFirstName())
+                            .append(" ").append(student.getLastName())
+                            .append("'s department does not match course department. ");
+                    continue;
+                }
+                
+                // Create enrollment
+                CourseEnrollment enrollment = new CourseEnrollment();
+                enrollment.setCourse(course);
+                enrollment.setStudent(student);
+                enrollment.setEnrollmentDate(LocalDate.now());
+                enrollment.setActive(true);
+                enrollment.setSession(course.getSession());
+                
+                courseEnrollmentRepository.save(enrollment);
+                course.getStudents().add(student);
+                successCount++;
+                
+            } catch (Exception e) {
+                errorMessages.append("Failed to add student ID ").append(studentId)
+                        .append(": ").append(e.getMessage()).append(". ");
+            }
+        }
+        
+        courseRepository.save(course);
+        
+        if (errorMessages.length() > 0) {
+            String message = successCount + " student(s) added successfully. " + errorMessages.toString();
+            throw new RuntimeException(message);
+        }
+    }
+
+    @Override
+    @Transactional
     public void removeStudentFromCourse(Long courseId, Long studentId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
@@ -200,7 +273,7 @@ public class CourseServiceImpl implements CourseService {
         if (enrollments != null && !enrollments.isEmpty()) {
             courseEnrollmentRepository.deleteAll(enrollments);
         }
-
+        
         if (course.getStudents() != null) {
             course.getStudents().remove(student);
             courseRepository.save(course);

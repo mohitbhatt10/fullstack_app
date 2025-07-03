@@ -557,6 +557,28 @@ public class AdminController {
         return "redirect:/admin/courses/" + courseId + "/students";
     }
 
+    @PostMapping("/courses/{courseId}/students/bulk-add")
+    public String addStudentsToCourse(@PathVariable Long courseId,
+                                      @RequestParam("studentIds") List<Long> studentIds,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            if (studentIds == null || studentIds.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No students selected");
+                return "redirect:/admin/courses/" + courseId + "/students";
+            }
+
+            logger.info("Adding {} students to course {}", studentIds.size(), courseId);
+            courseService.addStudentsToCourse(courseId, studentIds);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    studentIds.size() + " student(s) added to course successfully");
+        } catch (RuntimeException ex) {
+            logger.error("Failed to add students to course {}: {}", courseId, ex.getMessage(), ex);
+            // The service already provides detailed error messages including success count
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/courses/" + courseId + "/students";
+    }
+
     @GetMapping("/courses/{id}/students")
     public String listCourseStudents(@PathVariable Long id, Model model) {
         logger.debug("Fetching students for course {}", id);

@@ -17,6 +17,7 @@ public interface CourseService {
     void removeTeacherFromCourse(Long courseId, Long teacherId);
     List<CourseDTO> getCoursesByStudentId(Long studentId);
     void addStudentToCourse(Long courseId, Long studentId);
+    void addStudentsToCourse(Long courseId, List<Long> studentIds);
     void removeStudentFromCourse(Long courseId, Long studentId);
     boolean existsByCode(String code);
     Integer getCourseCount();

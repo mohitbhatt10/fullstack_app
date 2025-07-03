@@ -66,45 +66,164 @@
 
         <!-- Add Student Modal -->
         <div class="modal fade" id="addStudentModal" tabindex="-1">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Student to Course</h5>
+                        <h5 class="modal-title">Add Students to Course</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Roll Number</th>
-                                        <th>Name</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="student : ${availableStudents}">
-                                        <td th:text="${student.rollNumber}"></td>
-                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
-                                        <td>
-                                            <form th:action="@{/admin/courses/{courseId}/students/{studentId}/add(courseId=${course.id},studentId=${student.id})}"
-                                                  method="post">
-                                                <button type="submit" class="btn btn-sm btn-success">
-                                                    <i class="fas fa-user-plus"></i> Add
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(availableStudents)}">
-                                        <td colspan="3" class="text-center">No students available to add</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <form id="bulkAddStudentForm" th:action="@{/admin/courses/{courseId}/students/bulk-add(courseId=${course.id})}" method="post">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6>Available Students</h6>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllBtn">
+                                            <i class="fas fa-check-square"></i> Select All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllBtn">
+                                            <i class="fas fa-square"></i> Deselect All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-hover">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th width="50px">
+                                                <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                                            </th>
+                                            <th>Roll Number</th>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Semester</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="student : ${availableStudents}">
+                                            <td>
+                                                <input type="checkbox" 
+                                                       name="studentIds" 
+                                                       th:value="${student.id}" 
+                                                       class="form-check-input student-checkbox">
+                                            </td>
+                                            <td th:text="${student.rollNumber}"></td>
+                                            <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                            <td th:text="${student.department}"></td>
+                                            <td th:text="${student.semester}"></td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(availableStudents)}">
+                                            <td colspan="5" class="text-center text-muted">No students available to add</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" form="bulkAddStudentForm" class="btn btn-primary" id="addSelectedBtn">
+                            <i class="fas fa-user-plus"></i> Add Selected Students
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- JavaScript for bulk selection functionality -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const addSelectedBtn = document.getElementById('addSelectedBtn');
+            const bulkAddForm = document.getElementById('bulkAddStudentForm');
+
+            // Update button text and state based on selected checkboxes
+            function updateAddButton() {
+                const selectedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                if (selectedCount === 0) {
+                    addSelectedBtn.disabled = true;
+                    addSelectedBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Selected Students';
+                } else {
+                    addSelectedBtn.disabled = false;
+                    addSelectedBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Selected Students (' + selectedCount + ')';
+                }
+            }
+
+            // Update select all checkbox state
+            function updateSelectAllState() {
+                const totalCheckboxes = studentCheckboxes.length;
+                const checkedCheckboxes = document.querySelectorAll('.student-checkbox:checked').length;
+                
+                if (checkedCheckboxes === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (checkedCheckboxes === totalCheckboxes) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else {
+                    selectAllCheckbox.indeterminate = true;
+                }
+            }
+
+            // Select all functionality
+            selectAllCheckbox.addEventListener('change', function() {
+                studentCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateAddButton();
+            });
+
+            // Select all button
+            selectAllBtn.addEventListener('click', function() {
+                studentCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+                updateAddButton();
+            });
+
+            // Deselect all button
+            deselectAllBtn.addEventListener('click', function() {
+                studentCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                updateAddButton();
+            });
+
+            // Individual checkbox change
+            studentCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateSelectAllState();
+                    updateAddButton();
+                });
+            });
+
+            // Form submission validation
+            bulkAddForm.addEventListener('submit', function(e) {
+                const selectedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                if (selectedCount === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one student to add.');
+                    return false;
+                }
+                
+                // Show loading state
+                addSelectedBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+                addSelectedBtn.disabled = true;
+            });
+
+            // Initialize button state
+            updateAddButton();
+        });
+        </script>
     </section>
 </body>
 </html>
