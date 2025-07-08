@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout :: layout(~{::title}, ~{::section})}">
 <head>
-    <title th:text="${session.id == null ? 'Create Session' : 'Edit Session'}">Session Form</title>
+    <title th:text="${academicSession.id == null ? 'Create Session' : 'Edit Session'}">Session Form</title>
 </head>
 <body>
     <section>
         <div class="d-flex justify-content-between mb-4">
-            <h2 th:text="${session.id == null ? 'Create Academic Session' : 'Edit Academic Session'}">Session Form</h2>
+            <h2 th:text="${academicSession.id == null ? 'Create Academic Session' : 'Edit Academic Session'}">Session Form</h2>
             <a href="/admin/sessions" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Sessions
             </a>
@@ -15,11 +15,11 @@
 
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0" th:text="${session.id == null ? 'New Academic Session' : 'Edit Session: ' + session.name}">Session Details</h5>
+                <h5 class="mb-0" th:text="${academicSession.id == null ? 'New Academic Session' : 'Edit Session: ' + academicSession.name}">Session Details</h5>
             </div>
             <div class="card-body">
-                <form th:action="${session.id == null ? '/admin/sessions' : '/admin/sessions/' + session.id}" 
-                      th:object="${session}" method="post">
+                <form th:action="${academicSession.id == null ? '/admin/sessions' : '/admin/sessions/' + academicSession.id}"
+                      th:object="${academicSession}" method="post">
 
                     <div class="mb-3">
                         <label for="name" class="form-label">Session Name</label>

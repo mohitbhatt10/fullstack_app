@@ -3,7 +3,8 @@ package com.school.controller;
 import com.school.dto.SessionDTO;
 import com.school.service.SessionService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/sessions")
 public class SessionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
     private final SessionService sessionService;
 
     public SessionController(SessionService sessionService) {
@@ -27,24 +29,29 @@ public class SessionController {
 
     @GetMapping("/new")
     public String newSessionForm(Model model) {
-        model.addAttribute("session", new SessionDTO());
+        model.addAttribute("academicSession", new SessionDTO());
         return "admin/sessions/form";
     }
 
     @PostMapping
-    public String createSession(@Valid @ModelAttribute("session") SessionDTO sessionDTO,
-                              BindingResult result) {
+    public String createSession(@Valid @ModelAttribute("academicSession") SessionDTO sessionDTO,
+                              BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("academicSession", sessionDTO);
             return "admin/sessions/form";
         }
 
+        logger.debug("Creating session with data: {}", sessionDTO);
         sessionService.createSession(sessionDTO);
         return "redirect:/admin/sessions";
     }
 
     @GetMapping("/{id}/edit")
     public String editSessionForm(@PathVariable Long id, Model model) {
-        model.addAttribute("session", sessionService.getSessionById(id));
+        SessionDTO sessionDTO = sessionService.getSessionById(id);
+        logger.info("Editing session: ID={}, Name={}, StartDate={}, EndDate={}", 
+                   sessionDTO.getId(), sessionDTO.getName(), sessionDTO.getStartDate(), sessionDTO.getEndDate());
+        model.addAttribute("academicSession", sessionDTO);
         return "admin/sessions/form";
     }
 
@@ -56,12 +63,14 @@ public class SessionController {
 
     @PostMapping("/{id}")
     public String updateSession(@PathVariable Long id,
-                              @Valid @ModelAttribute("session") SessionDTO sessionDTO,
-                              BindingResult result) {
+                              @Valid @ModelAttribute("academicSession") SessionDTO sessionDTO,
+                              BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("academicSession", sessionDTO);
             return "admin/sessions/form";
         }
 
+        logger.debug("Updating session with id {}: {}", id, sessionDTO);
         sessionService.updateSession(id, sessionDTO);
         return "redirect:/admin/sessions";
     }
