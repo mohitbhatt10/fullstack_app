@@ -1,16 +1,86 @@
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin/students}" th:classappend="${#httpServletRequest.requestURI.contains('/admin/students') and !#httpServletRequest.requestURI.contains('/import') ? 'active' : ''}">
-                        <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="ni ni-hat-3 text-primary text-sm opacity-10"></i>
-                        </div>
-                        <span class="nav-link-text ms-1">Students</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin/students/import}" th:classappend="${#httpServletRequest.requestURI.contains('/admin/students/import') ? 'active' : ''}">
-                        <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="ni ni-cloud-upload-96 text-success text-sm opacity-10"></i>
-                        </div>
-                        <span class="nav-link-text ms-1">Import Students</span>
-                    </a>
-                </li>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <div th:fragment="sidebar">
+        <div class="p-3">
+            <h5 class="text-center mb-4">
+                <i class="fas fa-cogs me-2"></i>
+                Admin Panel
+            </h5>
+        </div>
+        
+        <nav class="nav nav-pills flex-column">
+            <!-- Dashboard -->
+            <a class="nav-link" th:href="@{/admin/dashboard}" id="nav-dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            
+            <!-- Students Management -->
+            <a class="nav-link" th:href="@{/admin/students}" id="nav-students">
+                <i class="fas fa-user-graduate"></i>
+                Students
+            </a>
+            
+            <a class="nav-link" th:href="@{/admin/students/import}" id="nav-students-import">
+                <i class="fas fa-file-import"></i>
+                Import Students
+            </a>
+            
+            <!-- Teachers Management -->
+            <a class="nav-link" th:href="@{/admin/teachers}" id="nav-teachers">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Teachers
+            </a>
+            
+            <a class="nav-link" th:href="@{/admin/teachers/import}" id="nav-teachers-import">
+                <i class="fas fa-file-import"></i>
+                Import Teachers
+            </a>
+            
+            <!-- Courses -->
+            <a class="nav-link" th:href="@{/admin/courses}" id="nav-courses">
+                <i class="fas fa-book"></i>
+                Courses
+            </a>
+            
+            <!-- Schedules -->
+            <a class="nav-link" th:href="@{/admin/schedules}" id="nav-schedules">
+                <i class="fas fa-calendar-alt"></i>
+                Schedules
+            </a>
+            
+            <!-- Sessions -->
+            <a class="nav-link" th:href="@{/admin/sessions}" id="nav-sessions">
+                <i class="fas fa-calendar-check"></i>
+                Sessions
+            </a>
+            
+            <!-- Enrollments -->
+            <a class="nav-link" th:href="@{/admin/enrollments}" id="nav-enrollments">
+                <i class="fas fa-user-plus"></i>
+                Enrollments
+            </a>
+            
+            <!-- Exam Types -->
+            <a class="nav-link" th:href="@{/admin/exam-types}" id="nav-exam-types">
+                <i class="fas fa-file-alt"></i>
+                Exam Types
+            </a>
+            
+            <!-- Profile Requests -->
+            <a class="nav-link" th:href="@{/admin/profile-requests}" id="nav-profile-requests">
+                <i class="fas fa-user-edit"></i>
+                Profile Requests
+            </a>
+            
+            <!-- Reports -->
+            <a class="nav-link" th:href="@{/admin/reports}" id="nav-reports">
+                <i class="fas fa-chart-bar"></i>
+                Reports
+            </a>
+        </nav>
+    </div>
+</body>
+</html>
