@@ -90,3 +90,164 @@ body {
 .dashboard-card:hover {
     transform: translateY(-5px);
 }
+
+/* Profile Enhancement Styles */
+.profile-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.profile-info-modern {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: -2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.info-item-modern {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.info-item-modern:hover {
+    background-color: #f8f9fa;
+}
+
+.info-item-modern:last-child {
+    border-bottom: none;
+}
+
+.btn-gradient-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.btn-gradient-modern:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.status-badge-modern {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.modal-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Admin Panel Enhancements */
+.admin-card-modern {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.admin-card-modern:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.admin-header-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Form Enhancements */
+.form-floating-modern > .form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-floating-modern > .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+/* Animation Classes */
+.fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slideInRight {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+    .profile-modern {
+        margin: 1rem;
+        border-radius: 15px;
+    }
+    
+    .admin-header-modern {
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    .btn-gradient-modern {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Loading States */
+.loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

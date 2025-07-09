@@ -2,39 +2,593 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
 <head>
     <title>User Profile</title>
+    <style>
+        /* Main container */
+        .profile-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        /* Profile header card */
+        .profile-header-card {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-username {
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+        
+        /* Picture upload section */
+        .picture-upload {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .picture-upload:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Info cards */
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .info-card-header {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .info-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .info-item:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .info-content {
+            flex: 1;
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        
+        /* Action buttons */
+        .action-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            color: white;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        .btn-secondary-custom {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            color: #64748b;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary-custom:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            background: #f8fafc;
+        }
+        
+        /* Pending requests */
+        .pending-requests {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .pending-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .pending-icon {
+            width: 32px;
+            height: 32px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 0.75rem;
+        }
+        
+        .request-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #4f46e5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .request-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .status-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .change-display {
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .change-arrow {
+            color: #4f46e5;
+            margin: 0 0.5rem;
+        }
+        
+        /* Modal styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .modal-header-custom {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+        }
+        
+        .form-group-custom {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label-custom {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control-custom {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control-custom:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .current-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .profile-header-card {
+                padding: 1.5rem;
+            }
+            
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                padding: 1rem;
+            }
+            
+            .info-item {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .info-grid {
+                padding: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <section>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h3>User Profile</h3>
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header-card text-center">
+            <img th:if="${user.id != null && user.profilePicture != null}"
+                 th:src="@{'/profile-picture/' + ${user.id}}"
+                 class="rounded-circle mb-3" width="120" height="120"
+                 alt="Profile Picture" />
+            <img th:unless="${user.id != null && user.profilePicture != null}"
+                 th:src="@{/images/default-profile.jpg}"
+                 alt="Default Profile Picture"
+                 class="profile-avatar" />
+            
+            <div class="profile-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
+            <div class="profile-username" th:text="'@' + ${user.username}"></div>
+            
+            <!-- Picture Upload -->
+            <div class="picture-upload">
+                <form th:action="@{/profile/picture}" method="post" enctype="multipart/form-data" class="d-flex align-items-center justify-content-center gap-2">
+                    <input type="file" name="file" accept="image/*" class="form-control form-control-sm" 
+                           style="max-width: 200px;" required />
+                    <button type="submit" class="btn btn-light btn-sm">
+                        <i class="fas fa-camera me-1"></i>Update Photo
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pending Requests Alert -->
+        <div th:if="${hasPendingRequest}" class="pending-requests">
+            <div class="pending-header">
+                <div class="pending-icon">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="card-body text-center">
-                    <img th:if="${user.id != null && user.profilePicture != null}"
-                         th:src="@{'/profile-picture/' + ${user.id}}"
-                         class="rounded-circle mb-3" width="120" height="120"
-                         alt="Profile Picture" />
-                    <img th:unless="${user.id != null && user.profilePicture != null}"
-                         th:src="@{/images/default-profile.jpg}"
-                         alt="Default Profile Picture"
-                         class="rounded-circle mb-3" width="120" height="120" />
-                    <form th:action="@{/profile/picture}" method="post" enctype="multipart/form-data" class="mb-3">
-                        <input type="file" name="file" accept="image/*" class="form-control mb-2" required />
-                        <button type="submit" class="btn btn-outline-primary btn-sm">Change Picture</button>
+                <div>
+                    <h6 class="mb-1 text-amber-800">Pending Profile Requests</h6>
+                    <p class="mb-0 text-amber-700 text-sm">You have profile change requests awaiting admin approval</p>
+                </div>
+            </div>
+            
+            <div th:each="request : ${pendingRequests}" class="request-item">
+                <div class="request-header">
+                    <div>
+                        <h6 class="mb-1">Profile Update Request</h6>
+                        <small class="text-muted" th:text="'Submitted ' + ${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></small>
+                    </div>
+                    <span class="status-badge status-pending">Pending</span>
+                </div>
+                
+                <div th:if="${request.changingUsername}" class="change-display">
+                    <strong>Username:</strong>
+                    <span th:text="${request.currentUsername}"></span>
+                    <i class="fas fa-arrow-right change-arrow"></i>
+                    <span th:text="${request.requestedUsername}"></span>
+                </div>
+                
+                <div th:if="${request.changingEmail}" class="change-display">
+                    <strong>Email:</strong>
+                    <span th:text="${request.currentEmail}"></span>
+                    <i class="fas fa-arrow-right change-arrow"></i>
+                    <span th:text="${request.requestedEmail}"></span>
+                </div>
+                
+                <div class="mt-3">
+                    <strong>Reason:</strong>
+                    <p class="mt-1 text-gray-600" th:text="${request.reason}"></p>
+                </div>
+                
+                <div class="text-end mt-3">
+                    <form th:action="@{/profile/edit-request/{id}/cancel(id=${request.id})}" 
+                          method="post" class="d-inline"
+                          onsubmit="return confirm('Are you sure you want to cancel this request?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-times me-1"></i>Cancel Request
+                        </button>
                     </form>
-                    <table class="table table-borderless text-start">
-                        <tr><th>Username:</th><td th:text="${user.username}"></td></tr>
-                        <tr><th>Name:</th><td th:text="${user.firstName + ' ' + user.lastName}"></td></tr>
-                        <tr><th>Email:</th><td th:text="${user.email}"></td></tr>
-                        <tr><th>Role:</th><td th:text="${user.role}"></td></tr>
-                    </table>
-                    <a th:href="@{/profile/change-password}" class="btn btn-warning mt-2">Change Password</a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Profile Information Card -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-user me-2"></i>Profile Information
+                </h5>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Username</div>
+                        <div class="info-value" th:text="${user.username}"></div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" th:text="${user.firstName + ' ' + user.lastName}"></div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" th:text="${user.email}"></div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-user-tag"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Role</div>
+                        <div class="info-value">
+                            <span class="badge bg-primary rounded-pill" th:text="${user.role}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section">
+            <button type="button" class="btn btn-primary-custom" 
+                    data-bs-toggle="modal" data-bs-target="#editProfileModal"
+                    th:disabled="${hasPendingRequest}">
+                <i class="fas fa-edit me-2"></i>Request Profile Changes
+            </button>
+            
+            <a th:href="@{/profile/change-password}" class="btn btn-secondary-custom">
+                <i class="fas fa-key me-2"></i>Change Password
+            </a>
+        </div>
+    </div>
+
+    <!-- Profile Edit Request Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Request Profile Changes
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <form th:action="@{/profile/edit-request}" th:object="${profileEditRequest}" method="post">
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info border-0 rounded-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> All profile changes require administrator approval. 
+                            You will be notified once your request is reviewed.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label class="form-label-custom">New Username</label>
+                                    <input type="text" class="form-control form-control-custom" 
+                                           th:field="*{requestedUsername}" 
+                                           th:value="${user.username}"
+                                           placeholder="Enter new username">
+                                    <div th:if="${#fields.hasErrors('requestedUsername')}" 
+                                         class="text-danger mt-1 small" 
+                                         th:errors="*{requestedUsername}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label class="form-label-custom">New Email</label>
+                                    <input type="email" class="form-control form-control-custom" 
+                                           th:field="*{requestedEmail}" 
+                                           th:value="${user.email}"
+                                           placeholder="Enter new email">
+                                    <div th:if="${#fields.hasErrors('requestedEmail')}" 
+                                         class="text-danger mt-1 small" 
+                                         th:errors="*{requestedEmail}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group-custom">
+                            <label class="form-label-custom">Reason for Changes <span class="text-danger">*</span></label>
+                            <textarea class="form-control form-control-custom" 
+                                      th:field="*{reason}" 
+                                      rows="4"
+                                      placeholder="Please explain why you need to change your profile information..."></textarea>
+                            <div th:if="${#fields.hasErrors('reason')}" 
+                                 class="text-danger mt-1 small" 
+                                 th:errors="*{reason}"></div>
+                        </div>
+                        
+                        <div class="current-info">
+                            <h6 class="mb-3">
+                                <i class="fas fa-info me-2"></i>Current Information
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Current Username</small>
+                                        <strong th:text="${user.username}"></strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Current Email</small>
+                                        <strong th:text="${user.email}"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer p-4 border-0">
+                        <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Request
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    // Auto-show modal if there are validation errors
+    document.addEventListener('DOMContentLoaded', function() {
+        if (/*[[${showEditModal}]]*/ false) {
+            var modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            modal.show();
+        }
+    });
+</script>
 </body>
 </html>
