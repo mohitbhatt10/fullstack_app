@@ -42,6 +42,11 @@
             color: white;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            margin-left: -100%;
         }
         
         .sidebar .nav-link {
@@ -86,6 +91,40 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             padding: 2rem;
             margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .content-area.expanded {
+            margin-left: -25%;
+        }
+        
+        .sidebar-toggle {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            z-index: 1030;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0 10px 10px 0;
+            padding: 15px 8px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            transform: translateY(-50%);
+        }
+        
+        .sidebar-toggle:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            color: white;
+            padding-right: 12px;
+        }
+        
+        .sidebar-toggle.collapsed {
+            left: 0;
+        }
+        
+        .sidebar-toggle.expanded {
+            left: 16.66%;
         }
         
         .navbar-brand {
@@ -127,8 +166,21 @@
                 top: 0;
             }
             
+            .sidebar.collapsed {
+                margin-left: 0;
+                display: none;
+            }
+            
             .content-area {
                 margin-top: 0;
+            }
+            
+            .content-area.expanded {
+                margin-left: 0;
+            }
+            
+            .sidebar-toggle.expanded {
+                left: 0;
             }
         }
     </style>
@@ -188,18 +240,23 @@
         </div>
     </nav>
 
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle collapsed" id="sidebarToggle" title="Toggle Sidebar">
+        <i class="fas fa-chevron-right" id="toggleIcon"></i>
+    </button>
+
     <!-- Main Content Layout -->
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0">
-                <div class="sidebar">
+            <div class="col-md-3 col-lg-2 px-0" id="sidebarContainer" style="display: none;">
+                <div class="sidebar collapsed" id="adminSidebar">
                     <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
                 </div>
             </div>
             
             <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
+            <div class="col-12" id="mainContent">
                 <!-- Alert Messages -->
                 <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
@@ -230,8 +287,57 @@
     <script th:src="@{/js/script.js}"></script>
     
     <script>
-        // Add active class to current navigation item
+        // Sidebar toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const sidebarContainer = document.getElementById('sidebarContainer');
+            const mainContent = document.getElementById('mainContent');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            // Check localStorage for saved state, default to collapsed (hidden) for first visit
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            const isCollapsed = savedState === null ? true : savedState === 'true';
+            
+            if (isCollapsed) {
+                collapseSidebar();
+            } else {
+                expandSidebar();
+            }
+            
+            sidebarToggle.addEventListener('click', function() {
+                if (sidebar.classList.contains('collapsed')) {
+                    expandSidebar();
+                } else {
+                    collapseSidebar();
+                }
+            });
+            
+            function collapseSidebar() {
+                sidebar.classList.add('collapsed');
+                sidebarContainer.style.display = 'none';
+                mainContent.classList.remove('col-md-9', 'col-lg-10');
+                mainContent.classList.add('col-12');
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+                sidebarToggle.classList.add('collapsed');
+                sidebarToggle.classList.remove('expanded');
+                localStorage.setItem('sidebarCollapsed', 'true');
+            }
+            
+            function expandSidebar() {
+                sidebar.classList.remove('collapsed');
+                sidebarContainer.style.display = 'block';
+                mainContent.classList.remove('col-12');
+                mainContent.classList.add('col-md-9', 'col-lg-10');
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
+                sidebarToggle.classList.remove('collapsed');
+                sidebarToggle.classList.add('expanded');
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+            
+            // Add active class to current navigation item
             const currentPath = window.location.pathname;
             const sidebarLinks = document.querySelectorAll('.sidebar .nav-link');
             
