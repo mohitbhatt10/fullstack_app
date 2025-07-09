@@ -64,9 +64,9 @@
                         <label for="sessionId" class="form-label">Academic Session</label>
                         <select class="form-select" id="sessionId" th:field="*{sessionId}" required>
                             <option value="">Select Session</option>
-                            <option th:each="session : ${sessions}" 
-                                    th:value="${session.id}"
-                                    th:text="${session.name + (session.active ? ' (Active)' : '')}">Session Name</option>
+                            <option th:each="academicSession : ${sessions}" 
+                                    th:value="${academicSession.id}"
+                                    th:text="${academicSession.name + (academicSession.active ? ' (Active)' : '')}">Session Name</option>
                         </select>
                         <div class="text-danger" th:if="${#fields.hasErrors('sessionId')}" th:errors="*{sessionId}"></div>
                     </div>

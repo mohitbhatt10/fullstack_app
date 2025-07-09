@@ -9,7 +9,7 @@ import com.school.service.CourseService;
 import com.school.service.SessionService;
 import com.school.service.StudentService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -67,14 +67,21 @@ public class CourseEnrollmentController {
     @GetMapping("/{id}/edit")
     public String editEnrollmentForm(@PathVariable Long id, Model model) {
         model.addAttribute("enrollment", enrollmentService.getEnrollmentById(id));
+        model.addAttribute("students", studentService.getAllStudents());
+        model.addAttribute("courses", courseService.getAllCourses());
+        model.addAttribute("sessions", sessionService.getAllSessions());
         return "admin/enrollments/form";
     }
 
     @PostMapping("/{id}")
     public String updateEnrollment(@PathVariable Long id,
                                  @Valid @ModelAttribute("enrollment") CourseEnrollmentDTO enrollmentDTO,
-                                 BindingResult result) {
+                                 BindingResult result,
+                                 Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("students", studentService.getAllStudents());
+            model.addAttribute("courses", courseService.getAllCourses());
+            model.addAttribute("sessions", sessionService.getAllSessions());
             return "admin/enrollments/form";
         }
 
@@ -108,7 +115,7 @@ public class CourseEnrollmentController {
     @GetMapping("/session/{sessionId}")
     public String listSessionEnrollments(@PathVariable Long sessionId, Model model) {
         SessionDTO session = sessionService.getSessionById(sessionId);
-        model.addAttribute("session", session);
+        model.addAttribute("academicSession", session);
         model.addAttribute("enrollments", enrollmentService.getEnrollmentsBySessionId(sessionId));
         return "admin/enrollments/session";
     }
