@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>User Profile</title>
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .profile-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .profile-left-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 16px;
+            border: 4px solid #e9ecef;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 4px;
+        }
+        
+        .profile-role {
+            color: #6c757d;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .profile-location {
+            color: #8d9498;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        
+        .btn-follow {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .btn-message {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .social-links {
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+        
+        .social-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .social-item:last-child {
+            border-bottom: none;
+        }
+        
+        .social-icon {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        
+        .social-value {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .profile-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        
+        .info-table {
+            width: 100%;
+        }
+        
+        .info-table tr {
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .info-table tr:last-child {
+            border-bottom: none;
+        }
+        
+        .info-table th {
+            text-align: left;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 12px 0;
+            width: 140px;
+        }
+        
+        .info-table td {
+            color: #212529;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 12px 0;
+        }
+        
+        .edit-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+        
+        .edit-btn:hover {
+            background: #138496;
+            color: white;
+        }
+        
+        .assignment-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .assignment-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .assignment-status {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .assignment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .assignment-column h6 {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        
+        .assignment-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .assignment-item-title {
+            color: #212529;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        
+        .assignment-item-meta {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        .photo-upload {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        
+        .photo-upload form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .assignment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<section>
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-layout">
+            <!-- Left Column -->
+            <div class="profile-left-card">
+                <!-- Avatar -->
+                <img th:if="${user.id != null && user.profilePicture != null}"
+                     th:src="@{'/profile-picture/' + ${user.id}}"
+                     class="profile-avatar"
+                     alt="Profile Picture" />
+                <img th:unless="${user.id != null && user.profilePicture != null}"
+                     th:src="@{/images/default-profile.jpg}"
+                     alt="Default Profile Picture"
+                     class="profile-avatar" />
+                
+                <!-- Name & Role -->
+                <div class="profile-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
+                <div class="profile-role" th:text="${user.role}"></div>
+                <div class="profile-location">School Management System</div>
+                
+                <!-- Action Buttons -->
+                <div class="profile-actions">
+                    <button type="button" class="btn-follow" 
+                            data-bs-toggle="modal" data-bs-target="#editProfileModal"
+                            th:disabled="${hasPendingRequest}">
+                        Edit
+                    </button>
+                    <a th:href="@{/profile/change-password}" class="btn-message text-decoration-none">
+                        Password
+                    </a>
+                </div>
+                
+                <!-- Photo Upload -->
+                <div class="photo-upload">
+                    <form th:action="@{/profile/picture}" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" accept="image/*" class="form-control form-control-sm" 
+                               style="max-width: 180px;" required />
+                        <button type="submit" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-camera me-1"></i>Update
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Social/Contact Links -->
+                <div class="social-links">
+                    <div class="social-item">
+                        <div class="social-icon">
+                            <i class="fas fa-globe"></i>
+                            <span>Website</span>
+                        </div>
+                        <div class="social-value">school.edu</div>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-icon">
+                            <i class="fab fa-github"></i>
+                            <span>Github</span>
+                        </div>
+                        <div class="social-value" th:text="${user.username}"></div>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-icon">
+                            <i class="fab fa-twitter"></i>
+                            <span>Twitter</span>
+                        </div>
+                        <div class="social-value" th:text="'@' + ${user.username}"></div>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-icon">
+                            <i class="fab fa-instagram"></i>
+                            <span>Instagram</span>
+                        </div>
+                        <div class="social-value" th:text="${user.username}"></div>
+                    </div>
+                    <div class="social-item">
+                        <div class="social-icon">
+                            <i class="fab fa-facebook"></i>
+                            <span>Facebook</span>
+                        </div>
+                        <div class="social-value" th:text="${user.username}"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="profile-right">
+                <!-- Pending Requests Alert -->
+                <div th:if="${hasPendingRequest}" class="alert alert-warning">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        <div>
+                            <strong>Pending Profile Requests</strong>
+                            <div class="small">You have profile change requests awaiting admin approval</div>
+                        </div>
+                    </div>
+                    
+                    <div th:each="request : ${pendingRequests}" class="mt-3 p-3 bg-white rounded">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">Profile Update Request</h6>
+                                <small class="text-muted" th:text="'Submitted ' + ${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></small>
+                            </div>
+                            <span class="badge bg-warning">Pending</span>
+                        </div>
+                        
+                        <div th:if="${request.changingUsername}" class="mb-2 p-2 bg-light rounded">
+                            <strong>Username:</strong>
+                            <span th:text="${request.currentUsername}"></span>
+                            <i class="fas fa-arrow-right mx-2 text-primary"></i>
+                            <span th:text="${request.requestedUsername}"></span>
+                        </div>
+                        
+                        <div th:if="${request.changingEmail}" class="mb-2 p-2 bg-light rounded">
+                            <strong>Email:</strong>
+                            <span th:text="${request.currentEmail}"></span>
+                            <i class="fas fa-arrow-right mx-2 text-primary"></i>
+                            <span th:text="${request.requestedEmail}"></span>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong>Reason:</strong>
+                            <p class="mt-1 mb-0 text-muted" th:text="${request.reason}"></p>
+                        </div>
+                        
+                        <div class="text-end">
+                            <form th:action="@{/profile/edit-request/{id}/cancel(id=${request.id})}" 
+                                  method="post" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to cancel this request?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-times me-1"></i>Cancel Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Information -->
+                <div class="info-card">
+                    <table class="info-table">
+                        <tr>
+                            <th>Full Name</th>
+                            <td th:text="${user.firstName + ' ' + user.lastName}"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td th:text="${user.email}"></td>
+                        </tr>
+                        <tr>
+                            <th>Username</th>
+                            <td th:text="${user.username}"></td>
+                        </tr>
+                        <tr>
+                            <th>Role</th>
+                            <td>
+                                <span class="badge bg-primary" th:text="${user.role}"></span>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <button type="button" class="btn edit-btn" 
+                            data-bs-toggle="modal" data-bs-target="#editProfileModal"
+                            th:disabled="${hasPendingRequest}">
+                        Edit
+                    </button>
+                </div>
+                
+                <!-- Assignment Status Cards -->
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">assignment</div>
+                        <div class="assignment-status">Project Status</div>
+                    </div>
+                    
+                    <div class="assignment-grid">
+                        <!-- Left Column -->
+                        <div class="assignment-column">
+                            <h6>assignment Project Status</h6>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">User Profile</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Dashboard</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">85% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Assignments</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 70%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">70% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Reports</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">60% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Settings</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 90%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">90% Complete</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="assignment-column">
+                            <h6>assignment Project Status</h6>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">User Profile</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Dashboard</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 85%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">85% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Assignments</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 70%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">70% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Reports</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 60%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">60% Complete</div>
+                            </div>
+                            
+                            <div class="assignment-item">
+                                <div class="assignment-item-title">Settings</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 90%;"></div>
+                                </div>
+                                <div class="assignment-item-meta">90% Complete</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Edit Request Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Request Profile Changes
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <form th:action="@{/profile/edit-request}" th:object="${profileEditRequest}" method="post">
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info border-0 rounded-3 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> All profile changes require administrator approval. 
+                            You will be notified once your request is reviewed.
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">New Username</label>
+                                    <input type="text" class="form-control" 
+                                           th:field="*{requestedUsername}" 
+                                           th:value="${user.username}"
+                                           placeholder="Enter new username">
+                                    <div th:if="${#fields.hasErrors('requestedUsername')}" 
+                                         class="text-danger mt-1 small" 
+                                         th:errors="*{requestedUsername}"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">New Email</label>
+                                    <input type="email" class="form-control" 
+                                           th:field="*{requestedEmail}" 
+                                           th:value="${user.email}"
+                                           placeholder="Enter new email">
+                                    <div th:if="${#fields.hasErrors('requestedEmail')}" 
+                                         class="text-danger mt-1 small" 
+                                         th:errors="*{requestedEmail}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Reason for Changes <span class="text-danger">*</span></label>
+                            <textarea class="form-control" 
+                                      th:field="*{reason}" 
+                                      rows="3"
+                                      placeholder="Please explain why you need to change your profile information..."></textarea>
+                            <div th:if="${#fields.hasErrors('reason')}" 
+                                 class="text-danger mt-1 small" 
+                                 th:errors="*{reason}"></div>
+                        </div>
+                        
+                        <div class="bg-light p-3 rounded mt-3">
+                            <h6 class="mb-3">
+                                <i class="fas fa-info me-2"></i>Current Information
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Current Username</small>
+                                        <strong th:text="${user.username}"></strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Current Email</small>
+                                        <strong th:text="${user.email}"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Auto-show modal if there are validation errors
+    document.addEventListener('DOMContentLoaded', function() {
+        if (/*[[${showEditModal}]]*/ false) {
+            var modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            modal.show();
+        }
+    });
+</script>
+</body>
+</html>

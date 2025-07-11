@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>User Profile - Test</title>
+    <style>
+        body {
+            background-color: #f0f2f5 !important;
+            display: block !important;
+            flex-direction: unset !important;
+            min-height: unset !important;
+        }
+        
+        .profile-container {
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .profile-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 30px;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 3px solid #e9ecef;
+            display: block;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+        
+        .profile-info {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        
+        .profile-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .profile-table th {
+            text-align: left;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 15px 0;
+            width: 150px;
+        }
+        
+        .profile-table td {
+            color: #212529;
+            font-weight: 500;
+            padding: 15px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<section>
+    <div class="profile-container">
+        <div class="profile-content">
+            <div class="profile-header">
+                <img th:if="${user.id != null && user.profilePicture != null}"
+                     th:src="@{'/profile-picture/' + ${user.id}}"
+                     class="profile-avatar"
+                     alt="Profile Picture" />
+                <img th:unless="${user.id != null && user.profilePicture != null}"
+                     th:src="@{/images/default-profile.jpg}"
+                     alt="Default Profile Picture"
+                     class="profile-avatar" />
+                
+                <div class="profile-name" th:text="${user.firstName + ' ' + user.lastName}">John Doe</div>
+                <div class="profile-info" th:text="${user.role}">Role</div>
+            </div>
+            
+            <table class="profile-table">
+                <tr>
+                    <th>Full Name</th>
+                    <td th:text="${user.firstName + ' ' + user.lastName}">John Doe</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td th:text="${user.email}">john@example.com</td>
+                </tr>
+                <tr>
+                    <th>Username</th>
+                    <td th:text="${user.username}">johndoe</td>
+                </tr>
+                <tr>
+                    <th>Role</th>
+                    <td th:text="${user.role}">USER</td>
+                </tr>
+                <tr th:if="${user.createdAt}">
+                    <th>Member Since</th>
+                    <td th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2025</td>
+                </tr>
+            </table>
+            
+            <div class="mt-4">
+                <button type="button" class="btn btn-primary me-2" 
+                        data-bs-toggle="modal" data-bs-target="#editProfileModal"
+                        th:disabled="${hasPendingRequest}">
+                    Edit Profile
+                </button>
+                <a th:href="@{/profile/change-password}" class="btn btn-secondary">Change Password</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileModalLabel">
+                        <i class="fas fa-user-edit me-2"></i>Request Profile Changes
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <form th:action="@{/profile/edit-request}" method="post">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="requestedUsername" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="requestedUsername" 
+                                           name="requestedUsername" th:value="${user.username}" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="requestedEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="requestedEmail" 
+                                           name="requestedEmail" th:value="${user.email}" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Changes</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" 
+                                      placeholder="Please explain why you need these changes..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Your request will be sent to administrators for approval. You will be notified once it's reviewed.
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
