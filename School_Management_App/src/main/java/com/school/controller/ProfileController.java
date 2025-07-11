@@ -36,7 +36,7 @@ public class ProfileController {
         model.addAttribute("hasPendingRequest", !pendingRequests.isEmpty());
         model.addAttribute("profileEditRequest", new ProfileEditRequestDTO());
         
-        return "profile/view";
+        return "profile/view_new";
     }
 
     @PostMapping("/picture")
@@ -76,7 +76,7 @@ public class ProfileController {
             model.addAttribute("hasPendingRequest", !pendingRequests.isEmpty());
             model.addAttribute("profileEditRequest", requestDTO); // Re-add the DTO with validation errors
             model.addAttribute("showEditModal", true);
-            return "profile/view";
+            return "profile/view_new";
         }
 
         try {
@@ -95,7 +95,7 @@ public class ProfileController {
     public String cancelEditRequest(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         try {
             ProfileEditRequestDTO request = profileEditRequestService.getRequestById(id);
-            if (request != null && request.getUserName().equals(principal.getName())) {
+            if (request != null && request.getCurrentUsername() != null && request.getCurrentUsername().equals(principal.getName())) {
                 profileEditRequestService.deleteRequest(id);
                 redirectAttributes.addFlashAttribute("successMessage", "Profile edit request cancelled successfully.");
             } else {
