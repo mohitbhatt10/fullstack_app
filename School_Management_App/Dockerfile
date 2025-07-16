@@ -1,30 +1,14 @@
-# Stage 1: Build the application using Maven
-FROM maven:3.9.6-eclipse-temurin-17 AS build
-
-# Set working directory
-WORKDIR /build
-
-# Copy project files
-COPY pom.xml .
-COPY src ./src
-
-# Build the Spring Boot application
-RUN mvn clean package -DskipTests
-
-# Stage 2: Run the application with a slim JDK image
+# Use OpenJDK 17 runtime
 FROM openjdk:17-jdk-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy the packaged application
-COPY --from=build /build/target/*.jar app.jar
+# Copy the JAR file from target directory
+COPY target/*.jar app.jar
 
-# Set JVM options for memory constraints
-ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:-TieredCompilation"
-
-# Expose port
+# Expose port 80
 EXPOSE 80
 
-# Run the application with memory constraints
-ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+# Run the application with dynamic profile (defaults to dev if not specified)
+CMD java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev} -jar app.jar
