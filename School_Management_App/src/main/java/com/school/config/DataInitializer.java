@@ -47,7 +47,7 @@ public class DataInitializer {
                 teacher.setFirstName("John");
                 teacher.setLastName("Smith");
                 teacher.setRole(UserRole.TEACHER);
-                teacher.setDepartment("Computer Science");
+                teacher.setDepartment("CSE");
                 teacher.setDesignation("Professor");
                 teacher.setSpecialization("Software Engineering");
                 teacher = teacherRepository.save(teacher);
@@ -66,7 +66,7 @@ public class DataInitializer {
                 student.setFirstName("Jane");
                 student.setLastName("Doe");
                 student.setRole(UserRole.STUDENT);
-                student.setDepartment("Computer Science");
+                student.setDepartment("CSE");
                 student.setSemester(1);
                 student.setRollNumber("CS2025001");
                 student = studentRepository.save(student);
@@ -97,7 +97,7 @@ public class DataInitializer {
                 course.setName("Introduction to Programming");
                 course.setCode("CS101");
                 course.setSemester(1);
-                course.setDepartment("Computer Science");
+                course.setDepartment("CSE");
                 course.setSyllabus("This course introduces students to the fundamentals of programming using modern programming languages. " +
                     "Topics covered include:\n\n" +
                     "• Programming fundamentals and problem-solving techniques\n" +
@@ -124,7 +124,7 @@ public class DataInitializer {
                 course2.setName("Data Structures");
                 course2.setCode("CS201");
                 course2.setSemester(1);
-                course2.setDepartment("Computer Science");
+                course2.setDepartment("CSE");
                 course2.setSyllabus("Advanced data structures and algorithms");
                 course2.setTeachers(new HashSet<>());
                 course2.getTeachers().add(teacher);
@@ -137,7 +137,7 @@ public class DataInitializer {
                 course3.setName("Database Systems");
                 course3.setCode("CS301");
                 course3.setSemester(1);
-                course3.setDepartment("Computer Science");
+                course3.setDepartment("CSE");
                 course3.setSyllabus("Database design and management systems");
                 course3.setTeachers(new HashSet<>());
                 course3.getTeachers().add(teacher);
