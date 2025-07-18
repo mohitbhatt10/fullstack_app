@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Teacher Report - Admin Panel</title>
+</head>
+<body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Report
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/reports}">Reports</a></li>
+                        <li class="breadcrumb-item active">Teacher Report</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/admin/reports}" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                </a>
+                <div class="btn-group">
+                    <form th:action="@{/admin/reports/export/teachers}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{courseId}">
+                        <input type="hidden" th:field="*{teacherId}">
+                        <input type="hidden" name="format" value="EXCEL">
+                        <button type="submit" class="btn btn-success me-1">
+                            <i class="fas fa-file-excel me-2"></i>Export Excel
+                        </button>
+                    </form>
+                    <form th:action="@{/admin/reports/export/teachers}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{courseId}">
+                        <input type="hidden" th:field="*{teacherId}">
+                        <input type="hidden" name="format" value="PDF">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="card-title">Applied Filters:</h6>
+                <div class="row">
+                    <div class="col-md-3" th:if="${filter.department}">
+                        <strong>Department:</strong> <span th:text="${filter.department}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total Teachers:</strong> <span th:text="${#lists.size(teachers)}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers Table -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-table me-2"></i>Teacher Details
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="teachersTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Specialization</th>
+                                <th>Total Courses</th>
+                                <th>Total Students</th>
+                                <th>Marks Entered</th>
+                                <th>Attendance Marked</th>
+                                <th>Avg Performance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="teacher : ${teachers}">
+                                <td th:text="${teacher.firstName + ' ' + teacher.lastName}"></td>
+                                <td th:text="${teacher.email}"></td>
+                                <td>
+                                    <span class="badge bg-info" th:text="${teacher.department}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${teacher.designation}"></span>
+                                </td>
+                                <td th:text="${teacher.specialization}"></td>
+                                <td>
+                                    <span class="badge bg-primary" th:text="${teacher.totalCourses ?: 0}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:text="${teacher.totalStudents ?: 0}"></span>
+                                </td>
+                                <td th:text="${teacher.marksEntered ?: 0}"></td>
+                                <td th:text="${teacher.attendanceMarked ?: 0}"></td>
+                                <td>
+                                    <span th:if="${teacher.averageStudentPerformance != null}" 
+                                          th:text="${#numbers.formatDecimal(teacher.averageStudentPerformance, 1, 2) + '%'}"
+                                          th:class="${teacher.averageStudentPerformance >= 75 ? 'text-success fw-bold' : 
+                                                    teacher.averageStudentPerformance >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                    <span th:unless="${teacher.averageStudentPerformance != null}" class="text-muted">N/A</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/reports/teacher/{id}(id=${teacher.id})}" 
+                                       class="btn btn-sm btn-outline-primary" title="View Detailed Report">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- No Data Message -->
+                <div th:if="${#lists.isEmpty(teachers)}" class="text-center py-4">
+                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No teachers found</h5>
+                    <p class="text-muted">Try adjusting your filters to see more results.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mt-4" th:unless="${#lists.isEmpty(teachers)}">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-primary text-white shadow">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                    Total Courses
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold" 
+                                     th:text="${teachers.stream().mapToInt(t -> t.totalCourses ?: 0).sum()}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-book fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-success text-white shadow">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                    Total Students Taught
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold" 
+                                     th:text="${teachers.stream().mapToInt(t -> t.totalStudents ?: 0).sum()}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-graduate fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-info text-white shadow">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                    Total Marks Entered
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold" 
+                                     th:text="${teachers.stream().mapToInt(t -> t.marksEntered ?: 0).sum()}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-edit fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card bg-warning text-white shadow">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                    Attendance Records
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold" 
+                                     th:text="${teachers.stream().mapToInt(t -> t.attendanceMarked ?: 0).sum()}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department-wise Distribution -->
+        <div class="row mt-4" th:unless="${#lists.isEmpty(teachers)}">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-pie me-2"></i>Department-wise Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div th:each="dept : ${teachers.stream().map(t -> t.department).distinct().collect(T(java.util.stream.Collectors).toList())}" 
+                                 class="col-md-4 mb-3">
+                                <div class="card border-left-primary">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" 
+                                                     th:text="${dept}">
+                                                </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                                     th:text="${teachers.stream().filter(t -> t.department.equals(dept)).count()} + ' Teachers'">
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-building fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize DataTable if available
+            if (typeof $ !== 'undefined' && $.fn.DataTable) {
+                $('#teachersTable').DataTable({
+                    responsive: true,
+                    pageLength: 25,
+                    order: [[0, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: -1 } // Disable sorting on Actions column
+                    ]
+                });
+            }
+        });
+    </script>
+</main>
+</body>
+</html>

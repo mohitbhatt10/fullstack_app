@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Attendance Report - Admin Panel</title>
+</head>
+<body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-calendar-check me-2"></i>Attendance Report
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/reports}">Reports</a></li>
+                        <li class="breadcrumb-item active">Attendance Report</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/admin/reports}" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                </a>
+                <div class="btn-group">
+                    <form th:action="@{/admin/reports/export/attendance}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{courseId}">
+                        <input type="hidden" th:field="*{startDate}">
+                        <input type="hidden" th:field="*{endDate}">
+                        <input type="hidden" name="format" value="EXCEL">
+                        <button type="submit" class="btn btn-success me-1">
+                            <i class="fas fa-file-excel me-2"></i>Export Excel
+                        </button>
+                    </form>
+                    <form th:action="@{/admin/reports/export/attendance}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{courseId}">
+                        <input type="hidden" th:field="*{startDate}">
+                        <input type="hidden" th:field="*{endDate}">
+                        <input type="hidden" name="format" value="PDF">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Course Report -->
+        <div th:if="${singleCourse}" th:object="${attendanceReport}">
+            <!-- Filter Summary -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">Report Summary:</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Period:</strong> <span th:text="*{startDate} + ' to ' + *{endDate}"></span>
+                        </div>
+                        <div class="col-md-3" th:if="*{department}">
+                            <strong>Department:</strong> <span th:text="*{department}"></span>
+                        </div>
+                        <div class="col-md-3" th:if="*{courseName}">
+                            <strong>Course:</strong> <span th:text="*{courseCode} + ' - ' + *{courseName}"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Overall Attendance:</strong> 
+                            <span th:text="${#numbers.formatDecimal(attendanceReport.overallAttendancePercentage, 1, 2) + '%'}"
+                                  th:class="*{overallAttendancePercentage >= 75 ? 'text-success fw-bold' : 
+                                           overallAttendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-primary text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Students
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" th:text="*{totalStudents}"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-graduate fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-success text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Present
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" th:text="*{totalPresent}"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-danger text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Absent
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" th:text="*{totalAbsent}"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-times-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-info text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Classes
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" th:text="*{totalClasses}"></div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student-wise Attendance -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>Student-wise Attendance
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="studentAttendanceTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Roll Number</th>
+                                    <th>Student Name</th>
+                                    <th>Classes Attended</th>
+                                    <th>Total Classes</th>
+                                    <th>Attendance %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="student : *{studentAttendances}">
+                                    <td th:text="${student.rollNumber}"></td>
+                                    <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                    <td th:text="${student.classesAttended}"></td>
+                                    <td th:text="${student.totalClasses}"></td>
+                                    <td>
+                                        <span th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
+                                              th:class="${student.attendancePercentage >= 75 ? 'text-success fw-bold' : 
+                                                        student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${student.attendanceStatus}"
+                                              th:class="${student.attendanceStatus == 'EXCELLENT' ? 'badge bg-success' : 
+                                                        student.attendanceStatus == 'GOOD' ? 'badge bg-primary' : 
+                                                        student.attendanceStatus == 'AVERAGE' ? 'badge bg-warning' : 'badge bg-danger'}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Attendance Chart -->
+            <div class="card shadow" th:if="*{dailyAttendances != null && !#lists.isEmpty(dailyAttendances)}">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line me-2"></i>Daily Attendance Trend
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Total</th>
+                                    <th>Attendance %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="daily : *{dailyAttendances}">
+                                    <td th:text="${daily.date}"></td>
+                                    <td>
+                                        <span class="badge bg-success" th:text="${daily.presentStudents}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger" th:text="${daily.absentStudents}"></span>
+                                    </td>
+                                    <td th:text="${daily.totalStudents}"></td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" 
+                                                 th:style="'width: ' + ${daily.attendancePercentage} + '%'"
+                                                 th:class="${daily.attendancePercentage >= 75 ? 'bg-success' : 
+                                                           daily.attendancePercentage >= 60 ? 'bg-warning' : 'bg-danger'}"
+                                                 th:text="${#numbers.formatDecimal(daily.attendancePercentage, 1, 1) + '%'}">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multiple Courses Report -->
+        <div th:unless="${singleCourse}">
+            <!-- Filter Summary -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">Applied Filters:</h6>
+                    <div class="row">
+                        <div class="col-md-3" th:if="${filter.department}">
+                            <strong>Department:</strong> <span th:text="${filter.department}"></span>
+                        </div>
+                        <div class="col-md-3" th:if="${filter.semester}">
+                            <strong>Semester:</strong> <span th:text="${filter.semester}"></span>
+                        </div>
+                        <div class="col-md-3" th:if="${filter.startDate}">
+                            <strong>Period:</strong> <span th:text="${filter.startDate} + ' to ' + ${filter.endDate}"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Total Courses:</strong> <span th:text="${#lists.size(attendanceReports)}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course-wise Attendance Summary -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-table me-2"></i>Course-wise Attendance Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="courseAttendanceTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Total Students</th>
+                                    <th>Total Classes</th>
+                                    <th>Overall Attendance %</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="report : ${attendanceReports}">
+                                    <td>
+                                        <span class="badge bg-primary" th:text="${report.courseCode}"></span>
+                                    </td>
+                                    <td th:text="${report.courseName}"></td>
+                                    <td th:text="${report.totalStudents}"></td>
+                                    <td th:text="${report.totalClasses}"></td>
+                                    <td>
+                                        <span th:text="${#numbers.formatDecimal(report.overallAttendancePercentage, 1, 2) + '%'}"
+                                              th:class="${report.overallAttendancePercentage >= 75 ? 'text-success fw-bold' : 
+                                                        report.overallAttendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${report.overallAttendancePercentage >= 75 ? 'EXCELLENT' : 
+                                                       report.overallAttendancePercentage >= 60 ? 'GOOD' : 
+                                                       report.overallAttendancePercentage >= 45 ? 'AVERAGE' : 'POOR'}"
+                                              th:class="${report.overallAttendancePercentage >= 75 ? 'badge bg-success' : 
+                                                        report.overallAttendancePercentage >= 60 ? 'badge bg-primary' : 
+                                                        report.overallAttendancePercentage >= 45 ? 'badge bg-warning' : 'badge bg-danger'}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Data Message -->
+                    <div th:if="${#lists.isEmpty(attendanceReports)}" class="text-center py-4">
+                        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No attendance data found</h5>
+                        <p class="text-muted">Try adjusting your filters or date range to see more results.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Statistics for Multiple Courses -->
+            <div class="row mt-4" th:unless="${#lists.isEmpty(attendanceReports)}">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-primary text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Students
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" 
+                                         th:text="${attendanceReports.stream().mapToInt(r -> r.totalStudents).sum()}">
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-graduate fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-success text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Average Attendance
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" 
+                                         th:text="${#numbers.formatDecimal(attendanceReports.stream().mapToDouble(r -> r.overallAttendancePercentage).average().orElse(0.0), 1, 2) + '%'}">
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-info text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Total Classes
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" 
+                                         th:text="${attendanceReports.stream().mapToInt(r -> r.totalClasses).sum()}">
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card bg-warning text-white shadow">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                        Courses Analyzed
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold" th:text="${#lists.size(attendanceReports)}">
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-book fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize DataTable if available
+            if (typeof $ !== 'undefined' && $.fn.DataTable) {
+                $('#studentAttendanceTable, #courseAttendanceTable').DataTable({
+                    responsive: true,
+                    pageLength: 25,
+                    order: [[0, 'asc']]
+                });
+            }
+        });
+    </script>
+</main>
+</body>
+</html>

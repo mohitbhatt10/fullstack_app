@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Reports - Admin Panel</title>
+</head>
+<body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-chart-bar me-2"></i>Reports Dashboard
+                </h1>
+                <p class="text-muted">Generate comprehensive reports for students, teachers, courses, and attendance</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Students
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalStudents}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Total Teachers
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalTeachers}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Total Courses
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalCourses}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-book fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Report Types
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${#lists.size(reportTypes)}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-bolt me-2"></i>Quick Reports
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <a th:href="@{/admin/reports/quick/attendance}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Quick Attendance Report
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a th:href="@{/admin/reports/quick/performance}" class="btn btn-outline-success btn-block">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Quick Performance Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Report Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Generate detailed reports with custom filters
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Export reports in PDF and Excel formats
+                        </p>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Real-time data with comprehensive analytics
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Generation Form -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-filter me-2"></i>Generate Custom Report
+                </h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/reports/generate}" method="post" th:object="${filter}">
+                    <div class="row">
+                        <!-- Report Type -->
+                        <div class="col-md-4 mb-3">
+                            <label for="reportType" class="form-label">Report Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="reportType" th:field="*{reportType}" required>
+                                <option value="">Select Report Type</option>
+                                <option value="STUDENT_REPORT">Student Report</option>
+                                <option value="TEACHER_REPORT">Teacher Report</option>
+                                <option value="COURSE_REPORT">Course Report</option>
+                                <option value="ATTENDANCE_REPORT">Attendance Report</option>
+                                <option value="ACADEMIC_PERFORMANCE">Academic Performance</option>
+                                <option value="DEPARTMENT_SUMMARY">Department Summary</option>
+                            </select>
+                        </div>
+
+                        <!-- Department Filter -->
+                        <div class="col-md-4 mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department" th:field="*{department}">
+                                <option value="">All Departments</option>
+                                <option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Semester Filter -->
+                        <div class="col-md-4 mb-3">
+                            <label for="semester" class="form-label">Semester</label>
+                            <select class="form-select" id="semester" th:field="*{semester}">
+                                <option value="">All Semesters</option>
+                                <option th:each="sem : ${semesters}" th:value="${sem}" th:text="${sem}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Course Filter -->
+                        <div class="col-md-6 mb-3">
+                            <label for="courseId" class="form-label">Course</label>
+                            <select class="form-select" id="courseId" th:field="*{courseId}">
+                                <option value="">All Courses</option>
+                                <option th:each="course : ${courses}" 
+                                        th:value="${course.id}" 
+                                        th:text="${course.code + ' - ' + course.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Teacher Filter -->
+                        <div class="col-md-6 mb-3">
+                            <label for="teacherId" class="form-label">Teacher</label>
+                            <select class="form-select" id="teacherId" th:field="*{teacherId}">
+                                <option value="">All Teachers</option>
+                                <option th:each="teacher : ${teachers}" 
+                                        th:value="${teacher.id}" 
+                                        th:text="${teacher.firstName + ' ' + teacher.lastName}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date Range (for attendance reports) -->
+                    <div class="row" id="dateRangeSection" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
+                        </div>
+                    </div>
+
+                    <!-- Export Format -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="format" class="form-label">Export Format</label>
+                            <select class="form-select" id="format" th:field="*{format}">
+                                <option value="VIEW">View in Browser</option>
+                                <option value="EXCEL">Export to Excel</option>
+                                <option value="PDF">Export to PDF</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-chart-bar me-2"></i>Generate Report
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-undo me-2"></i>Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const reportTypeSelect = document.getElementById('reportType');
+            const dateRangeSection = document.getElementById('dateRangeSection');
+            const departmentSelect = document.getElementById('department');
+            const semesterSelect = document.getElementById('semester');
+            const courseSelect = document.getElementById('courseId');
+            const teacherSelect = document.getElementById('teacherId');
+
+            // Show/hide date range based on report type
+            reportTypeSelect.addEventListener('change', function() {
+                if (this.value === 'ATTENDANCE_REPORT') {
+                    dateRangeSection.style.display = 'block';
+                    // Set default dates
+                    const endDate = new Date();
+                    const startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - 1);
+                    
+                    document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+                    document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+                } else {
+                    dateRangeSection.style.display = 'none';
+                }
+            });
+
+            // Filter courses and teachers based on department
+            function updateFilters() {
+                const selectedDepartment = departmentSelect.value;
+                const selectedSemester = semesterSelect.value;
+                
+                // Update courses
+                fetch(`/admin/reports/api/courses?department=${selectedDepartment}&semester=${selectedSemester}`)
+                    .then(response => response.json())
+                    .then(courses => {
+                        courseSelect.innerHTML = '<option value="">All Courses</option>';
+                        courses.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = `${course.code} - ${course.name}`;
+                            courseSelect.appendChild(option);
+                        });
+                    });
+
+                // Update teachers
+                fetch(`/admin/reports/api/teachers?department=${selectedDepartment}`)
+                    .then(response => response.json())
+                    .then(teachers => {
+                        teacherSelect.innerHTML = '<option value="">All Teachers</option>';
+                        teachers.forEach(teacher => {
+                            const option = document.createElement('option');
+                            option.value = teacher.id;
+                            option.textContent = `${teacher.firstName} ${teacher.lastName}`;
+                            teacherSelect.appendChild(option);
+                        });
+                    });
+            }
+
+            departmentSelect.addEventListener('change', updateFilters);
+            semesterSelect.addEventListener('change', updateFilters);
+        });
+    </script>
+</main>
+</body>
+</html>
