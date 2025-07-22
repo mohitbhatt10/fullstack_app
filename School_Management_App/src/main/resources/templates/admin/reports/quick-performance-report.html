@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Quick Performance Report - Admin Panel</title>
+</head>
+<body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Performance Report
+                </h1>
+                <p class="text-muted">Current semester performance overview</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/reports}">Reports</a></li>
+                        <li class="breadcrumb-item active">Quick Performance</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/admin/reports}" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Export PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Filter Options -->
+        <div class="card mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-filter me-2"></i>Quick Filters
+                </h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/reports/quick/performance}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="department" th:value="${filter.department}">
+                            <option value="">All Departments</option>
+                            <option th:each="dept : ${departments}" 
+                                    th:value="${dept}" 
+                                    th:text="${dept}"
+                                    th:selected="${dept == filter.department}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="semester" class="form-label">Semester</label>
+                        <select class="form-select" id="semester" name="semester" th:value="${filter.semester}">
+                            <option value="">All Semesters</option>
+                            <option th:each="sem : ${semesters}" 
+                                    th:value="${sem}" 
+                                    th:text="${sem}"
+                                    th:selected="${sem == filter.semester}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Report Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="card-title">Report Summary:</h6>
+                <div class="row">
+                    <div class="col-md-3" th:if="${filter.department}">
+                        <strong>Department:</strong> 
+                        <span th:text="${filter.department}"></span>
+                    </div>
+                    <div class="col-md-3" th:if="${filter.semester}">
+                        <strong>Semester:</strong> 
+                        <span th:text="${filter.semester}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Total Students:</strong> 
+                        <span th:text="${#lists.size(performances)}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Generated:</strong> 
+                        <span th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Overview Cards -->
+        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Passed Students
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                     th:text="${performances.stream().filter(p -> p.status == 'PASS').count()}">0</div>
+                                <div class="text-xs text-muted">
+                                    <span th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'PASS').count() * 100.0 / performances.size(), 1, 1) + '% of total'}"></span>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Failed Students
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                     th:text="${performances.stream().filter(p -> p.status == 'FAIL').count()}">0</div>
+                                <div class="text-xs text-muted">
+                                    <span th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'FAIL').count() * 100.0 / performances.size(), 1, 1) + '% of total'}"></span>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Average Performance
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                     th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.averageMarks != null).mapToDouble(p -> p.averageMarks).average().orElse(0.0), 1, 2) + '%'}">0%</div>
+                                <div class="text-xs text-muted">
+                                    Class average marks
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Average Attendance
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" 
+                                     th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.attendancePercentage != null).mapToDouble(p -> p.attendancePercentage).average().orElse(0.0), 1, 2) + '%'}">0%</div>
+                                <div class="text-xs text-muted">
+                                    Class average attendance
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade Distribution -->
+        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-pie me-2"></i>Grade Distribution Overview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'A').count()}">0</h2>
+                                        <small>Grade A</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'A').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'B').count()}">0</h2>
+                                        <small>Grade B</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'B').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'C').count()}">0</h2>
+                                        <small>Grade C</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'C').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'D').count()}">0</h2>
+                                        <small>Grade D</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'D').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'F').count()}">0</h2>
+                                        <small>Grade F</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'F').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center mb-3">
+                                <div class="card bg-secondary text-white">
+                                    <div class="card-body">
+                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == null || p.grade.isEmpty()).count()}">0</h2>
+                                        <small>No Grade</small>
+                                        <div class="mt-1">
+                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == null || p.grade.isEmpty()).count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers and Students Needing Attention -->
+        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+            <!-- Top 10 Performers -->
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-trophy me-2"></i>Top 10 Performers
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Roll No.</th>
+                                        <th>Name</th>
+                                        <th>Marks %</th>
+                                        <th>Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="student, iterStat : ${performances.stream().filter(p -> p.averageMarks != null).sorted((s1, s2) -> Double.compare(s2.averageMarks, s1.averageMarks)).limit(10).toList()}"
+                                        th:if="${iterStat.index < 10}">
+                                        <td>
+                                            <span th:text="${iterStat.index + 1}"
+                                                  th:class="${iterStat.index == 0 ? 'badge bg-warning' : 
+                                                            iterStat.index == 1 ? 'badge bg-secondary' : 
+                                                            iterStat.index == 2 ? 'badge bg-info' : 'badge bg-light text-dark'}"></span>
+                                        </td>
+                                        <td th:text="${student.rollNumber}"></td>
+                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td>
+                                            <span th:text="${#numbers.formatDecimal(student.averageMarks, 1, 2) + '%'}"
+                                                  class="text-success fw-bold"></span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${student.grade}"
+                                                  th:class="${student.grade == 'A' ? 'badge bg-success' : 
+                                                            student.grade == 'B' ? 'badge bg-primary' : 
+                                                            student.grade == 'C' ? 'badge bg-warning' : 'badge bg-info'}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Needing Attention -->
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Students Needing Attention
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Roll No.</th>
+                                        <th>Name</th>
+                                        <th>Marks %</th>
+                                        <th>Attendance %</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="student : ${performances.stream().filter(p -> p.status == 'FAIL' || (p.averageMarks != null && p.averageMarks < 50) || (p.attendancePercentage != null && p.attendancePercentage < 60)).limit(10).toList()}">
+                                        <td th:text="${student.rollNumber}"></td>
+                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td>
+                                            <span th:if="${student.averageMarks != null}" 
+                                                  th:text="${#numbers.formatDecimal(student.averageMarks, 1, 2) + '%'}"
+                                                  th:class="${student.averageMarks >= 50 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                            <span th:unless="${student.averageMarks != null}" class="text-muted">N/A</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${student.attendancePercentage != null}" 
+                                                  th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
+                                                  th:class="${student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                            <span th:unless="${student.attendancePercentage != null}" class="text-muted">N/A</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${student.status == 'FAIL' ? 'FAILING' : 
+                                                           (student.averageMarks != null && student.averageMarks < 40) ? 'CRITICAL' : 
+                                                           (student.attendancePercentage != null && student.attendancePercentage < 60) ? 'LOW ATTENDANCE' : 'AT RISK'}"
+                                                  th:class="${student.status == 'FAIL' ? 'badge bg-danger' : 'badge bg-warning'}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Analysis -->
+        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-bar me-2"></i>Performance Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Excellent Performers (80%+ marks & attendance)</span>
+                                <span class="badge bg-success" 
+                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 80 && p.attendancePercentage >= 80).count()}"></span>
+                            </div>
+                            <div class="progress mt-1" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 80 && p.attendancePercentage >= 80).count() * 100.0 / performances.size()} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Good Performers (60-79% marks, 70%+ attendance)</span>
+                                <span class="badge bg-primary" 
+                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 60 && p.averageMarks < 80 && p.attendancePercentage >= 70).count()}"></span>
+                            </div>
+                            <div class="progress mt-1" style="height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 60 && p.averageMarks < 80 && p.attendancePercentage >= 70).count() * 100.0 / performances.size()} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Average Performers (40-59% marks, 60%+ attendance)</span>
+                                <span class="badge bg-warning" 
+                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 40 && p.averageMarks < 60 && p.attendancePercentage >= 60).count()}"></span>
+                            </div>
+                            <div class="progress mt-1" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 40 && p.averageMarks < 60 && p.attendancePercentage >= 60).count() * 100.0 / performances.size()} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Need Improvement (Below 40% marks or 60% attendance)</span>
+                                <span class="badge bg-danger" 
+                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && (p.averageMarks < 40 || p.attendancePercentage < 60)).count()}"></span>
+                            </div>
+                            <div class="progress mt-1" style="height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && (p.averageMarks < 40 || p.attendancePercentage < 60)).count() * 100.0 / performances.size()} + '%'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="col-lg-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-lightbulb me-2"></i>Key Insights
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${performances.stream().filter(p -> p.status == 'FAIL').count() > performances.size() * 0.3}" 
+                             class="alert alert-danger alert-sm">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>High Failure Rate</strong><br>
+                            <small>More than 30% students failing</small>
+                        </div>
+
+                        <div th:if="${performances.stream().filter(p -> p.attendancePercentage != null && p.attendancePercentage < 60).count() > performances.size() * 0.2}" 
+                             class="alert alert-warning alert-sm">
+                            <i class="fas fa-calendar-times me-2"></i>
+                            <strong>Low Attendance</strong><br>
+                            <small>20%+ students have poor attendance</small>
+                        </div>
+
+                        <div th:if="${performances.stream().filter(p -> p.averageMarks != null && p.averageMarks >= 80).count() > performances.size() * 0.5}" 
+                             class="alert alert-success alert-sm">
+                            <i class="fas fa-trophy me-2"></i>
+                            <strong>Excellent Performance</strong><br>
+                            <small>50%+ students performing excellently</small>
+                        </div>
+
+                        <div class="mt-3">
+                            <h6 class="text-muted">Quick Stats:</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="fas fa-check text-success me-2"></i>Pass Rate: <strong th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'PASS').count() * 100.0 / performances.size(), 1, 1) + '%'}"></strong></li>
+                                <li><i class="fas fa-star text-warning me-2"></i>A Grade: <strong th:text="${performances.stream().filter(p -> p.grade == 'A').count()}"></strong> students</li>
+                                <li><i class="fas fa-exclamation text-danger me-2"></i>At Risk: <strong th:text="${performances.stream().filter(p -> p.averageMarks != null && p.averageMarks < 50).count()}"></strong> students</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-tasks me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports(reportType='ACADEMIC_PERFORMANCE')}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Detailed Performance Report
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports/quick/attendance}" class="btn btn-outline-success btn-block">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Quick Attendance Report
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/marks}" class="btn btn-outline-info btn-block">
+                                    <i class="fas fa-edit me-2"></i>
+                                    Manage Marks
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary btn-block">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to All Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Data Message -->
+        <div th:if="${#lists.isEmpty(performances)}" class="text-center py-5">
+            <i class="fas fa-info-circle fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Performance Data Found</h4>
+            <p class="text-muted">Try adjusting your filters or ensure that marks and attendance data has been entered for students.</p>
+            <a th:href="@{/admin/reports}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function exportToExcel() {
+            // Create a form to submit export request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/reports/export/performance';
+            
+            // Add filter parameters
+            const department = document.getElementById('department').value;
+            const semester = document.getElementById('semester').value;
+            
+            if (department) {
+                const deptInput = document.createElement('input');
+                deptInput.type = 'hidden';
+                deptInput.name = 'department';
+                deptInput.value = department;
+                form.appendChild(deptInput);
+            }
+            
+            if (semester) {
+                const semInput = document.createElement('input');
+                semInput.type = 'hidden';
+                semInput.name = 'semester';
+                semInput.value = semester;
+                form.appendChild(semInput);
+            }
+            
+            const formatInput = document.createElement('input');
+            formatInput.type = 'hidden';
+            formatInput.name = 'format';
+            formatInput.value = 'EXCEL';
+            form.appendChild(formatInput);
+            
+            const reportTypeInput = document.createElement('input');
+            reportTypeInput.type = 'hidden';
+            reportTypeInput.name = 'reportType';
+            reportTypeInput.value = 'ACADEMIC_PERFORMANCE';
+            form.appendChild(reportTypeInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+        
+        function exportToPDF() {
+            // Create a form to submit export request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/admin/reports/export/performance';
+            
+            // Add filter parameters
+            const department = document.getElementById('department').value;
+            const semester = document.getElementById('semester').value;
+            
+            if (department) {
+                const deptInput = document.createElement('input');
+                deptInput.type = 'hidden';
+                deptInput.name = 'department';
+                deptInput.value = department;
+                form.appendChild(deptInput);
+            }
+            
+            if (semester) {
+                const semInput = document.createElement('input');
+                semInput.type = 'hidden';
+                semInput.name = 'semester';
+                semInput.value = semester;
+                form.appendChild(semInput);
+            }
+            
+            const formatInput = document.createElement('input');
+            formatInput.type = 'hidden';
+            formatInput.name = 'format';
+            formatInput.value = 'PDF';
+            form.appendChild(formatInput);
+            
+            const reportTypeInput = document.createElement('input');
+            reportTypeInput.type = 'hidden';
+            reportTypeInput.name = 'reportType';
+            reportTypeInput.value = 'ACADEMIC_PERFORMANCE';
+            form.appendChild(reportTypeInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+    </script>
+</main>
+</body>
+</html>

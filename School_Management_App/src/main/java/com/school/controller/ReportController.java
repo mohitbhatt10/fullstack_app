@@ -248,6 +248,32 @@ public class ReportController {
                 .body(resource);
     }
 
+    @PostMapping("/export/performance")
+    public ResponseEntity<ByteArrayResource> exportPerformanceReport(
+            @ModelAttribute ReportFilterDTO filter) {
+        log.info("Exporting performance report with filter: {}", filter);
+        
+        List<StudentPerformanceSummaryDTO> performances = reportService.generateAcademicPerformanceReport(filter);
+        ByteArrayResource resource;
+        String filename;
+        String contentType;
+        
+        if ("PDF".equalsIgnoreCase(filter.getFormat())) {
+            resource = reportService.exportPerformanceReportToPDF(performances);
+            filename = "performance-report-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".pdf";
+            contentType = "application/pdf";
+        } else {
+            resource = reportService.exportPerformanceReportToExcel(performances);
+            filename = "performance-report-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xlsx";
+            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+        
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(resource);
+    }
+
     // Individual report endpoints
     @GetMapping("/student/{id}")
     public String individualStudentReport(@PathVariable Long id, Model model) {

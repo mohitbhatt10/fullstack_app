@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Quick Attendance Report - Admin Panel</title>
+</head>
+<body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
+<main>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Attendance Report
+                </h1>
+                <p class="text-muted">Last 30 days attendance overview</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/reports}">Reports</a></li>
+                        <li class="breadcrumb-item active">Quick Attendance</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a th:href="@{/admin/reports}" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                </a>
+                <div class="btn-group">
+                    <form th:action="@{/admin/reports/export/attendance}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{startDate}">
+                        <input type="hidden" th:field="*{endDate}">
+                        <input type="hidden" name="format" value="EXCEL">
+                        <button type="submit" class="btn btn-success me-1">
+                            <i class="fas fa-file-excel me-2"></i>Export Excel
+                        </button>
+                    </form>
+                    <form th:action="@{/admin/reports/export/attendance}" method="post" class="d-inline" th:object="${filter}">
+                        <input type="hidden" th:field="*{reportType}">
+                        <input type="hidden" th:field="*{department}">
+                        <input type="hidden" th:field="*{semester}">
+                        <input type="hidden" th:field="*{startDate}">
+                        <input type="hidden" th:field="*{endDate}">
+                        <input type="hidden" name="format" value="PDF">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Filter Options -->
+        <div class="card mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-filter me-2"></i>Quick Filters
+                </h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/reports/quick/attendance}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="department" th:value="${filter.department}">
+                            <option value="">All Departments</option>
+                            <option th:each="dept : ${departments}" 
+                                    th:value="${dept}" 
+                                    th:text="${dept}"
+                                    th:selected="${dept == filter.department}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="semester" class="form-label">Semester</label>
+                        <select class="form-select" id="semester" name="semester" th:value="${filter.semester}">
+                            <option value="">All Semesters</option>
+                            <option th:each="sem : ${semesters}" 
+                                    th:value="${sem}" 
+                                    th:text="${sem}"
+                                    th:selected="${sem == filter.semester}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" th:value="${filter.startDate}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" th:value="${filter.endDate}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Report Summary -->
+        <div class="card mb-4" th:object="${attendanceReport}">
+            <div class="card-body">
+                <h6 class="card-title">Report Summary:</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Period:</strong> 
+                        <span th:text="*{startDate} + ' to ' + *{endDate}"></span>
+                    </div>
+                    <div class="col-md-3" th:if="*{department}">
+                        <strong>Department:</strong> 
+                        <span th:text="*{department}"></span>
+                    </div>
+                    <div class="col-md-3" th:if="*{courseName}">
+                        <strong>Course:</strong> 
+                        <span th:text="*{courseCode} + ' - ' + *{courseName}"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Overall Attendance:</strong> 
+                        <span th:text="${#numbers.formatDecimal(attendanceReport.overallAttendancePercentage, 1, 2) + '%'}"
+                              th:class="*{overallAttendancePercentage >= 75 ? 'text-success fw-bold' : 
+                                       overallAttendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row mb-4" th:object="${attendanceReport}">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Students
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="*{totalStudents}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Total Present
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="*{totalPresent}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Total Absent
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="*{totalAbsent}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Total Classes
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="*{totalClasses}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Status Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-pie me-2"></i>Attendance Status Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body" th:object="${attendanceReport}">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 90).count()}"></h3>
+                                        <small>Excellent (90%+)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 75 && s.attendancePercentage < 90).count()}"></h3>
+                                        <small>Good (75-89%)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 60 && s.attendancePercentage < 75).count()}"></h3>
+                                        <small>Average (60-74%)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage < 60).count()}"></h3>
+                                        <small>Poor (Below 60%)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 10 Students by Attendance -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-trophy me-2"></i>Top 10 Students (Highest Attendance)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Roll No.</th>
+                                        <th>Name</th>
+                                        <th>Attendance %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="student, iterStat : ${attendanceReport.studentAttendances.stream().sorted((s1, s2) -> Double.compare(s2.attendancePercentage, s1.attendancePercentage)).limit(10).toList()}"
+                                        th:if="${iterStat.index < 10}">
+                                        <td>
+                                            <span th:text="${iterStat.index + 1}"
+                                                  th:class="${iterStat.index == 0 ? 'badge bg-warning' : 
+                                                            iterStat.index == 1 ? 'badge bg-secondary' : 
+                                                            iterStat.index == 2 ? 'badge bg-info' : 'badge bg-light text-dark'}"></span>
+                                        </td>
+                                        <td th:text="${student.rollNumber}"></td>
+                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td>
+                                            <span th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
+                                                  class="text-success fw-bold"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom 10 Students by Attendance -->
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Students Needing Attention (Lowest Attendance)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Roll No.</th>
+                                        <th>Name</th>
+                                        <th>Attendance %</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="student : ${attendanceReport.studentAttendances.stream().sorted((s1, s2) -> Double.compare(s1.attendancePercentage, s2.attendancePercentage)).limit(10).toList()}">
+                                        <td th:text="${student.rollNumber}"></td>
+                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td>
+                                            <span th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
+                                                  th:class="${student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${student.attendancePercentage < 60 ? 'CRITICAL' : 'MONITOR'}"
+                                                  th:class="${student.attendancePercentage < 60 ? 'badge bg-danger' : 'badge bg-warning'}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Attendance Trend (Last 7 Days) -->
+        <div class="card shadow" th:if="${attendanceReport.dailyAttendances != null && !#lists.isEmpty(attendanceReport.dailyAttendances)}">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-line me-2"></i>Recent Daily Attendance Trend
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Total</th>
+                                <th>Attendance %</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="daily, iterStat : ${attendanceReport.dailyAttendances.stream().sorted((d1, d2) -> d2.date.compareTo(d1.date)).limit(7).toList()}">
+                                <td th:text="${#temporals.format(daily.date, 'MMM dd, yyyy')}"></td>
+                                <td>
+                                    <span class="badge bg-success" th:text="${daily.presentStudents}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger" th:text="${daily.absentStudents}"></span>
+                                </td>
+                                <td th:text="${daily.totalStudents}"></td>
+                                <td>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar" 
+                                             th:style="'width: ' + ${daily.attendancePercentage} + '%'"
+                                             th:class="${daily.attendancePercentage >= 75 ? 'bg-success' : 
+                                                       daily.attendancePercentage >= 60 ? 'bg-warning' : 'bg-danger'}"
+                                             th:text="${#numbers.formatDecimal(daily.attendancePercentage, 1, 1) + '%'}">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage > attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
+                                       class="fas fa-arrow-up text-success" title="Improving"></i>
+                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage < attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
+                                       class="fas fa-arrow-down text-danger" title="Declining"></i>
+                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage == attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
+                                       class="fas fa-minus text-muted" title="Stable"></i>
+                                    <span th:if="${iterStat.index == 0}" class="text-muted">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-tasks me-2"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports(reportType='ATTENDANCE_REPORT')}" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Detailed Attendance Report
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports/quick/performance}" class="btn btn-outline-success btn-block">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Quick Performance Report
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/attendance}" class="btn btn-outline-info btn-block">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Manage Attendance
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary btn-block">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to All Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates if not provided
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            if (!startDateInput.value) {
+                const startDate = new Date();
+                startDate.setMonth(startDate.getMonth() - 1);
+                startDateInput.value = startDate.toISOString().split('T')[0];
+            }
+            
+            if (!endDateInput.value) {
+                const endDate = new Date();
+                endDateInput.value = endDate.toISOString().split('T')[0];
+            }
+        });
+    </script>
+</main>
+</body>
+</html>

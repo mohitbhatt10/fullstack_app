@@ -845,6 +845,169 @@ public class ReportServiceImpl implements ReportService {
     }
     
     @Override
+    public ByteArrayResource exportPerformanceReportToExcel(List<StudentPerformanceSummaryDTO> performances) {
+        log.info("Exporting {} student performances to Excel", performances.size());
+        
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Performance Report");
+            
+            // Create header style
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {
+                "Roll Number", "First Name", "Last Name", "Average Marks", 
+                "Attendance %", "Grade", "Status", "Performance Level"
+            };
+            
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+            
+            // Create data rows
+            for (int i = 0; i < performances.size(); i++) {
+                Row row = sheet.createRow(i + 1);
+                StudentPerformanceSummaryDTO performance = performances.get(i);
+                
+                row.createCell(0).setCellValue(performance.getRollNumber());
+                row.createCell(1).setCellValue(performance.getFirstName());
+                row.createCell(2).setCellValue(performance.getLastName());
+                row.createCell(3).setCellValue(performance.getAverageMarks() != null ? performance.getAverageMarks() : 0.0);
+                row.createCell(4).setCellValue(performance.getAttendancePercentage() != null ? performance.getAttendancePercentage() : 0.0);
+                row.createCell(5).setCellValue(performance.getGrade() != null ? performance.getGrade() : "N/A");
+                row.createCell(6).setCellValue(performance.getStatus() != null ? performance.getStatus() : "N/A");
+                
+                // Calculate performance level
+                String performanceLevel = "INSUFFICIENT DATA";
+                if (performance.getAverageMarks() != null && performance.getAttendancePercentage() != null) {
+                    if (performance.getAverageMarks() >= 80 && performance.getAttendancePercentage() >= 80) {
+                        performanceLevel = "EXCELLENT";
+                    } else if (performance.getAverageMarks() >= 60 && performance.getAttendancePercentage() >= 70) {
+                        performanceLevel = "GOOD";
+                    } else if (performance.getAverageMarks() >= 40 && performance.getAttendancePercentage() >= 60) {
+                        performanceLevel = "AVERAGE";
+                    } else {
+                        performanceLevel = "NEEDS IMPROVEMENT";
+                    }
+                }
+                row.createCell(7).setCellValue(performanceLevel);
+            }
+            
+            // Auto-size columns
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayResource(outputStream.toByteArray());
+            
+        } catch (IOException e) {
+            log.error("Error creating Excel file", e);
+            throw new RuntimeException("Failed to create Excel file", e);
+        }
+    }
+    
+    @Override
+    public ByteArrayResource exportPerformanceReportToPDF(List<StudentPerformanceSummaryDTO> performances) {
+        log.info("Exporting {} student performances to PDF", performances.size());
+        
+        try {
+            Document document = new Document(PageSize.A4.rotate());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfWriter.getInstance(document, outputStream);
+            
+            document.open();
+            
+            // Add title
+            com.itextpdf.text.Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+            Paragraph title = new Paragraph("Student Performance Report", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+            
+            // Add summary
+            if (!performances.isEmpty()) {
+                double avgMarks = performances.stream()
+                        .filter(p -> p.getAverageMarks() != null)
+                        .mapToDouble(StudentPerformanceSummaryDTO::getAverageMarks)
+                        .average()
+                        .orElse(0.0);
+                
+                double avgAttendance = performances.stream()
+                        .filter(p -> p.getAttendancePercentage() != null)
+                        .mapToDouble(StudentPerformanceSummaryDTO::getAttendancePercentage)
+                        .average()
+                        .orElse(0.0);
+                
+                long passedStudents = performances.stream()
+                        .filter(p -> "PASS".equals(p.getStatus()))
+                        .count();
+                
+                Paragraph summary = new Paragraph();
+                summary.add(new Phrase("Total Students: " + performances.size() + "\n"));
+                summary.add(new Phrase("Average Marks: " + String.format("%.2f%%", avgMarks) + "\n"));
+                summary.add(new Phrase("Average Attendance: " + String.format("%.2f%%", avgAttendance) + "\n"));
+                summary.add(new Phrase("Pass Rate: " + String.format("%.2f%%", (double) passedStudents / performances.size() * 100) + "\n\n"));
+                document.add(summary);
+            }
+            
+            // Create table
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100);
+            
+            // Add headers
+            String[] headers = {
+                "Roll Number", "Student Name", "Avg Marks", "Attendance %", "Grade", "Status", "Level"
+            };
+            
+            for (String header : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(header, FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
+                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                cell.setPadding(5);
+                table.addCell(cell);
+            }
+            
+            // Add data rows
+            for (StudentPerformanceSummaryDTO performance : performances) {
+                table.addCell(performance.getRollNumber());
+                table.addCell(performance.getFirstName() + " " + performance.getLastName());
+                table.addCell(String.format("%.2f", performance.getAverageMarks() != null ? performance.getAverageMarks() : 0.0));
+                table.addCell(String.format("%.2f%%", performance.getAttendancePercentage() != null ? performance.getAttendancePercentage() : 0.0));
+                table.addCell(performance.getGrade() != null ? performance.getGrade() : "N/A");
+                table.addCell(performance.getStatus() != null ? performance.getStatus() : "N/A");
+                
+                // Calculate performance level
+                String performanceLevel = "INSUFFICIENT DATA";
+                if (performance.getAverageMarks() != null && performance.getAttendancePercentage() != null) {
+                    if (performance.getAverageMarks() >= 80 && performance.getAttendancePercentage() >= 80) {
+                        performanceLevel = "EXCELLENT";
+                    } else if (performance.getAverageMarks() >= 60 && performance.getAttendancePercentage() >= 70) {
+                        performanceLevel = "GOOD";
+                    } else if (performance.getAverageMarks() >= 40 && performance.getAttendancePercentage() >= 60) {
+                        performanceLevel = "AVERAGE";
+                    } else {
+                        performanceLevel = "NEEDS IMPROVEMENT";
+                    }
+                }
+                table.addCell(performanceLevel);
+            }
+            
+            document.add(table);
+            document.close();
+            
+            return new ByteArrayResource(outputStream.toByteArray());
+            
+        } catch (DocumentException e) {
+            log.error("Error creating PDF file", e);
+            throw new RuntimeException("Failed to create PDF file", e);
+        }
+    }
+    
+    @Override
     public List<String> getAvailableReportTypes() {
         return Arrays.asList(
             "STUDENT_REPORT",

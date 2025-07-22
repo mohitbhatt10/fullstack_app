@@ -43,6 +43,9 @@ public interface ReportService {
     ByteArrayResource exportAttendanceReportToExcel(AttendanceReportDTO attendanceReport);
     ByteArrayResource exportAttendanceReportToPDF(AttendanceReportDTO attendanceReport);
     
+    ByteArrayResource exportPerformanceReportToExcel(List<StudentPerformanceSummaryDTO> performances);
+    ByteArrayResource exportPerformanceReportToPDF(List<StudentPerformanceSummaryDTO> performances);
+    
     // Utility methods
     List<String> getAvailableReportTypes();
     List<String> getAvailableDepartments();
