@@ -3,6 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
+      - cd School_Management_App
       - mvn clean install -DskipTests
       - echo Logging in to Amazon ECR...
       - aws --version
