@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: school-management-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: school-management-app
+  template:
+    metadata:
+      labels:
+        app: school-management-app
+    spec:
+      containers:
+        - name: school-management-app
+          image: 875212669782.dkr.ecr.ap-south-1.amazonaws.com/mb-repo:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DATABASE_URL
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DATABASE_USERNAME
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: DATABASE_PASSWORD
+            - name: PORT
+              value: "80"
+            - name: STARTUP_ENTITIES_REQUIRED
+              value: "false"
+            - name: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
+              value: "30000"
+            - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+              value: "10"
+            - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+              value: "2"
+            - name: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
+              value: "300000"
+            - name: SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD
+              value: "60000"
+            - name: MAIL_HOST
+              value: "smtp.gmail.com"
+            - name: MAIL_PORT
+              value: "587"
+            - name: MAIL_USERNAME
+              value: "your-email@gmail.com"
+            - name: MAIL_PASSWORD
+              value: "your-app-password"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: school-management-app-service
+spec:
+  selector:
+    app: school-management-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

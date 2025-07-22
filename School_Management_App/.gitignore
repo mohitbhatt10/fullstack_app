@@ -7,3 +7,6 @@
 log
 *.log
 /logs/*.gz
+
+# Database secrets - DO NOT COMMIT
+db-secret.yaml
