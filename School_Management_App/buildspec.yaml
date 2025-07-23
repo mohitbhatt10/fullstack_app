@@ -26,16 +26,20 @@ phases:
       - echo Writing image definitions file...
       # add your container name
       - DOCKER_CONTAINER_NAME=mb-repo
-      - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > ../imagedefinitions.json
       - echo $DOCKER_CONTAINER_NAME
       - echo printing imagedefinitions.json
-      - cat imagedefinitions.json
+      - cat ../imagedefinitions.json
+      - cd ..
+      - echo "Files in root directory:"
       - ls -la
-      - echo "Listing target directory:"
-      - ls -la target/
+      - echo "Files in School_Management_App:"
+      - ls -la School_Management_App/
+      - echo "JAR files:"
+      - ls -la School_Management_App/target/*.jar
 
 artifacts:
   files:
     - imagedefinitions.json
-    - target/*.jar
+    - School_Management_App/target/*.jar
 
