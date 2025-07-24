@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress checkstyle warnings for generated code -->
+    <suppress checks=".*" files=".*[\\/]target[\\/]generated-sources[\\/].*"/>
+    
+    <!-- Suppress line length warnings for test files -->
+    <suppress checks="LineLength" files=".*Test\.java"/>
+    
+    <!-- Suppress magic number warnings for test data -->
+    <suppress checks="MagicNumber" files=".*Test\.java"/>
+</suppressions>
