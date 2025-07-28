@@ -100,7 +100,7 @@
         </div>
 
         <!-- Performance Overview Cards -->
-        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+        <div class="row mb-4" th:if="${performances != null && !#lists.isEmpty(performances)}">
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
@@ -110,9 +110,9 @@
                                     Passed Students
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" 
-                                     th:text="${performances.stream().filter(p -> p.status == 'PASS').count()}">0</div>
+                                     th:text="${#lists.size(performances.?[status == 'PASS'])}">0</div>
                                 <div class="text-xs text-muted">
-                                    <span th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'PASS').count() * 100.0 / performances.size(), 1, 1) + '% of total'}"></span>
+                                    <span th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[status == 'PASS']) * 100.0 / performances.size(), 1, 1) + '% of total' : '0% of total'}"></span>
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -132,9 +132,9 @@
                                     Failed Students
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" 
-                                     th:text="${performances.stream().filter(p -> p.status == 'FAIL').count()}">0</div>
+                                     th:text="${#lists.size(performances.?[status == 'FAIL'])}">0</div>
                                 <div class="text-xs text-muted">
-                                    <span th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'FAIL').count() * 100.0 / performances.size(), 1, 1) + '% of total'}"></span>
+                                    <span th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[status == 'FAIL']) * 100.0 / performances.size(), 1, 1) + '% of total' : '0% of total'}"></span>
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -154,7 +154,8 @@
                                     Average Performance
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" 
-                                     th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.averageMarks != null).mapToDouble(p -> p.averageMarks).average().orElse(0.0), 1, 2) + '%'}">0%</div>
+                                     th:text="${!#lists.isEmpty(performances.?[averageMarks != null]) ? 
+                                              #numbers.formatDecimal(#aggregates.avg(performances.?[averageMarks != null].![averageMarks]), 1, 2) + '%' : '0%'}">0%</div>
                                 <div class="text-xs text-muted">
                                     Class average marks
                                 </div>
@@ -176,7 +177,8 @@
                                     Average Attendance
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800" 
-                                     th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.attendancePercentage != null).mapToDouble(p -> p.attendancePercentage).average().orElse(0.0), 1, 2) + '%'}">0%</div>
+                                     th:text="${!#lists.isEmpty(performances.?[attendancePercentage != null]) ? 
+                                              #numbers.formatDecimal(#aggregates.avg(performances.?[attendancePercentage != null].![attendancePercentage]), 1, 2) + '%' : '0%'}">0%</div>
                                 <div class="text-xs text-muted">
                                     Class average attendance
                                 </div>
@@ -191,7 +193,7 @@
         </div>
 
         <!-- Grade Distribution -->
-        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+        <div class="row mb-4" th:if="${performances != null && !#lists.isEmpty(performances)}">
             <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header py-3">
@@ -204,10 +206,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-success text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'A').count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == 'A'])}">0</h2>
                                         <small>Grade A</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'A').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == 'A']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -215,10 +217,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'B').count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == 'B'])}">0</h2>
                                         <small>Grade B</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'B').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == 'B']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -226,10 +228,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-warning text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'C').count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == 'C'])}">0</h2>
                                         <small>Grade C</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'C').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == 'C']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -237,10 +239,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-info text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'D').count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == 'D'])}">0</h2>
                                         <small>Grade D</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'D').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == 'D']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -248,10 +250,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-danger text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == 'F').count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == 'F'])}">0</h2>
                                         <small>Grade F</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == 'F').count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == 'F']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -259,10 +261,10 @@
                             <div class="col-md-2 text-center mb-3">
                                 <div class="card bg-secondary text-white">
                                     <div class="card-body">
-                                        <h2 class="mb-0" th:text="${performances.stream().filter(p -> p.grade == null || p.grade.isEmpty()).count()}">0</h2>
+                                        <h2 class="mb-0" th:text="${#lists.size(performances.?[grade == null or grade == ''])}">0</h2>
                                         <small>No Grade</small>
                                         <div class="mt-1">
-                                            <small th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.grade == null || p.grade.isEmpty()).count() * 100.0 / performances.size(), 1, 1) + '%'}">0%</small>
+                                            <small th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[grade == null or grade == '']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -274,7 +276,7 @@
         </div>
 
         <!-- Top Performers and Students Needing Attention -->
-        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+        <div class="row mb-4" th:if="${performances != null && !#lists.isEmpty(performances)}">
             <!-- Top 10 Performers -->
             <div class="col-lg-6">
                 <div class="card shadow">
@@ -296,26 +298,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="student, iterStat : ${performances.stream().filter(p -> p.averageMarks != null).sorted((s1, s2) -> Double.compare(s2.averageMarks, s1.averageMarks)).limit(10).toList()}"
-                                        th:if="${iterStat.index < 10}">
+                                    <tr th:each="student, iterStat : ${performances}" 
+                                        th:if="${student.averageMarks != null && iterStat.index < 10}">
                                         <td>
                                             <span th:text="${iterStat.index + 1}"
                                                   th:class="${iterStat.index == 0 ? 'badge bg-warning' : 
                                                             iterStat.index == 1 ? 'badge bg-secondary' : 
                                                             iterStat.index == 2 ? 'badge bg-info' : 'badge bg-light text-dark'}"></span>
                                         </td>
-                                        <td th:text="${student.rollNumber}"></td>
-                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td th:text="${student.rollNumber ?: 'N/A'}"></td>
+                                        <td th:text="${(student.firstName ?: '') + ' ' + (student.lastName ?: '')}"></td>
                                         <td>
-                                            <span th:text="${#numbers.formatDecimal(student.averageMarks, 1, 2) + '%'}"
+                                            <span th:text="${student.averageMarks != null ? #numbers.formatDecimal(student.averageMarks, 1, 2) + '%' : 'N/A'}"
                                                   class="text-success fw-bold"></span>
                                         </td>
                                         <td>
-                                            <span th:text="${student.grade}"
+                                            <span th:text="${student.grade ?: 'N/A'}"
                                                   th:class="${student.grade == 'A' ? 'badge bg-success' : 
                                                             student.grade == 'B' ? 'badge bg-primary' : 
-                                                            student.grade == 'C' ? 'badge bg-warning' : 'badge bg-info'}"></span>
+                                                            student.grade == 'C' ? 'badge bg-warning' : 
+                                                            student.grade == 'D' ? 'badge bg-info' : 'badge bg-secondary'}"></span>
                                         </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(performances.?[averageMarks != null])}">
+                                        <td colspan="5" class="text-center text-muted">No performance data available</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -345,9 +351,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="student : ${performances.stream().filter(p -> p.status == 'FAIL' || (p.averageMarks != null && p.averageMarks < 50) || (p.attendancePercentage != null && p.attendancePercentage < 60)).limit(10).toList()}">
-                                        <td th:text="${student.rollNumber}"></td>
-                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                    <tr th:each="student, iterStat : ${performances.?[status == 'FAIL' or (averageMarks != null && averageMarks < 50) or (attendancePercentage != null && attendancePercentage < 60)]}" 
+                                        th:if="${iterStat.index < 10}">
+                                        <td th:text="${student.rollNumber ?: 'N/A'}"></td>
+                                        <td th:text="${(student.firstName ?: '') + ' ' + (student.lastName ?: '')}"></td>
                                         <td>
                                             <span th:if="${student.averageMarks != null}" 
                                                   th:text="${#numbers.formatDecimal(student.averageMarks, 1, 2) + '%'}"
@@ -367,6 +374,9 @@
                                                   th:class="${student.status == 'FAIL' ? 'badge bg-danger' : 'badge bg-warning'}"></span>
                                         </td>
                                     </tr>
+                                    <tr th:if="${#lists.isEmpty(performances.?[status == 'FAIL' or (averageMarks != null && averageMarks < 50) or (attendancePercentage != null && attendancePercentage < 60)])}">
+                                        <td colspan="5" class="text-center text-muted">No students needing attention</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -376,7 +386,7 @@
         </div>
 
         <!-- Performance Analysis -->
-        <div class="row mb-4" th:unless="${#lists.isEmpty(performances)}">
+        <div class="row mb-4" th:if="${performances != null && !#lists.isEmpty(performances)}">
             <div class="col-lg-8">
                 <div class="card shadow">
                     <div class="card-header py-3">
@@ -389,11 +399,11 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Excellent Performers (80%+ marks & attendance)</span>
                                 <span class="badge bg-success" 
-                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 80 && p.attendancePercentage >= 80).count()}"></span>
+                                      th:text="${#lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 80 && attendancePercentage >= 80])}">0</span>
                             </div>
                             <div class="progress mt-1" style="height: 10px;">
                                 <div class="progress-bar bg-success" role="progressbar" 
-                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 80 && p.attendancePercentage >= 80).count() * 100.0 / performances.size()} + '%'"></div>
+                                     th:style="'width: ' + ${performances.size() > 0 ? #lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 80 && attendancePercentage >= 80]) * 100.0 / performances.size() : 0} + '%'"></div>
                             </div>
                         </div>
 
@@ -401,11 +411,11 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Good Performers (60-79% marks, 70%+ attendance)</span>
                                 <span class="badge bg-primary" 
-                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 60 && p.averageMarks < 80 && p.attendancePercentage >= 70).count()}"></span>
+                                      th:text="${#lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 60 && averageMarks < 80 && attendancePercentage >= 70])}">0</span>
                             </div>
                             <div class="progress mt-1" style="height: 10px;">
                                 <div class="progress-bar bg-primary" role="progressbar" 
-                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 60 && p.averageMarks < 80 && p.attendancePercentage >= 70).count() * 100.0 / performances.size()} + '%'"></div>
+                                     th:style="'width: ' + ${performances.size() > 0 ? #lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 60 && averageMarks < 80 && attendancePercentage >= 70]) * 100.0 / performances.size() : 0} + '%'"></div>
                             </div>
                         </div>
 
@@ -413,11 +423,11 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Average Performers (40-59% marks, 60%+ attendance)</span>
                                 <span class="badge bg-warning" 
-                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 40 && p.averageMarks < 60 && p.attendancePercentage >= 60).count()}"></span>
+                                      th:text="${#lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 40 && averageMarks < 60 && attendancePercentage >= 60])}">0</span>
                             </div>
                             <div class="progress mt-1" style="height: 10px;">
                                 <div class="progress-bar bg-warning" role="progressbar" 
-                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && p.averageMarks >= 40 && p.averageMarks < 60 && p.attendancePercentage >= 60).count() * 100.0 / performances.size()} + '%'"></div>
+                                     th:style="'width: ' + ${performances.size() > 0 ? #lists.size(performances.?[averageMarks != null && attendancePercentage != null && averageMarks >= 40 && averageMarks < 60 && attendancePercentage >= 60]) * 100.0 / performances.size() : 0} + '%'"></div>
                             </div>
                         </div>
 
@@ -425,11 +435,11 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-bold">Need Improvement (Below 40% marks or 60% attendance)</span>
                                 <span class="badge bg-danger" 
-                                      th:text="${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && (p.averageMarks < 40 || p.attendancePercentage < 60)).count()}"></span>
+                                      th:text="${#lists.size(performances.?[averageMarks != null && attendancePercentage != null && (averageMarks < 40 or attendancePercentage < 60)])}">0</span>
                             </div>
                             <div class="progress mt-1" style="height: 10px;">
                                 <div class="progress-bar bg-danger" role="progressbar" 
-                                     th:style="'width: ' + ${performances.stream().filter(p -> p.averageMarks != null && p.attendancePercentage != null && (p.averageMarks < 40 || p.attendancePercentage < 60)).count() * 100.0 / performances.size()} + '%'"></div>
+                                     th:style="'width: ' + ${performances.size() > 0 ? #lists.size(performances.?[averageMarks != null && attendancePercentage != null && (averageMarks < 40 or attendancePercentage < 60)]) * 100.0 / performances.size() : 0} + '%'"></div>
                             </div>
                         </div>
                     </div>
@@ -445,21 +455,21 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div th:if="${performances.stream().filter(p -> p.status == 'FAIL').count() > performances.size() * 0.3}" 
+                        <div th:if="${#lists.size(performances.?[status == 'FAIL']) > performances.size() * 0.3}" 
                              class="alert alert-danger alert-sm">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>High Failure Rate</strong><br>
                             <small>More than 30% students failing</small>
                         </div>
 
-                        <div th:if="${performances.stream().filter(p -> p.attendancePercentage != null && p.attendancePercentage < 60).count() > performances.size() * 0.2}" 
+                        <div th:if="${#lists.size(performances.?[attendancePercentage != null && attendancePercentage < 60]) > performances.size() * 0.2}" 
                              class="alert alert-warning alert-sm">
                             <i class="fas fa-calendar-times me-2"></i>
                             <strong>Low Attendance</strong><br>
                             <small>20%+ students have poor attendance</small>
                         </div>
 
-                        <div th:if="${performances.stream().filter(p -> p.averageMarks != null && p.averageMarks >= 80).count() > performances.size() * 0.5}" 
+                        <div th:if="${#lists.size(performances.?[averageMarks != null && averageMarks >= 80]) > performances.size() * 0.5}" 
                              class="alert alert-success alert-sm">
                             <i class="fas fa-trophy me-2"></i>
                             <strong>Excellent Performance</strong><br>
@@ -469,9 +479,9 @@
                         <div class="mt-3">
                             <h6 class="text-muted">Quick Stats:</h6>
                             <ul class="list-unstyled small">
-                                <li><i class="fas fa-check text-success me-2"></i>Pass Rate: <strong th:text="${#numbers.formatDecimal(performances.stream().filter(p -> p.status == 'PASS').count() * 100.0 / performances.size(), 1, 1) + '%'}"></strong></li>
-                                <li><i class="fas fa-star text-warning me-2"></i>A Grade: <strong th:text="${performances.stream().filter(p -> p.grade == 'A').count()}"></strong> students</li>
-                                <li><i class="fas fa-exclamation text-danger me-2"></i>At Risk: <strong th:text="${performances.stream().filter(p -> p.averageMarks != null && p.averageMarks < 50).count()}"></strong> students</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Pass Rate: <strong th:text="${performances.size() > 0 ? #numbers.formatDecimal(#lists.size(performances.?[status == 'PASS']) * 100.0 / performances.size(), 1, 1) + '%' : '0%'}">0%</strong></li>
+                                <li><i class="fas fa-star text-warning me-2"></i>A Grade: <strong th:text="${#lists.size(performances.?[grade == 'A'])}">0</strong> students</li>
+                                <li><i class="fas fa-exclamation text-danger me-2"></i>At Risk: <strong th:text="${#lists.size(performances.?[averageMarks != null && averageMarks < 50])}">0</strong> students</li>
                             </ul>
                         </div>
                     </div>
@@ -489,27 +499,27 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row g-3">
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports(reportType='ACADEMIC_PERFORMANCE')}" class="btn btn-outline-primary btn-block">
+                                <a th:href="@{/admin/reports(reportType='ACADEMIC_PERFORMANCE')}" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-chart-line me-2"></i>
                                     Detailed Performance Report
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports/quick/attendance}" class="btn btn-outline-success btn-block">
+                                <a th:href="@{/admin/reports/quick/attendance}" class="btn btn-outline-success w-100">
                                     <i class="fas fa-calendar-check me-2"></i>
                                     Quick Attendance Report
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/marks}" class="btn btn-outline-info btn-block">
+                                <a th:href="@{/admin/marks}" class="btn btn-outline-info w-100">
                                     <i class="fas fa-edit me-2"></i>
                                     Manage Marks
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary btn-block">
+                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary w-100">
                                     <i class="fas fa-arrow-left me-2"></i>
                                     Back to All Reports
                                 </a>
@@ -531,7 +541,7 @@
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
         function exportToExcel() {
             // Create a form to submit export request
             const form = document.createElement('form');
@@ -539,8 +549,8 @@
             form.action = '/admin/reports/export/performance';
             
             // Add filter parameters
-            const department = document.getElementById('department').value;
-            const semester = document.getElementById('semester').value;
+            const department = document.getElementById('department')?.value;
+            const semester = document.getElementById('semester')?.value;
             
             if (department) {
                 const deptInput = document.createElement('input');
@@ -582,8 +592,8 @@
             form.action = '/admin/reports/export/performance';
             
             // Add filter parameters
-            const department = document.getElementById('department').value;
-            const semester = document.getElementById('semester').value;
+            const department = document.getElementById('department')?.value;
+            const semester = document.getElementById('semester')?.value;
             
             if (department) {
                 const deptInput = document.createElement('input');
