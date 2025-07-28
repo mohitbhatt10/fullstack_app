@@ -209,12 +209,12 @@
                             <i class="fas fa-chart-pie me-2"></i>Attendance Status Distribution
                         </h6>
                     </div>
-                    <div class="card-body" th:object="${attendanceReport}">
+                    <div class="card-body" th:object="${attendanceReport}" th:if="${attendanceReport != null && attendanceReport.studentAttendances != null}">
                         <div class="row">
                             <div class="col-md-3 text-center">
                                 <div class="card bg-success text-white">
                                     <div class="card-body">
-                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 90).count()}"></h3>
+                                        <h3 class="mb-0" th:text="${#lists.size(attendanceReport.studentAttendances.?[attendancePercentage != null && attendancePercentage >= 90])}">0</h3>
                                         <small>Excellent (90%+)</small>
                                     </div>
                                 </div>
@@ -222,7 +222,7 @@
                             <div class="col-md-3 text-center">
                                 <div class="card bg-primary text-white">
                                     <div class="card-body">
-                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 75 && s.attendancePercentage < 90).count()}"></h3>
+                                        <h3 class="mb-0" th:text="${#lists.size(attendanceReport.studentAttendances.?[attendancePercentage != null && attendancePercentage >= 75 && attendancePercentage < 90])}">0</h3>
                                         <small>Good (75-89%)</small>
                                     </div>
                                 </div>
@@ -230,7 +230,7 @@
                             <div class="col-md-3 text-center">
                                 <div class="card bg-warning text-white">
                                     <div class="card-body">
-                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage >= 60 && s.attendancePercentage < 75).count()}"></h3>
+                                        <h3 class="mb-0" th:text="${#lists.size(attendanceReport.studentAttendances.?[attendancePercentage != null && attendancePercentage >= 60 && attendancePercentage < 75])}">0</h3>
                                         <small>Average (60-74%)</small>
                                     </div>
                                 </div>
@@ -238,19 +238,22 @@
                             <div class="col-md-3 text-center">
                                 <div class="card bg-danger text-white">
                                     <div class="card-body">
-                                        <h3 class="mb-0" th:text="${attendanceReport.studentAttendances.stream().filter(s -> s.attendancePercentage < 60).count()}"></h3>
+                                        <h3 class="mb-0" th:text="${#lists.size(attendanceReport.studentAttendances.?[attendancePercentage != null && attendancePercentage < 60])}">0</h3>
                                         <small>Poor (Below 60%)</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="card-body text-center text-muted" th:unless="${attendanceReport != null && attendanceReport.studentAttendances != null}">
+                        <p>No attendance data available</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Top 10 Students by Attendance -->
-        <div class="row mb-4">
+        <div class="row mb-4" th:if="${attendanceReport != null && attendanceReport.studentAttendances != null && !#lists.isEmpty(attendanceReport.studentAttendances)}">
             <div class="col-lg-6">
                 <div class="card shadow">
                     <div class="card-header py-3">
@@ -270,20 +273,23 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="student, iterStat : ${attendanceReport.studentAttendances.stream().sorted((s1, s2) -> Double.compare(s2.attendancePercentage, s1.attendancePercentage)).limit(10).toList()}"
-                                        th:if="${iterStat.index < 10}">
+                                    <tr th:each="student, iterStat : ${attendanceReport.studentAttendances}" 
+                                        th:if="${student.attendancePercentage != null && iterStat.index < 10}">
                                         <td>
                                             <span th:text="${iterStat.index + 1}"
                                                   th:class="${iterStat.index == 0 ? 'badge bg-warning' : 
                                                             iterStat.index == 1 ? 'badge bg-secondary' : 
                                                             iterStat.index == 2 ? 'badge bg-info' : 'badge bg-light text-dark'}"></span>
                                         </td>
-                                        <td th:text="${student.rollNumber}"></td>
-                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                        <td th:text="${student.rollNumber ?: 'N/A'}"></td>
+                                        <td th:text="${(student.firstName ?: '') + ' ' + (student.lastName ?: '')}"></td>
                                         <td>
-                                            <span th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
+                                            <span th:text="${student.attendancePercentage != null ? #numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%' : 'N/A'}"
                                                   class="text-success fw-bold"></span>
                                         </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(attendanceReport.studentAttendances)}">
+                                        <td colspan="4" class="text-center text-muted">No student data available</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -312,17 +318,21 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="student : ${attendanceReport.studentAttendances.stream().sorted((s1, s2) -> Double.compare(s1.attendancePercentage, s2.attendancePercentage)).limit(10).toList()}">
-                                        <td th:text="${student.rollNumber}"></td>
-                                        <td th:text="${student.firstName + ' ' + student.lastName}"></td>
+                                    <tr th:each="student, iterStat : ${attendanceReport.studentAttendances}" 
+                                        th:if="${student.attendancePercentage != null && iterStat.index < 10}">
+                                        <td th:text="${student.rollNumber ?: 'N/A'}"></td>
+                                        <td th:text="${(student.firstName ?: '') + ' ' + (student.lastName ?: '')}"></td>
                                         <td>
-                                            <span th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
-                                                  th:class="${student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                            <span th:text="${student.attendancePercentage != null ? #numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%' : 'N/A'}"
+                                                  th:class="${student.attendancePercentage != null && student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
                                         </td>
                                         <td>
-                                            <span th:text="${student.attendancePercentage < 60 ? 'CRITICAL' : 'MONITOR'}"
-                                                  th:class="${student.attendancePercentage < 60 ? 'badge bg-danger' : 'badge bg-warning'}"></span>
+                                            <span th:text="${student.attendancePercentage != null && student.attendancePercentage < 60 ? 'CRITICAL' : 'MONITOR'}"
+                                                  th:class="${student.attendancePercentage != null && student.attendancePercentage < 60 ? 'badge bg-danger' : 'badge bg-warning'}"></span>
                                         </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(attendanceReport.studentAttendances)}">
+                                        <td colspan="4" class="text-center text-muted">No student data available</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -333,7 +343,7 @@
         </div>
 
         <!-- Daily Attendance Trend (Last 7 Days) -->
-        <div class="card shadow" th:if="${attendanceReport.dailyAttendances != null && !#lists.isEmpty(attendanceReport.dailyAttendances)}">
+        <div class="card shadow mb-4" th:if="${attendanceReport != null && attendanceReport.dailyAttendances != null && !#lists.isEmpty(attendanceReport.dailyAttendances)}">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">
                     <i class="fas fa-chart-line me-2"></i>Recent Daily Attendance Trend
@@ -349,21 +359,21 @@
                                 <th>Absent</th>
                                 <th>Total</th>
                                 <th>Attendance %</th>
-                                <th>Trend</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="daily, iterStat : ${attendanceReport.dailyAttendances.stream().sorted((d1, d2) -> d2.date.compareTo(d1.date)).limit(7).toList()}">
-                                <td th:text="${#temporals.format(daily.date, 'MMM dd, yyyy')}"></td>
+                            <tr th:each="daily, iterStat : ${attendanceReport.dailyAttendances}" th:if="${iterStat.index < 7}">
+                                <td th:text="${daily.date != null ? #temporals.format(daily.date, 'MMM dd, yyyy') : 'N/A'}"></td>
                                 <td>
-                                    <span class="badge bg-success" th:text="${daily.presentStudents}"></span>
+                                    <span class="badge bg-success" th:text="${daily.presentStudents ?: 0}"></span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-danger" th:text="${daily.absentStudents}"></span>
+                                    <span class="badge bg-danger" th:text="${daily.absentStudents ?: 0}"></span>
                                 </td>
-                                <td th:text="${daily.totalStudents}"></td>
+                                <td th:text="${daily.totalStudents ?: 0}"></td>
                                 <td>
-                                    <div class="progress" style="height: 25px;">
+                                    <div class="progress" style="height: 25px;" th:if="${daily.attendancePercentage != null}">
                                         <div class="progress-bar" 
                                              th:style="'width: ' + ${daily.attendancePercentage} + '%'"
                                              th:class="${daily.attendancePercentage >= 75 ? 'bg-success' : 
@@ -371,16 +381,20 @@
                                              th:text="${#numbers.formatDecimal(daily.attendancePercentage, 1, 1) + '%'}">
                                         </div>
                                     </div>
+                                    <span th:unless="${daily.attendancePercentage != null}" class="text-muted">N/A</span>
                                 </td>
                                 <td>
-                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage > attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
-                                       class="fas fa-arrow-up text-success" title="Improving"></i>
-                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage < attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
-                                       class="fas fa-arrow-down text-danger" title="Declining"></i>
-                                    <i th:if="${iterStat.index > 0 && daily.attendancePercentage == attendanceReport.dailyAttendances.get(iterStat.index - 1).attendancePercentage}" 
-                                       class="fas fa-minus text-muted" title="Stable"></i>
-                                    <span th:if="${iterStat.index == 0}" class="text-muted">-</span>
+                                    <span th:if="${daily.attendancePercentage != null && daily.attendancePercentage >= 75}" 
+                                          class="badge bg-success">Good</span>
+                                    <span th:if="${daily.attendancePercentage != null && daily.attendancePercentage >= 60 && daily.attendancePercentage < 75}" 
+                                          class="badge bg-warning">Average</span>
+                                    <span th:if="${daily.attendancePercentage != null && daily.attendancePercentage < 60}" 
+                                          class="badge bg-danger">Poor</span>
+                                    <span th:unless="${daily.attendancePercentage != null}" class="text-muted">-</span>
                                 </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(attendanceReport.dailyAttendances)}">
+                                <td colspan="6" class="text-center text-muted">No daily attendance data available</td>
                             </tr>
                         </tbody>
                     </table>
@@ -398,27 +412,27 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row g-3">
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports(reportType='ATTENDANCE_REPORT')}" class="btn btn-outline-primary btn-block">
+                                <a th:href="@{/admin/reports(reportType='ATTENDANCE_REPORT')}" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-chart-bar me-2"></i>
                                     Detailed Attendance Report
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports/quick/performance}" class="btn btn-outline-success btn-block">
+                                <a th:href="@{/admin/reports/quick/performance}" class="btn btn-outline-success w-100">
                                     <i class="fas fa-chart-line me-2"></i>
                                     Quick Performance Report
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/attendance}" class="btn btn-outline-info btn-block">
+                                <a th:href="@{/admin/attendance}" class="btn btn-outline-info w-100">
                                     <i class="fas fa-calendar-check me-2"></i>
                                     Manage Attendance
                                 </a>
                             </div>
                             <div class="col-md-3">
-                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary btn-block">
+                                <a th:href="@{/admin/reports}" class="btn btn-outline-secondary w-100">
                                     <i class="fas fa-arrow-left me-2"></i>
                                     Back to All Reports
                                 </a>
