@@ -6,25 +6,27 @@
 </head>
 <body th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::main})}">
 <main>
-    <div class="container-fluid">
+    <div class="container-fluid px-4">
         <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <div>
                 <h1 class="h3 mb-0 text-gray-800">
                     <i class="fas fa-user-graduate me-2"></i>Student Report
                 </h1>
-                <nav aria-label="breadcrumb">
+                <nav aria-label="breadcrumb" class="mt-2">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a th:href="@{/admin/reports}">Reports</a></li>
-                        <li class="breadcrumb-item active">Student Report</li>
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/admin/reports}" class="text-decoration-none">Reports</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Student Report</li>
                     </ol>
                 </nav>
             </div>
-            <div>
-                <a th:href="@{/admin/reports}" class="btn btn-secondary me-2">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Reports
+            <div class="d-flex flex-wrap gap-2 mt-3 mt-sm-0">
+                <a th:href="@{/admin/reports}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Reports
                 </a>
-                <div class="btn-group">
+                <div class="btn-group" role="group">
                     <form th:action="@{/admin/reports/export/students}" method="post" class="d-inline" th:object="${filter}">
                         <input type="hidden" th:field="*{reportType}">
                         <input type="hidden" th:field="*{department}">
@@ -32,8 +34,8 @@
                         <input type="hidden" th:field="*{courseId}">
                         <input type="hidden" th:field="*{teacherId}">
                         <input type="hidden" name="format" value="EXCEL">
-                        <button type="submit" class="btn btn-success me-1">
-                            <i class="fas fa-file-excel me-2"></i>Export Excel
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-excel me-1"></i>Excel
                         </button>
                     </form>
                     <form th:action="@{/admin/reports/export/students}" method="post" class="d-inline" th:object="${filter}">
@@ -44,91 +46,232 @@
                         <input type="hidden" th:field="*{teacherId}">
                         <input type="hidden" name="format" value="PDF">
                         <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                            <i class="fas fa-file-pdf me-1"></i>PDF
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Filter Summary -->
-        <div class="card mb-4">
+        <!-- Filter Summary Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-filter me-2"></i>Applied Filters
+                </h6>
+            </div>
             <div class="card-body">
-                <h6 class="card-title">Applied Filters:</h6>
-                <div class="row">
-                    <div class="col-md-3" th:if="${filter.department}">
-                        <strong>Department:</strong> <span th:text="${filter.department}"></span>
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6" th:if="${filter != null and filter.department != null and !#strings.isEmpty(filter.department)}">
+                        <div class="d-flex align-items-center">
+                            <strong class="text-dark me-2">Department:</strong>
+                            <span class="badge bg-primary" th:text="${filter.department}"></span>
+                        </div>
                     </div>
-                    <div class="col-md-3" th:if="${filter.semester}">
-                        <strong>Semester:</strong> <span th:text="${filter.semester}"></span>
+                    <div class="col-lg-3 col-md-6" th:if="${filter != null and filter.semester != null and !#strings.isEmpty(filter.semester)}">
+                        <div class="d-flex align-items-center">
+                            <strong class="text-dark me-2">Semester:</strong>
+                            <span class="badge bg-success" th:text="${filter.semester}"></span>
+                        </div>
                     </div>
-                    <div class="col-md-3" th:if="${filter.courseId}">
-                        <strong>Course:</strong> Selected
+                    <div class="col-lg-3 col-md-6" th:if="${filter != null and filter.courseId != null and filter.courseId > 0}">
+                        <div class="d-flex align-items-center">
+                            <strong class="text-dark me-2">Course ID:</strong>
+                            <span class="badge bg-info" th:text="${filter.courseId}"></span>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <strong>Total Students:</strong> <span th:text="${#lists.size(students)}"></span>
+                    <div class="col-lg-3 col-md-6" th:if="${filter != null and filter.teacherId != null and filter.teacherId > 0}">
+                        <div class="d-flex align-items-center">
+                            <strong class="text-dark me-2">Teacher ID:</strong>
+                            <span class="badge bg-warning" th:text="${filter.teacherId}"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="d-flex align-items-center">
+                            <strong class="text-dark me-2">Total Students:</strong>
+                            <span class="badge bg-secondary fs-6" th:text="${students != null ? #lists.size(students) : 0}"></span>
+                        </div>
+                    </div>
+                    <!-- No filters message -->
+                    <div class="col-12" th:if="${filter == null or (
+                        (#strings.isEmpty(filter.department) or filter.department == null) and 
+                        (#strings.isEmpty(filter.semester) or filter.semester == null) and 
+                        (filter.courseId == null or filter.courseId <= 0) and 
+                        (filter.teacherId == null or filter.teacherId <= 0)
+                    )}">
+                        <div class="alert alert-info d-flex align-items-center mb-0" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <div>No filters applied - showing all students</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Students Table -->
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
+        <!-- Summary Statistics Row -->
+        <div class="row g-4 mb-4" th:unless="${students == null or #lists.isEmpty(students)}">
+            <!-- Average Performance Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row g-0 align-items-center">
+                            <div class="col me-2">
+                                <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                    Average Performance
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    <th:block th:with="studentsWithPerformance=${students.?[overallAverage != null]}">
+                                        <span th:if="${!#lists.isEmpty(studentsWithPerformance)}" 
+                                              th:text="${#numbers.formatDecimal(#aggregates.avg(studentsWithPerformance.![overallAverage]), 1, 2) + '%'}"></span>
+                                        <span th:if="${#lists.isEmpty(studentsWithPerformance)}">0.00%</span>
+                                    </th:block>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Attendance Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row g-0 align-items-center">
+                            <div class="col me-2">
+                                <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                    Average Attendance
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">
+                                    <th:block th:with="studentsWithAttendance=${students.?[attendancePercentage != null]}">
+                                        <span th:if="${!#lists.isEmpty(studentsWithAttendance)}" 
+                                              th:text="${#numbers.formatDecimal(#aggregates.avg(studentsWithAttendance.![attendancePercentage]), 1, 2) + '%'}"></span>
+                                        <span th:if="${#lists.isEmpty(studentsWithAttendance)}">0.00%</span>
+                                    </th:block>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Passed Courses Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row g-0 align-items-center">
+                            <div class="col me-2">
+                                <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                    Total Passed Courses
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800" 
+                                     th:text="${#aggregates.sum(students.![passedCourses ?: 0])}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Failed Courses Card -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row g-0 align-items-center">
+                            <div class="col me-2">
+                                <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                    Total Failed Courses
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800" 
+                                     th:text="${#aggregates.sum(students.![failedCourses ?: 0])}">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Data Table -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary">
                     <i class="fas fa-table me-2"></i>Student Details
                 </h6>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="studentsTable">
-                        <thead class="table-dark">
+                <!-- Data Table -->
+                <div class="table-responsive" th:unless="${students == null or #lists.isEmpty(students)}">
+                    <table class="table table-bordered table-hover" id="studentsTable" width="100%" cellspacing="0">
+                        <thead class="table-light">
                             <tr>
-                                <th>Roll Number</th>
+                                <th class="text-center">Roll Number</th>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Department</th>
-                                <th>Semester</th>
-                                <th>Overall Average</th>
-                                <th>Attendance %</th>
-                                <th>Total Courses</th>
-                                <th>Passed</th>
-                                <th>Failed</th>
-                                <th>Grade</th>
-                                <th>Actions</th>
+                                <th class="text-center">Department</th>
+                                <th class="text-center">Semester</th>
+                                <th class="text-center">Performance</th>
+                                <th class="text-center">Attendance</th>
+                                <th class="text-center">Total Courses</th>
+                                <th class="text-center">Passed</th>
+                                <th class="text-center">Failed</th>
+                                <th class="text-center">Grade</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="student : ${students}">
-                                <td th:text="${student.rollNumber}"></td>
-                                <td th:text="${student.firstName + ' ' + student.lastName}"></td>
-                                <td th:text="${student.email}"></td>
+                                <td class="text-center fw-bold" th:text="${student.rollNumber}"></td>
                                 <td>
-                                    <span class="badge bg-info" th:text="${student.department}"></span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <div class="icon-circle bg-primary">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-gray-800" th:text="${student.firstName + ' ' + student.lastName}"></div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td th:text="${student.semester}"></td>
-                                <td>
+                                <td class="text-muted" th:text="${student.email}"></td>
+                                <td class="text-center">
+                                    <span class="badge bg-info text-white" th:text="${student.department}"></span>
+                                </td>
+                                <td class="text-center" th:text="${student.semester}"></td>
+                                <td class="text-center">
                                     <span th:if="${student.overallAverage != null}" 
                                           th:text="${#numbers.formatDecimal(student.overallAverage, 1, 2) + '%'}"
-                                          th:class="${student.overallAverage >= 75 ? 'text-success fw-bold' : 
-                                                    student.overallAverage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                          th:class="${student.overallAverage >= 75 ? 'badge bg-success' : 
+                                                    student.overallAverage >= 60 ? 'badge bg-warning' : 'badge bg-danger'}"></span>
                                     <span th:unless="${student.overallAverage != null}" class="text-muted">N/A</span>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <span th:if="${student.attendancePercentage != null}" 
                                           th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 2) + '%'}"
-                                          th:class="${student.attendancePercentage >= 75 ? 'text-success fw-bold' : 
-                                                    student.attendancePercentage >= 60 ? 'text-warning fw-bold' : 'text-danger fw-bold'}"></span>
+                                          th:class="${student.attendancePercentage >= 75 ? 'badge bg-success' : 
+                                                    student.attendancePercentage >= 60 ? 'badge bg-warning' : 'badge bg-danger'}"></span>
                                     <span th:unless="${student.attendancePercentage != null}" class="text-muted">N/A</span>
                                 </td>
-                                <td th:text="${student.totalCourses ?: 0}"></td>
-                                <td>
+                                <td class="text-center" th:text="${student.totalCourses ?: 0}"></td>
+                                <td class="text-center">
                                     <span class="badge bg-success" th:text="${student.passedCourses ?: 0}"></span>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <span class="badge bg-danger" th:text="${student.failedCourses ?: 0}"></span>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <span th:if="${student.performanceGrade}" 
                                           th:text="${student.performanceGrade}"
                                           th:class="${student.performanceGrade == 'A' ? 'badge bg-success' : 
@@ -137,9 +280,10 @@
                                                     student.performanceGrade == 'D' ? 'badge bg-info' : 'badge bg-danger'}"></span>
                                     <span th:unless="${student.performanceGrade}" class="text-muted">N/A</span>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <a th:href="@{/admin/reports/student/{id}(id=${student.id})}" 
-                                       class="btn btn-sm btn-outline-primary" title="View Detailed Report">
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="View Detailed Report">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -149,109 +293,85 @@
                 </div>
 
                 <!-- No Data Message -->
-                <div th:if="${#lists.isEmpty(students)}" class="text-center py-4">
-                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No students found</h5>
-                    <p class="text-muted">Try adjusting your filters to see more results.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary Statistics -->
-        <div class="row mt-4" th:unless="${#lists.isEmpty(students)}">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card bg-primary text-white shadow">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                    Average Performance
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold" 
-                                     th:text="${#numbers.formatDecimal(students.stream().filter(s -> s.overallAverage != null).mapToDouble(s -> s.overallAverage).average().orElse(0.0), 1, 2) + '%'}">
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-chart-line fa-2x"></i>
-                            </div>
-                        </div>
+                <div th:if="${students == null or #lists.isEmpty(students)}" class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-info-circle fa-4x text-gray-400"></i>
                     </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card bg-success text-white shadow">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                    Average Attendance
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold" 
-                                     th:text="${#numbers.formatDecimal(students.stream().filter(s -> s.attendancePercentage != null).mapToDouble(s -> s.attendancePercentage).average().orElse(0.0), 1, 2) + '%'}">
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-calendar-check fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card bg-info text-white shadow">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                    Total Passed Courses
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold" 
-                                     th:text="${students.stream().mapToInt(s -> s.passedCourses ?: 0).sum()}">
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check-circle fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="card bg-warning text-white shadow">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                    Total Failed Courses
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold" 
-                                     th:text="${students.stream().mapToInt(s -> s.failedCourses ?: 0).sum()}">
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-times-circle fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
+                    <h5 class="text-gray-600 mb-2">No students found</h5>
+                    <p class="text-muted mb-4">Try adjusting your filters to see more results.</p>
+                    <a th:href="@{/admin/reports}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
+    <!-- Custom Styles -->
+    <style>
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
+        }
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
+        }
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        .text-xs {
+            font-size: 0.7rem;
+        }
+        .icon-circle {
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+        .text-gray-400 {
+            color: #c2c7d0 !important;
+        }
+        .text-gray-600 {
+            color: #6c757d !important;
+        }
+        .text-gray-800 {
+            color: #5a5c69 !important;
+        }
+    </style>
+
+    <!-- JavaScript -->
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize DataTable if available
-            if (typeof $ !== 'undefined' && $.fn.DataTable) {
+            // Initialize DataTable if available and there's data
+            if (typeof $ !== 'undefined' && $.fn.DataTable && document.getElementById('studentsTable')) {
                 $('#studentsTable').DataTable({
                     responsive: true,
                     pageLength: 25,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
                     order: [[0, 'asc']],
                     columnDefs: [
-                        { orderable: false, targets: -1 } // Disable sorting on Actions column
-                    ]
+                        { orderable: false, targets: -1 }, // Disable sorting on Actions column
+                        { className: "text-center", targets: [0, 3, 4, 5, 6, 7, 8, 9, 10, 11] }
+                    ],
+                    language: {
+                        search: "Search students:",
+                        searchPlaceholder: "Enter roll number, name, email...",
+                        lengthMenu: "Show _MENU_ students per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ students",
+                        infoEmpty: "No students available",
+                        infoFiltered: "(filtered from _MAX_ total students)",
+                        zeroRecords: "No matching students found"
+                    },
+                    dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                         "<'row'<'col-sm-12'tr>>" +
+                         "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
                 });
             }
         });
