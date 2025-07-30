@@ -11,6 +11,7 @@ public interface UserService extends UserDetailsService {
     UserDTO getUserByUsername(String username);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    boolean existsByPhoneNumber(String phoneNumber);
     com.school.entity.User findEntityByUsername(String username);
     void updateProfilePicture(String username, org.springframework.web.multipart.MultipartFile file);
     boolean changePassword(String username, String oldPassword, String newPassword);

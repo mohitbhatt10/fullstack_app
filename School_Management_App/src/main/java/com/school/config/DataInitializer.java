@@ -33,6 +33,7 @@ public class DataInitializer {
                 admin.setEmail("admin@school.com");
                 admin.setFirstName("System");
                 admin.setLastName("Administrator");
+                admin.setPhoneNumber("1234567890");
                 admin.setRole(UserRole.ADMIN);
                 userRepository.save(admin);
             }
@@ -50,6 +51,7 @@ public class DataInitializer {
                 teacher.setDepartment("CSE");
                 teacher.setDesignation("Professor");
                 teacher.setSpecialization("Software Engineering");
+                teacher.setPhoneNumber("2345678901");
                 teacher = teacherRepository.save(teacher);
             } else {
                 teacher = teacherRepository.findByUsername("teacher")
@@ -69,6 +71,7 @@ public class DataInitializer {
                 student.setDepartment("CSE");
                 student.setSemester(1);
                 student.setRollNumber("CS2025001");
+                student.setPhoneNumber("3456789012");
                 student = studentRepository.save(student);
             } else {
                 student = studentRepository.findByUsername("student")

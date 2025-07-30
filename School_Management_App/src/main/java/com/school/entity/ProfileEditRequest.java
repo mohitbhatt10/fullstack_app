@@ -30,11 +30,17 @@ public class ProfileEditRequest {
     @Column(name = "current_email")
     private String currentEmail;
 
+    @Column(name = "current_phone_number")
+    private String currentPhoneNumber;
+
     @Column(name = "requested_username")
     private String requestedUsername;
 
     @Column(name = "requested_email")
     private String requestedEmail;
+
+    @Column(name = "requested_phone_number")
+    private String requestedPhoneNumber;
 
     @Column(name = "reason", columnDefinition = "TEXT")
     private String reason;

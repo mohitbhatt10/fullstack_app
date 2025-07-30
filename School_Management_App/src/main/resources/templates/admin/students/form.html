@@ -95,6 +95,21 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
+                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneNumber" th:field="*{phoneNumber}" 
+                                   required pattern="^(\+?[1-9]\d{1,14}|\d{10,15})$" 
+                                   placeholder="+1234567890 or 1234567890"
+                                   title="Please enter a valid phone number (10-15 digits, optional country code)">
+                            <div class="small text-muted mt-1">Format: +1234567890 or 1234567890 (10-15 digits)</div>
+                            <div class="text-danger" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Empty column for symmetry -->
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
                             <label for="rollNumber" class="form-label">Roll Number</label>
                             <input type="text" class="form-control" id="rollNumber" th:field="*{rollNumber}" 
                                    required pattern="[A-Z0-9]+" placeholder="e.g., CSE21001"
@@ -206,6 +221,10 @@
                                     <tr>
                                         <th>Email:</th>
                                         <td id="previewEmail"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Phone Number:</th>
+                                        <td id="previewPhoneNumber"></td>
                                     </tr>
                                     <tr>
                                         <th>Username:</th>

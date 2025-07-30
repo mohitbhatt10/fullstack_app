@@ -29,6 +29,11 @@ public class UserDTO {
     @Size(max = 50, message = "Last name cannot exceed 50 characters")
     private String lastName;
 
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^(\\+?[1-9]\\d{1,14}|\\d{10,15})$", 
+             message = "Please provide a valid phone number (10-15 digits, optional country code)")
+    private String phoneNumber;
+
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 

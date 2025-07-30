@@ -115,6 +115,13 @@
                                 <i class="fas fa-arrow-right mx-2 text-primary"></i>
                                 <span class="fw-bold" th:text="${request.requestedEmail}"></span>
                             </div>
+
+                            <div th:if="${request.changingPhoneNumber}" class="change-highlight">
+                                <strong>Phone Number:</strong><br>
+                                <span class="text-muted" th:text="${request.currentPhoneNumber}"></span>
+                                <i class="fas fa-arrow-right mx-2 text-primary"></i>
+                                <span class="fw-bold" th:text="${request.requestedPhoneNumber}"></span>
+                            </div>
                         </div>
                         
                         <div class="mt-3">

@@ -51,6 +51,14 @@
                     <div class="social-links">
                         <div class="social-item">
                             <div class="social-icon">
+                                <i class="fas fa-phone"></i>
+                                Phone
+                            </div>
+                            <div class="social-value" th:text="${user.phoneNumber}">+1234567890</div>
+                        </div>
+                        
+                        <div class="social-item">
+                            <div class="social-icon">
                                 <i class="fas fa-globe"></i>
                                 Website
                             </div>
@@ -103,6 +111,10 @@
                             <tr>
                                 <th>Email</th>
                                 <td th:text="${user.email}">fip@jukmuh.al</td>
+                            </tr>
+                            <tr>
+                                <th>Phone Number</th>
+                                <td th:text="${user.phoneNumber}">+1234567890</td>
                             </tr>
                             <tr>
                                 <th>Username</th>
@@ -234,15 +246,35 @@
                                 <div class="mb-3">
                                     <label for="requestedUsername" class="form-label">Username</label>
                                     <input type="text" class="form-control" id="requestedUsername" 
-                                           name="requestedUsername" th:value="${user.username}" />
+                                           name="requestedUsername" th:value="${user.username}" 
+                                           pattern="^[a-zA-Z0-9._-]+$" 
+                                           title="Username can only contain letters, numbers, dots, underscores and hyphens" />
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="requestedEmail" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="requestedEmail" 
-                                           name="requestedEmail" th:value="${user.email}" />
+                                           name="requestedEmail" th:value="${user.email}" 
+                                           title="Please provide a valid email address" />
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="requestedPhoneNumber" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="requestedPhoneNumber" 
+                                           name="requestedPhoneNumber" th:value="${user.phoneNumber}" 
+                                           pattern="^(\+?[1-9]\d{1,14}|\d{10,15})$"
+                                           placeholder="+1234567890 or 1234567890"
+                                           title="Please enter a valid phone number (10-15 digits, optional country code)" />
+                                    <small class="form-text text-muted">Format: +1234567890 or 1234567890 (10-15 digits)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Empty column for symmetry -->
                             </div>
                         </div>
                         
@@ -254,7 +286,7 @@
                         
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            Your request will be sent to administrators for approval. You will be notified once it's reviewed.
+                            Your request will be sent to administrators for approval. You can change your username, email, and phone number. You will be notified once it's reviewed.
                         </div>
                     </div>
                     
@@ -291,6 +323,68 @@
             container.style.padding = '0';
             container.style.margin = '0';
         });
+        
+        // Phone number validation
+        const phoneInput = document.getElementById('requestedPhoneNumber');
+        const reasonTextarea = document.getElementById('reason');
+        const submitButton = document.querySelector('#editProfileModal button[type="submit"]');
+        
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                const phonePattern = /^(\+?[1-9]\d{1,14}|\d{10,15})$/;
+                if (this.value && !phonePattern.test(this.value)) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else if (this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-invalid', 'is-valid');
+                }
+            });
+        }
+        
+        // Form validation for edit profile modal
+        const editProfileForm = document.querySelector('#editProfileModal form');
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', function(e) {
+                const username = document.getElementById('requestedUsername').value.trim();
+                const email = document.getElementById('requestedEmail').value.trim();
+                const phoneNumber = document.getElementById('requestedPhoneNumber').value.trim();
+                const reason = document.getElementById('reason').value.trim();
+                
+                // Check if any field has been changed
+                const currentUsername = /*[[${user.username}]]*/ '';
+                const currentEmail = /*[[${user.email}]]*/ '';
+                const currentPhoneNumber = /*[[${user.phoneNumber}]]*/ '';
+                
+                const hasChanges = username !== currentUsername || 
+                                 email !== currentEmail || 
+                                 phoneNumber !== currentPhoneNumber;
+                
+                if (!hasChanges) {
+                    e.preventDefault();
+                    alert('Please make at least one change before submitting.');
+                    return;
+                }
+                
+                if (!reason) {
+                    e.preventDefault();
+                    alert('Please provide a reason for the changes.');
+                    document.getElementById('reason').focus();
+                    return;
+                }
+                
+                // Validate phone number format
+                const phonePattern = /^(\+?[1-9]\d{1,14}|\d{10,15})$/;
+                if (phoneNumber && !phonePattern.test(phoneNumber)) {
+                    e.preventDefault();
+                    alert('Please enter a valid phone number format.');
+                    document.getElementById('requestedPhoneNumber').focus();
+                    return;
+                }
+            });
+        }
     });
 </script>
 </body>

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class ProfileEditRequestServiceImpl implements ProfileEditRequestService 
             throw new RuntimeException("You already have a pending profile edit request. Please wait for admin approval.");
         }
 
-        // Check if requested username is available
+        // Check if the requested username is available
         if (!isUsernameAvailableForRequest(requestDTO.getRequestedUsername(), user.getUsername())) {
             throw new RuntimeException("The requested username is already taken or has a pending request.");
         }
@@ -47,12 +48,14 @@ public class ProfileEditRequestServiceImpl implements ProfileEditRequestService 
             throw new RuntimeException("The requested email is already taken or has a pending request.");
         }
 
-        ProfileEditRequest request = new ProfileEditRequest();
+        ProfileEditRequest request  = new ProfileEditRequest();
         request.setUser(user);
         request.setCurrentUsername(user.getUsername());
         request.setCurrentEmail(user.getEmail());
+        request.setCurrentPhoneNumber(user.getPhoneNumber());
         request.setRequestedUsername(requestDTO.getRequestedUsername());
         request.setRequestedEmail(requestDTO.getRequestedEmail());
+        request.setRequestedPhoneNumber(requestDTO.getRequestedPhoneNumber());
         request.setReason(requestDTO.getReason());
         request.setStatus(ProfileEditRequest.RequestStatus.PENDING);
 
@@ -110,6 +113,7 @@ public class ProfileEditRequestServiceImpl implements ProfileEditRequestService 
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProfileEditRequestDTO approveRequest(Long id, String adminUsername, String adminComments) {
         ProfileEditRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Profile edit request not found with ID: " + id));
@@ -125,6 +129,7 @@ public class ProfileEditRequestServiceImpl implements ProfileEditRequestService 
         User user = request.getUser();
         user.setUsername(request.getRequestedUsername());
         user.setEmail(request.getRequestedEmail());
+        user.setPhoneNumber(request.getRequestedPhoneNumber());
         userRepository.save(user);
 
         // Update the request

@@ -55,6 +55,15 @@
                                         </div>
 
                                         <div class="mb-3">
+                                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" id="phoneNumber" th:field="*{teacher.phoneNumber}" 
+                                                   pattern="^(\+?[1-9]\d{1,14}|\d{10,15})$" 
+                                                   placeholder="+1234567890 or 1234567890" 
+                                                   title="Please enter a valid phone number (10-15 digits, optional country code)" required>
+                                            <small class="form-text text-muted">Format: +1234567890 or 1234567890 (10-15 digits)</small>
+                                        </div>
+
+                                        <div class="mb-3">
                                             <label for="department" class="form-label">Department</label>
                                             <input type="text" class="form-control" id="department" th:field="*{teacher.department}" required>
                                         </div>

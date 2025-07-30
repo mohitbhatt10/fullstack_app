@@ -99,25 +99,54 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public List<TeacherDTO> importTeachersFromExcel(org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
         List<TeacherDTO> importedTeachers = new java.util.ArrayList<>();
+        List<String> errors = new java.util.ArrayList<>();
+        
         try (org.apache.poi.ss.usermodel.Workbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(file.getInputStream())) {
             org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0);
             boolean isHeader = true;
+            int rowNum = 0;
+            
             for (org.apache.poi.ss.usermodel.Row row : sheet) {
+                rowNum++;
                 if (isHeader) {
                     isHeader = false;
                     continue; // skip header
                 }
                 if (row == null || row.getCell(0) == null) continue;
-                TeacherDTO teacherDTO = new TeacherDTO();
-                teacherDTO.setFirstName(getCellString(row, 0));
-                teacherDTO.setLastName(getCellString(row, 1));
-                teacherDTO.setEmail(getCellString(row, 2));
-                teacherDTO.setDepartment(getCellString(row, 3));
-                teacherDTO.setDesignation(getCellString(row, 4));
-                teacherDTO.setSpecialization(getCellString(row, 5));
-                teacherDTO.setPassword(row.getCell(6) != null ? getCellString(row, 6) : "password123"); // default password if not provided
-                teacherDTO.setUsername(getCellString(row, 7));
-                importedTeachers.add(createTeacher(teacherDTO));
+                
+                try {
+                    TeacherDTO teacherDTO = new TeacherDTO();
+                    teacherDTO.setFirstName(getCellString(row, 0));
+                    teacherDTO.setLastName(getCellString(row, 1));
+                    teacherDTO.setEmail(getCellString(row, 2));
+                    
+                    // Get phone number and validate if provided
+                    String phoneNumber = getCellString(row, 3);
+                    if (phoneNumber != null && !phoneNumber.isEmpty()) {
+                        String phonePattern = "^(\\+?[1-9]\\d{1,14}|\\d{10,15})$";
+                        if (!phoneNumber.matches(phonePattern)) {
+                            String errorMsg = String.format("Row %d has invalid phone number format '%s', skipping", rowNum, phoneNumber);
+                            errors.add(errorMsg);
+                            continue;
+                        }
+                        teacherDTO.setPhoneNumber(phoneNumber);
+                    }
+                    
+                    teacherDTO.setDepartment(getCellString(row, 4));
+                    teacherDTO.setDesignation(getCellString(row, 5));
+                    teacherDTO.setSpecialization(getCellString(row, 6));
+                    teacherDTO.setPassword(row.getCell(7) != null ? getCellString(row, 7) : "password123"); // default password if not provided
+                    teacherDTO.setUsername(getCellString(row, 8));
+                    
+                    importedTeachers.add(createTeacher(teacherDTO));
+                } catch (Exception e) {
+                    String errorMsg = String.format("Error processing row %d: %s", rowNum, e.getMessage());
+                    errors.add(errorMsg);
+                }
+            }
+            
+            if (!errors.isEmpty() && importedTeachers.isEmpty()) {
+                throw new RuntimeException(String.format("Import failed with errors. First error: %s", errors.get(0)));
             }
         }
         return importedTeachers;
@@ -126,8 +155,10 @@ public class TeacherServiceImpl implements TeacherService {
     private String getCellString(org.apache.poi.ss.usermodel.Row row, int cellNum) {
         org.apache.poi.ss.usermodel.Cell cell = row.getCell(cellNum);
         if (cell == null) return "";
-        cell.setCellType(org.apache.poi.ss.usermodel.CellType.STRING);
-        return cell.getStringCellValue().trim();
+        
+        // Use DataFormatter to get string value without deprecated method
+        org.apache.poi.ss.usermodel.DataFormatter dataFormatter = new org.apache.poi.ss.usermodel.DataFormatter();
+        return dataFormatter.formatCellValue(cell).trim();
     }
 
     @Override

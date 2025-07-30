@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const firstNameInput = document.getElementById('firstName');
     const lastNameInput = document.getElementById('lastName');
     const emailInput = document.getElementById('email');
+    const phoneNumberInput = document.getElementById('phoneNumber');
     const usernameInput = document.getElementById('username');
     const rollNumberInput = document.getElementById('rollNumber');
     const departmentInput = document.getElementById('department');
@@ -56,6 +57,17 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         clearError(emailInput);
+        return true;
+    }
+
+    // Validate phone number
+    function validatePhoneNumber() {
+        const phonePattern = /^(\+?[1-9]\d{1,14}|\d{10,15})$/;
+        if (!phonePattern.test(phoneNumberInput.value)) {
+            showError(phoneNumberInput, 'Please enter a valid phone number (10-15 digits, optional country code)');
+            return false;
+        }
+        clearError(phoneNumberInput);
         return true;
     }
 
@@ -289,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('previewFullName').textContent = 
                 `${firstNameInput.value} ${lastNameInput.value}`;
             document.getElementById('previewEmail').textContent = emailInput.value;
+            document.getElementById('previewPhoneNumber').textContent = phoneNumberInput.value;
             document.getElementById('previewUsername').textContent = usernameInput.value;
             document.getElementById('previewRollNumber').textContent = rollNumberInput.value;
             document.getElementById('previewDepartment').textContent = departmentInput.value;
@@ -303,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (firstNameInput) isValid = validateName(firstNameInput) && isValid;
         if (lastNameInput) isValid = validateName(lastNameInput) && isValid;
         if (emailInput) isValid = validateEmail() && isValid;
+        if (phoneNumberInput) isValid = validatePhoneNumber() && isValid;
         if (usernameInput) isValid = validateUsername() && isValid;
         if (rollNumberInput) isValid = validateRollNumber() && isValid;
         if (departmentInput) isValid = validateDepartment() && isValid;

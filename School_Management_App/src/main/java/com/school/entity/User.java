@@ -1,6 +1,10 @@
 package com.school.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,20 +24,34 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     @Column(nullable = false, unique = true)
     private String username;
 
+    @NotBlank(message = "Password is required")
     @Column(nullable = false)
     private String password;
 
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     @Column(nullable = false)
     private String firstName;
 
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
     @Column(nullable = false)
     private String lastName;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Pattern(regexp = "^(\\+?[1-9]\\d{1,14}|\\d{10,15})$", 
+             message = "Please provide a valid phone number (10-15 digits, optional country code)")
+    @Column(nullable = true, unique = false, length = 20)
+    private String phoneNumber;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

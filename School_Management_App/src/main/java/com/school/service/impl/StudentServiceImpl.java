@@ -236,11 +236,12 @@ public class StudentServiceImpl implements StudentService {
                     String firstName = getCellValueAsString(row, 0, dataFormatter);
                     String lastName = getCellValueAsString(row, 1, dataFormatter);
                     String email = getCellValueAsString(row, 2, dataFormatter);
-                    String username = getCellValueAsString(row, 3, dataFormatter);
-                    String password = getCellValueAsString(row, 4, dataFormatter);
-                    String rollNumber = getCellValueAsString(row, 5, dataFormatter);
-                    String department = getCellValueAsString(row, 6, dataFormatter);
-                    String semesterStr = getCellValueAsString(row, 7, dataFormatter);
+                    String phoneNumber = getCellValueAsString(row, 3, dataFormatter);
+                    String username = getCellValueAsString(row, 4, dataFormatter);
+                    String password = getCellValueAsString(row, 5, dataFormatter);
+                    String rollNumber = getCellValueAsString(row, 6, dataFormatter);
+                    String department = getCellValueAsString(row, 7, dataFormatter);
+                    String semesterStr = getCellValueAsString(row, 8, dataFormatter);
                     
                     // Validate required fields
                     StringBuilder missingFields = new StringBuilder();
@@ -263,10 +264,24 @@ public class StudentServiceImpl implements StudentService {
                         continue;
                     }
                     
+                    // Validate phone number format if provided
+                    if (!ObjectUtils.isEmpty(phoneNumber)) {
+                        String phonePattern = "^(\\+?[1-9]\\d{1,14}|\\d{10,15})$";
+                        if (!phoneNumber.matches(phonePattern)) {
+                            String errorMsg = String.format("Row %d has invalid phone number format '%s', skipping", rowNum, phoneNumber);
+                            logger.warn(errorMsg);
+                            errors.add(errorMsg);
+                            skippedRows++;
+                            rowNum++;
+                            continue;
+                        }
+                    }
+                    
                     // Set student properties
                     studentDTO.setFirstName(firstName);
                     studentDTO.setLastName(lastName);
                     studentDTO.setEmail(email);
+                    studentDTO.setPhoneNumber(!ObjectUtils.isEmpty(phoneNumber) ? phoneNumber : null);
                     studentDTO.setUsername(username);
                     studentDTO.setPassword(password);
                     studentDTO.setRollNumber(rollNumber);

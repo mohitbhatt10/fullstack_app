@@ -24,6 +24,7 @@ public class ProfileEditRequestDTO {
 
     private String currentUsername;
     private String currentEmail;
+    private String currentPhoneNumber;
 
     @NotBlank(message = "Username is required")
     @Size(min = 4, max = 50, message = "Username must be between 4 and 50 characters")
@@ -33,6 +34,11 @@ public class ProfileEditRequestDTO {
     @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
     private String requestedEmail;
+
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^(\\+?[1-9]\\d{1,14}|\\d{10,15})$", 
+             message = "Please provide a valid phone number (10-15 digits, optional country code)")
+    private String requestedPhoneNumber;
 
     @NotBlank(message = "Please provide a reason for this change")
     @Size(max = 1000, message = "Reason cannot exceed 1000 characters")
@@ -75,5 +81,13 @@ public class ProfileEditRequestDTO {
 
     public boolean isChangingEmail() {
         return requestedEmail != null && !requestedEmail.equals(currentEmail);
+    }
+
+    public boolean isChangingPhoneNumber() {
+        return requestedPhoneNumber != null && !requestedPhoneNumber.equals(currentPhoneNumber);
+    }
+
+    public boolean hasAnyChanges() {
+        return isChangingUsername() || isChangingEmail() || isChangingPhoneNumber();
     }
 }

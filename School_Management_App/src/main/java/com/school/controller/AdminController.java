@@ -166,7 +166,7 @@ public class AdminController {
             
             // Create header row
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"First Name", "Last Name", "Email", "Username", "Password", "Roll Number", "Department", "Semester"};
+            String[] headers = {"First Name", "Last Name", "Email", "Phone Number", "Username", "Password", "Roll Number", "Department", "Semester"};
             
             // Create cell style for header
             CellStyle headerStyle = workbook.createCellStyle();
@@ -187,11 +187,12 @@ public class AdminController {
             sampleRow.createCell(0).setCellValue("John");
             sampleRow.createCell(1).setCellValue("Doe");
             sampleRow.createCell(2).setCellValue("john.doe@example.com");
-            sampleRow.createCell(3).setCellValue("johndoe");
-            sampleRow.createCell(4).setCellValue("password123");
-            sampleRow.createCell(5).setCellValue("CSE001");
-            sampleRow.createCell(6).setCellValue("CSE");
-            sampleRow.createCell(7).setCellValue(1);
+            sampleRow.createCell(3).setCellValue("+1234567890");
+            sampleRow.createCell(4).setCellValue("johndoe");
+            sampleRow.createCell(5).setCellValue("password123");
+            sampleRow.createCell(6).setCellValue("CSE001");
+            sampleRow.createCell(7).setCellValue("CSE");
+            sampleRow.createCell(8).setCellValue(1);
             
             // Write workbook to response
             workbook.write(response.getOutputStream());
@@ -403,7 +404,7 @@ public class AdminController {
 
             // Create header row
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"First Name", "Last Name", "Email", "Department", "Designation", "Specialization", "Password", "Username"};
+            String[] headers = {"First Name", "Last Name", "Email", "Phone Number", "Department", "Designation", "Specialization", "Password", "Username"};
 
             // Create cell style for header
             CellStyle headerStyle = workbook.createCellStyle();
@@ -424,11 +425,12 @@ public class AdminController {
             sampleRow.createCell(0).setCellValue("Charlie");
             sampleRow.createCell(1).setCellValue("Roots");
             sampleRow.createCell(2).setCellValue("charlieR@example.com");
-            sampleRow.createCell(3).setCellValue("CSE");
-            sampleRow.createCell(4).setCellValue("Professor");
-            sampleRow.createCell(5).setCellValue("Artificial Intelligence");
-            sampleRow.createCell(6).setCellValue("Password@123");
-            sampleRow.createCell(7).setCellValue("charlieR");
+            sampleRow.createCell(3).setCellValue("+1987654321");
+            sampleRow.createCell(4).setCellValue("CSE");
+            sampleRow.createCell(5).setCellValue("Professor");
+            sampleRow.createCell(6).setCellValue("Artificial Intelligence");
+            sampleRow.createCell(7).setCellValue("Password@123");
+            sampleRow.createCell(8).setCellValue("charlieR");
 
             // Write workbook to response
             workbook.write(response.getOutputStream());

@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const teacherForm = document.getElementById('teacherForm');
     const emailInput = document.getElementById('email');
+    const phoneNumberInput = document.getElementById('phoneNumber');
     const emailDomainSelect = document.getElementById('emailDomainSelect');
     const passwordInput = document.getElementById('password');
     const generatePasswordBtn = document.getElementById('generate-password');
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
             const username = document.getElementById('username').value;
             const department = document.getElementById('department').value;
             const designation = document.getElementById('designation').value;
@@ -139,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             document.getElementById('previewFullName').textContent = `${firstName} ${lastName}`;
             document.getElementById('previewEmail').textContent = email;
+            document.getElementById('previewPhoneNumber').textContent = phoneNumber;
             document.getElementById('previewUsername').textContent = username;
             document.getElementById('previewDepartment').textContent = department;
             document.getElementById('previewDesignation').textContent = designation;
@@ -163,6 +166,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.setCustomValidity('Please enter a valid email address');
                 } else {
                     this.setCustomValidity('');
+                }
+            });
+        }
+
+        // Custom validation for phone number
+        if (phoneNumberInput) {
+            phoneNumberInput.addEventListener('input', function() {
+                const phonePattern = /^(\+?[1-9]\d{1,14}|\d{10,15})$/;
+                if (this.value && !phonePattern.test(this.value)) {
+                    this.setCustomValidity('Please enter a valid phone number (10-15 digits, optionally starting with +)');
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else if (this.value) {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid', 'is-valid');
                 }
             });
         }
