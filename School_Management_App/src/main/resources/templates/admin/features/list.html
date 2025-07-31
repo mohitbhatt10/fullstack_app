@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::section})}">
+<head>
+    <title>Feature Management - School Management System</title>
+</head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-toggle-on me-2"></i>Feature Management
+        </h2>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Feature Switches Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-cogs me-2"></i>System Features
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">
+                                <i class="fas fa-tag me-1"></i>Feature Name
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-info-circle me-1"></i>Description
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-calendar me-1"></i>Created Date
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-user me-1"></i>Last Updated By
+                            </th>
+                            <th scope="col">
+                                <i class="fas fa-clock me-1"></i>Updated Date
+                            </th>
+                            <th scope="col" class="text-center">
+                                <i class="fas fa-toggle-on me-1"></i>Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="feature : ${features}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i th:if="${feature.featureKey == 'TWO_FACTOR_AUTH'}" class="fas fa-shield-alt text-primary me-2"></i>
+                                    <i th:if="${feature.featureKey == 'EMAIL_NOTIFICATIONS'}" class="fas fa-envelope text-info me-2"></i>
+                                    <i th:if="${feature.featureKey == 'SMS_NOTIFICATIONS'}" class="fas fa-sms text-success me-2"></i>
+                                    <div>
+                                        <strong th:text="${feature.featureName}">Feature Name</strong>
+                                        <br>
+                                        <small class="text-muted" th:text="${feature.featureKey}">FEATURE_KEY</small>
+                                        <div th:if="${feature.featureKey == 'TWO_FACTOR_AUTH'}" class="mt-1">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-shield-alt me-1"></i>Security Feature
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted" th:text="${feature.description}">Feature description</small>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(feature.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</small>
+                            </td>
+                            <td>
+                                <span th:if="${feature.updatedBy}" th:text="${feature.updatedBy}" class="fw-bold">admin</span>
+                                <span th:unless="${feature.updatedBy}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <small th:if="${feature.updatedAt}" th:text="${#temporals.format(feature.updatedAt, 'MMM dd, yyyy')}">Jan 01, 2024</small>
+                                <span th:unless="${feature.updatedAt}" class="text-muted">-</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex flex-column align-items-center">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               th:id="'switch-' + ${feature.featureKey}"
+                                               th:checked="${feature.enabled}"
+                                               th:data-feature-key="${feature.featureKey}"
+                                               onchange="toggleFeature(this)">
+                                        <label class="form-check-label" th:for="'switch-' + ${feature.featureKey}">
+                                        </label>
+                                    </div>
+                                    <span th:text="${feature.enabled} ? 'Enabled' : 'Disabled'" 
+                                          th:class="${feature.enabled} ? 'badge bg-success' : 'badge bg-secondary'">Status</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- End of Feature Switches Card -->
+    <script>
+        function toggleFeature(checkbox) {
+            const featureKey = checkbox.dataset.featureKey;
+            const isEnabled = checkbox.checked;
+            
+            console.log('Toggling feature:', featureKey, 'to:', isEnabled);
+            
+            // Show loading state
+            checkbox.disabled = true;
+            const statusBadge = checkbox.closest('td').querySelector('.badge');
+            const originalText = statusBadge.textContent;
+            const originalClass = statusBadge.className;
+            statusBadge.textContent = 'Updating...';
+            statusBadge.className = 'badge bg-warning';
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            // Send toggle request
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            fetch(`/admin/features/${featureKey}/toggle`, {
+                method: 'POST',
+                headers: headers
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (response.ok) {
+                    // Update UI
+                    statusBadge.textContent = isEnabled ? 'Enabled' : 'Disabled';
+                    statusBadge.className = isEnabled ? 'badge bg-success' : 'badge bg-secondary';
+                    
+                    // Show success message
+                    showAlert('success', `Feature ${isEnabled ? 'enabled' : 'disabled'} successfully!`);
+                } else {
+                    // Log the response for debugging
+                    response.text().then(text => {
+                        console.error('Error response:', text);
+                    });
+                    
+                    // Revert checkbox state
+                    checkbox.checked = !isEnabled;
+                    statusBadge.textContent = originalText;
+                    statusBadge.className = originalClass;
+                    showAlert('danger', `Failed to toggle feature. Status: ${response.status}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Revert checkbox state
+                checkbox.checked = !isEnabled;
+                statusBadge.textContent = originalText;
+                statusBadge.className = originalClass;
+                showAlert('danger', 'Network error. Please try again.');
+            })
+            .finally(() => {
+                checkbox.disabled = false;
+            });
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert at the top of the section
+            const section = document.querySelector('section');
+            const firstChild = section.children[1]; // After the header
+            section.insertBefore(alertDiv, firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</section>
+</body>
+</html>

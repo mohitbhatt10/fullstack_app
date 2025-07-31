@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Two-Factor Authentication - School Management System</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid vh-100">
+        <div class="row h-100">
+            <!-- Left side - Image/Branding -->
+            <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-primary">
+                <div class="text-center text-white">
+                    <h1 class="display-4 mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                    </h1>
+                    <h2 class="mb-3">Secure Authentication</h2>
+                    <p class="lead">We've sent a verification code to your registered mobile number for enhanced security.</p>
+                </div>
+            </div>
+            
+            <!-- Right side - 2FA Form -->
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div class="w-100" style="max-width: 400px;">
+                    <div class="text-center mb-4">
+                        <h3>Two-Factor Authentication</h3>
+                        <p class="text-muted">Enter the 6-digit code sent to</p>
+                        <p class="fw-bold" th:text="${phoneNumber}">****1234</p>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${error}">Error message</span>
+                    </div>
+
+                    <!-- 2FA Form -->
+                    <form th:action="@{/auth/2fa/verify}" method="post" id="otpForm">
+                        <div class="mb-4">
+                            <label for="otpCode" class="form-label">Verification Code</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="otpCode" name="otpCode" 
+                                   placeholder="000000" 
+                                   pattern="[0-9]{6}" 
+                                   maxlength="6" 
+                                   required autofocus>
+                            <div class="form-text">Enter the 6-digit code from your SMS</div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg" id="verifyBtn">
+                                <i class="fas fa-check me-2"></i>Verify Code
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Resend OTP -->
+                    <div class="text-center">
+                        <p class="mb-2">Didn't receive the code?</p>
+                        <button type="button" class="btn btn-link" id="resendBtn">
+                            <i class="fas fa-sync-alt me-1"></i>Resend Code
+                        </button>
+                        <div id="resendTimer" class="text-muted small mt-1" style="display: none;">
+                            Resend available in <span id="countdown">60</span> seconds
+                        </div>
+                    </div>
+
+                    <!-- Back to Login -->
+                    <div class="text-center mt-4">
+                        <a th:href="@{/login}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInput = document.getElementById('otpCode');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const resendBtn = document.getElementById('resendBtn');
+            const resendTimer = document.getElementById('resendTimer');
+            const countdown = document.getElementById('countdown');
+            let resendTimeout = 60;
+            let resendInterval;
+
+            // Auto-format OTP input
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) {
+                    verifyBtn.focus();
+                }
+            });
+
+            // Auto-submit when 6 digits entered
+            otpInput.addEventListener('keyup', function(e) {
+                if (this.value.length === 6 && e.key !== 'Backspace') {
+                    document.getElementById('otpForm').submit();
+                }
+            });
+
+            // Resend OTP functionality
+            resendBtn.addEventListener('click', function() {
+                this.disabled = true;
+                verifyBtn.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
+
+                fetch('/auth/2fa/resend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data === 'success') {
+                        showAlert('success', 'Verification code sent successfully!');
+                        startResendTimer();
+                    } else if (data === 'session_expired') {
+                        showAlert('danger', 'Session expired. Please login again.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                    } else {
+                        showAlert('danger', 'Failed to send verification code. Please try again.');
+                        this.disabled = false;
+                        verifyBtn.disabled = false;
+                        this.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Resend Code';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Network error. Please try again.');
+                    this.disabled = false;
+                    verifyBtn.disabled = false;
+                    this.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Resend Code';
+                });
+            });
+
+            function startResendTimer() {
+                resendBtn.style.display = 'none';
+                resendTimer.style.display = 'block';
+                resendTimeout = 60;
+                countdown.textContent = resendTimeout;
+
+                resendInterval = setInterval(function() {
+                    resendTimeout--;
+                    countdown.textContent = resendTimeout;
+
+                    if (resendTimeout <= 0) {
+                        clearInterval(resendInterval);
+                        resendTimer.style.display = 'none';
+                        resendBtn.style.display = 'inline-block';
+                        resendBtn.disabled = false;
+                        verifyBtn.disabled = false;
+                        resendBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Resend Code';
+                    }
+                }, 1000);
+            }
+
+            function showAlert(type, message) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                const form = document.getElementById('otpForm');
+                form.parentNode.insertBefore(alertDiv, form);
+                
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+
+            // Start initial resend timer
+            startResendTimer();
+        });
+    </script>
+</section>
+</body>
+</html>
