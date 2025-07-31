@@ -72,8 +72,8 @@ public class OtpServiceImpl implements OtpService {
         }
         
         // Mark as verified
-        otpRepository.markAsVerified(otp.getId(), LocalDateTime.now());
-        log.info("OTP verified successfully for phone: {}", phoneNumber);
+        //otpRepository.markAsVerified(otp.getId(), LocalDateTime.now());
+        //log.info("OTP verified successfully for phone: {}", phoneNumber);
         return true;
     }
 
@@ -94,6 +94,8 @@ public class OtpServiceImpl implements OtpService {
         
         OtpVerification otp = latestOtpOpt.get();
         otp.setSessionToken(sessionToken);
+        otp.setVerified(true);
+        otp.setVerifiedAt(LocalDateTime.now());
         otpRepository.save(otp);
         
         log.info("Verification session created for phone: {}", phoneNumber);

@@ -19,10 +19,14 @@ public class SecurityConfig {
 
     private final UserService userService;
     private final PasswordConfig passwordConfig;
+    private final TwoFactorAuthenticationSuccessHandler twoFactorAuthenticationSuccessHandler;
 
-    public SecurityConfig(UserService userService, PasswordConfig passwordConfig) {
+    public SecurityConfig(UserService userService, 
+                         PasswordConfig passwordConfig,
+                         TwoFactorAuthenticationSuccessHandler twoFactorAuthenticationSuccessHandler) {
         this.userService = userService;
         this.passwordConfig = passwordConfig;
+        this.twoFactorAuthenticationSuccessHandler = twoFactorAuthenticationSuccessHandler;
     }
 
     @Bean
@@ -50,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/home","/forgot-password","/reset-password").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/login", "/login-error").permitAll()
+                .requestMatchers("/auth/2fa", "/auth/2fa/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/teacher/**").hasRole("TEACHER")
                 .requestMatchers("/student/**").hasRole("STUDENT")
@@ -58,7 +63,7 @@ public class SecurityConfig {
             .formLogin((form) -> form
                 .loginPage("/login")
                 .failureUrl("/login-error")
-                .defaultSuccessUrl("/", true)
+                .successHandler(twoFactorAuthenticationSuccessHandler)
                 .permitAll()
             )
             .logout((logout) -> logout
