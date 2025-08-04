@@ -3,6 +3,7 @@ package com.school.service.impl;
 import com.school.entity.OtpVerification;
 import com.school.repository.OtpVerificationRepository;
 import com.school.service.OtpService;
+import com.school.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class OtpServiceImpl implements OtpService {
 
     private final OtpVerificationRepository otpRepository;
+    private final SmsService smsService;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
@@ -138,12 +140,34 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private void sendSms(String phoneNumber, String otpCode) {
-        // TODO: Integrate with actual SMS service (Twilio, AWS SNS, etc.)
-        // For now, just log the SMS content
-        String message = String.format("Your School Management System verification code is: %s. This code will expire in 5 minutes.", otpCode);
-        log.info("SMS sent to {}: {}", phoneNumber, message);
+        String message = String.format(
+            "Your School Management System verification code is: %s. This code will expire in 5 minutes. Do not share this code with anyone.",
+            otpCode
+        );
         
-        // In production, replace this with actual SMS service integration:
-        // smsService.sendSms(phoneNumber, message);
+        try {
+            boolean sent = smsService.sendSms(phoneNumber, message);
+            
+            if (sent) {
+                log.info("SMS sent successfully to: {}", maskPhoneNumber(phoneNumber));
+            } else {
+                log.warn("Failed to send SMS to: {}", maskPhoneNumber(phoneNumber));
+                // In production, you might want to throw an exception or implement retry logic
+            }
+            
+        } catch (Exception e) {
+            log.error("Error sending SMS to {}: {}", maskPhoneNumber(phoneNumber), e.getMessage());
+            // In production, you might want to implement fallback mechanisms
+            // For now, we'll just log the error and continue
+        }
+    }
+    
+    private String maskPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.length() < 4) {
+            return "****";
+        }
+        
+        String lastFour = phoneNumber.substring(phoneNumber.length() - 4);
+        return "****" + lastFour;
     }
 }

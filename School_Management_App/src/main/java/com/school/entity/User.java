@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Password is required")
     @Column(nullable = false)
+    @ToString.Exclude
     private String password;
 
     @NotBlank(message = "First name is required")
@@ -62,6 +64,7 @@ public class User implements UserDetails {
 
     @Lob
     @Column(name = "profile_picture", columnDefinition="MEDIUMBLOB")
+    @ToString.Exclude
     private byte[] profilePicture;
 
     @Column(name = "profile_picture_content_type")
