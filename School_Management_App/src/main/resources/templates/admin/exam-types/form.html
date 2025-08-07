@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::section})}">
 <head>
     <title th:text="${examType.id != null ? 'Edit Exam Type' : 'Add New Exam Type'} + ' - School Management System'">Exam Type Form - School Management System</title>
 </head>

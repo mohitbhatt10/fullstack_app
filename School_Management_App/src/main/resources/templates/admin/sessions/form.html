@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+      th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::section})}">
 <head>
     <title th:text="${academicSession.id == null ? 'Create Session' : 'Edit Session'}">Session Form</title>
 </head>

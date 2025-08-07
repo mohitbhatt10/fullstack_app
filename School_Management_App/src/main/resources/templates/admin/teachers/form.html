@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::title}, ~{::#content})}">
+      th:replace="~{admin-layout :: adminLayout(~{::title}, ~{::#content})}">
 <head>
     <title th:text="${teacher.id == null ? 'Add New Teacher' : 'Edit Teacher'}">Teacher Form</title>
 </head>
