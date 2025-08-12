@@ -142,6 +142,20 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Public About Navigation -->
+                <ul class="navbar-nav me-auto" sec:authorize="!isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-info-circle me-1"></i> About
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/about/admin}"><i class="fas fa-user-shield me-2"></i> Admin Portal</a></li>
+                            <li><a class="dropdown-item" th:href="@{/about/teacher}"><i class="fas fa-chalkboard-teacher me-2"></i> Teacher Portal</a></li>
+                            <li><a class="dropdown-item" th:href="@{/about/student}"><i class="fas fa-user-graduate me-2"></i> Student Portal</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
                 <!-- Admin Navigation -->
                 <ul class="navbar-nav me-auto" sec:authorize="hasRole('ADMIN')">
                     <li class="nav-item dropdown">
