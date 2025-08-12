@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,6 +71,40 @@ public class TeacherController {
         model.addAttribute("recentAttendance", recentAttendance);
         model.addAttribute("recentMarks", recentMarks);
         
+        // Today's schedules for quick attendance
+        try {
+            Long teacherId = teacherService.getTeacherByUsername(username).getId();
+            LocalDate today = LocalDate.now();
+            DayOfWeek day = today.getDayOfWeek();
+            List<CourseScheduleDTO> schedulesToday = courseScheduleService.getSchedulesByTeacherForDay(teacherId, day);
+            // Build view models with attendance status
+            List<com.school.dto.TeacherTodayScheduleDTO> todayItems = new ArrayList<>();
+            for (CourseScheduleDTO s : schedulesToday) {
+                AttendanceSummaryDTO summary = attendanceService.getAttendanceSummaryByScheduleAndDate(s.getId(), today);
+                boolean hasAttendance = summary != null && summary.getTotalCount() != null && summary.getTotalCount() > 0;
+                String scheduleInfo = String.format("%s %s-%s (%s)", s.getDayOfWeek(),
+                        s.getStartTime(), s.getEndTime(), s.getClassroom());
+                todayItems.add(com.school.dto.TeacherTodayScheduleDTO.builder()
+                        .scheduleId(s.getId())
+                        .courseId(s.getCourseId())
+                        .courseName(s.getCourseName())
+                        .courseCode(s.getCourseCode())
+                        .classroom(s.getClassroom())
+                        .startTime(s.getStartTime())
+                        .endTime(s.getEndTime())
+                        .scheduleInfo(scheduleInfo)
+                        .hasAttendance(hasAttendance)
+                        .date(today)
+                        .presentCount(summary != null ? summary.getPresentCount() : null)
+                        .totalCount(summary != null ? summary.getTotalCount() : null)
+                        .build());
+            }
+            model.addAttribute("todaySchedules", todayItems);
+        } catch (Exception e) {
+            logger.warn("Failed to load today's schedules for teacher {}: {}", username, e.getMessage());
+            model.addAttribute("todaySchedules", Collections.emptyList());
+        }
+        
         return "teacher/dashboard";
     }
 
@@ -83,11 +118,20 @@ public class TeacherController {
     }
 
     @GetMapping("/courses/{courseId}/attendance/form")
-    public String showAttendanceForm(@PathVariable Long courseId, Model model) {
+    public String showAttendanceForm(@PathVariable Long courseId, Model model,
+                                     @RequestParam(value = "scheduleId", required = false) Long preselectedScheduleId,
+                                     @RequestParam(value = "date", required = false) String preselectedDate)
+    {
         model.addAttribute("course", courseService.getCourseById(courseId));
         model.addAttribute("students", studentService.getStudentsByCourseId(courseId));
         model.addAttribute("attendance", new AttendanceDTO());
         model.addAttribute("schedules", courseScheduleService.getSchedulesByCourseId(courseId));
+        if (preselectedScheduleId != null) {
+            model.addAttribute("selectedScheduleId", preselectedScheduleId);
+        }
+        if (preselectedDate != null && !preselectedDate.isBlank()) {
+            model.addAttribute("preselectedDate", preselectedDate);
+        }
         
         // Add attendance window information
         LocalDate today = LocalDate.now();
@@ -101,9 +145,7 @@ public class TeacherController {
     
     @GetMapping("/courses/{courseId}/attendance")
     public String viewCourseAttendance(@PathVariable Long courseId, Model model, Principal principal) {
-        // Get the current authenticated teacher's username
-        String username = principal.getName();
-        
+    // Get course attendance view
         // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
         
@@ -428,9 +470,6 @@ public class TeacherController {
 
     @GetMapping("/courses/{courseId}/marks")
     public String viewCourseMarks(@PathVariable Long courseId, Model model, Principal principal) {
-        // Get the current authenticated teacher's username
-        String username = principal.getName();
-
         // Get course details
         model.addAttribute("course", courseService.getCourseById(courseId));
 

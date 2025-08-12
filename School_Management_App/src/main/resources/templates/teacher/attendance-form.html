@@ -145,32 +145,40 @@
                         <i class="bi bi-exclamation-triangle-fill"></i> Please select a valid date before marking attendance.
                     </div>
                     
-                    <script>
+                    <script th:inline="javascript">
                         // Set values when document loads
                         document.addEventListener('DOMContentLoaded', function() {
                             const courseIdHidden = document.querySelector("input[name='courseId'][type='hidden']:not(#courseId)").value;
-                            
-                            // Set the course ID in the hidden field
                             document.getElementById('courseId').value = courseIdHidden;
-                            
-                            // Clear date input and initialize as empty
-                            const dateInput = document.getElementById('attendanceDate');
-                            dateInput.value = '';
-                            document.getElementById('dateInput').value = '';
-                            
-                            // Initialize state variables - nothing is selected yet
+
+                            // Read preselected date injected from controller (Thymeleaf inlines value or leaves fallback '')
+                            const preselectedDate = /*[[${preselectedDate}]]*/ '';
+                            // If Thymeleaf did not inline (fallback), try reading from URL param
+                            let effectivePreselectedDate = preselectedDate;
+                            if (!effectivePreselectedDate) {
+                                const urlParams = new URLSearchParams(window.location.search);
+                                effectivePreselectedDate = urlParams.get('date') || '';
+                            }
+
+                            // Normalise date format (expect yyyy-MM-dd)
+                            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                            if (effectivePreselectedDate && !dateRegex.test(effectivePreselectedDate)) {
+                                effectivePreselectedDate = '';
+                            }
+
+                            // Store globally for initial schedule handling
+                            window.__initialPreselectedDate = effectivePreselectedDate;
+
+                            // Initialize state variables first
                             isScheduleSelected = false;
                             isValidDateSelected = false;
-                            
-                            // Initialize the form as disabled
                             disableAttendanceElements(true);
-                            
-                            // Check if there's a pre-selected schedule
+
                             const scheduleSelect = document.getElementById('scheduleSelect');
                             if (scheduleSelect.value) {
-                                // Handle schedule change but don't auto-select date
                                 isScheduleSelected = true;
-                                handleScheduleChange();
+                                // Pass flag to preserve preselected date
+                                handleScheduleChange(true);
                             }
                         });
                         
@@ -195,7 +203,7 @@
                         }
                         
                         // Function to handle schedule change
-                        function handleScheduleChange() {
+                        function handleScheduleChange(isInitialLoad = false) {
                             const scheduleSelect = document.getElementById('scheduleSelect');
                             const scheduleValue = scheduleSelect.value;
                             document.getElementById('scheduleIdInput').value = scheduleValue;
@@ -214,9 +222,21 @@
                                 // Get the day of week from the selected schedule
                                 const selectedOption = scheduleSelect.options[scheduleSelect.selectedIndex];
                                 const dayOfWeek = selectedOption.getAttribute('data-day-of-week');
-                                
-                                // Setup date constraints and validation for this schedule
-                                findMatchingDates(dayOfWeek);
+                                // Setup date constraints and validation for this schedule; preserve date on initial load
+                                const dayIndex = findMatchingDates(dayOfWeek, isInitialLoad);
+
+                                // Attempt to auto-populate & validate preselected date only on initial load
+                                if (isInitialLoad && window.__initialPreselectedDate) {
+                                    const dateInput = document.getElementById('attendanceDate');
+                                    dateInput.value = window.__initialPreselectedDate;
+                                    document.getElementById('dateInput').value = window.__initialPreselectedDate;
+                                    // Validate silently; then load students if valid
+                                    validateDateSelection(dateInput, dayIndex).then(valid => {
+                                        if (valid) {
+                                            validateAndLoadStudents();
+                                        }
+                                    });
+                                }
                                 
                                 // Make date field look required
                                 dateInput.classList.add('required-field');
@@ -235,12 +255,14 @@
                         }
                         
                         // Function to setup date validation for the selected schedule
-                        function findMatchingDates(dayOfWeekStr) {
+                        function findMatchingDates(dayOfWeekStr, preserveCurrent = false) {
                             const dateInput = document.getElementById('attendanceDate');
                             const today = new Date();
-                            
-                            // Clear any previous date selection
-                            dateInput.value = '';
+                            const previousValue = dateInput.value;
+                            if (!preserveCurrent) {
+                                // Clear any previous date selection unless preserving
+                                dateInput.value = '';
+                            }
                             
                             // Set max date to today (no future dates)
                             const formattedToday = formatDate(today);
@@ -258,11 +280,11 @@
                             // Store the day of week index as a data attribute for validation
                             dateInput.setAttribute('data-day-index', dayOfWeekIndex);
                             
-                            // Reset date validity flag - user must explicitly select a date
-                            isValidDateSelected = false;
-                            
-                            // Clear hidden date input
-                            document.getElementById('dateInput').value = '';
+                            // Reset date validity flag unless preserving and value still matches constraints
+                            if (!(preserveCurrent && previousValue)) {
+                                isValidDateSelected = false;
+                                document.getElementById('dateInput').value = '';
+                            }
                             
                             // Update UI to reflect that date selection is required
                             updateAttendanceUI();
@@ -279,14 +301,20 @@
                             // Re-add the onchange handler
                             newDateInput.onchange = validateAndLoadStudents;
                             
-                            // Show a hint about which day to select
-                            document.getElementById('dateHelperText').innerHTML = 
-                                `Please select any <strong>${getDayName(dayOfWeekIndex)}</strong> from current or previous months (up to 6 months ago)`;
+                            // Show a hint about which day to select (or that it was auto-selected)
+                            const helper = document.getElementById('dateHelperText');
+                            if (preserveCurrent && previousValue) {
+                                helper.innerHTML = `Auto-selected <strong>${previousValue}</strong>. Change if you need another <strong>${getDayName(dayOfWeekIndex)}</strong>.`;
+                            } else {
+                                helper.innerHTML = `Please select any <strong>${getDayName(dayOfWeekIndex)}</strong> from current or previous months (up to 6 months ago)`;
+                            }
                             
                             // Update date warning
                             document.getElementById('dateWarning').innerHTML = 
                                 `<i class="bi bi-exclamation-triangle-fill"></i> Please select a <strong>${getDayName(dayOfWeekIndex)}</strong> date before marking attendance.`;
-                            document.getElementById('dateWarning').style.display = 'block';
+                            document.getElementById('dateWarning').style.display = preserveCurrent && previousValue ? 'none' : 'block';
+
+                            return dayOfWeekIndex;
                         }
                         
                         // Get day of week index from string (e.g., "MONDAY" => 1)
@@ -585,14 +613,13 @@
             window.onload = function() {
                 const courseIdHidden = document.querySelector("input[name='courseId']").value;
                 const date = document.getElementById('attendanceDate').value;
-                
-                // Set the values in the form's hidden fields
                 document.getElementById('courseId').value = courseIdHidden;
                 document.getElementById('dateInput').value = date;
-                
-                // Initialize schedule dependency
-                handleScheduleChange();
-                
+                // Don't re-run handleScheduleChange here; DOMContentLoaded already handled initial state.
+                // If no schedule was pre-selected (manual navigation case), initialize now.
+                if (!document.getElementById('scheduleSelect').value) {
+                    handleScheduleChange();
+                }
                 // Initialize tooltips
                 const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                 tooltipTriggerList.map(function (tooltipTriggerEl) {

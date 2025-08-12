@@ -61,6 +61,50 @@
                 </div>
             </div>
 
+            <!-- Today's Classes (Quick Attendance) -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Today's Classes</h5>
+                        <small class="text-muted" th:text="${#temporals.format(T(java.time.LocalDate).now(), 'EEEE, dd MMM yyyy')}">Today</small>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(todaySchedules)}" class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No classes scheduled for today.
+                        </div>
+                        <div class="list-group" th:unless="${#lists.isEmpty(todaySchedules)}">
+                            <div class="list-group-item" th:each="item : ${todaySchedules}">
+                                <div class="d-flex justify-content-between flex-wrap align-items-center">
+                                    <div class="me-3">
+                                        <div class="fw-semibold">
+                                            <span th:text="${item.courseName}">Course</span>
+                                            <small class="text-muted" th:text="${'(' + item.courseCode + ')'}">Code</small>
+                                        </div>
+                                        <small class="text-muted" th:text="${item.scheduleInfo}">Schedule</small>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div th:if="${item.hasAttendance}" class="text-success me-2">
+                                            <i class="fas fa-check-circle"></i>
+                                            <small th:text="${item.presentCount + '/' + item.totalCount}">0/0</small>
+                                        </div>
+                                        <a th:if="${item.hasAttendance}"
+                                           th:href="@{/teacher/courses/{courseId}/attendance/{scheduleId}/{date}/edit(courseId=${item.courseId},scheduleId=${item.scheduleId},date=${#temporals.format(item.date,'yyyy-MM-dd')})}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </a>
+                                        <a th:if="${!item.hasAttendance}"
+                                           th:href="@{/teacher/courses/{courseId}/attendance/form(courseId=${item.courseId}, scheduleId=${item.scheduleId}, date=${#temporals.format(item.date,'yyyy-MM-dd')})}"
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-clipboard-check me-1"></i>Mark
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- My Courses -->
             <div class="col-md-12 mb-4">
                 <div class="card">
@@ -246,7 +290,7 @@
             </div>
         </div>
 
-        <!-- Course Selection Modal for Attendance -->
+    <!-- Course Selection Modal for Attendance -->
         <div class="modal fade" id="courseSelectionModal" tabindex="-1" aria-labelledby="courseSelectionModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">

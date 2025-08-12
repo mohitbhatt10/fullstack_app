@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "mvn-compile-skip-tests",
+			"type": "shell",
+			"command": "mvn",
+			"args": [
+				"-q",
+				"-DskipTests",
+				"compile"
+			],
+			"problemMatcher": [
+				"$gcc"
+			]
+		}
+	]
+}
