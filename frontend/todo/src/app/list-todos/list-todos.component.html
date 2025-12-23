@@ -1,60 +1,89 @@
-<h1> Todo </h1>
+<div class="container-fluid py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h3 mb-1 fw-bold">Todo</h1>
+      <p class="text-muted mb-0">Manage your tasks with quick filters and inline actions.</p>
+    </div>
+    <button (click)="addTodo()" class="btn btn-success shadow-sm">
+      <i class="fa fa-plus me-2"></i>Add Todo
+    </button>
+  </div>
 
-<div class="alert alert-success" *ngIf="message">{{message}}</div>
+  <div class="alert alert-success shadow-sm" *ngIf="message">{{message}}</div>
 
-<!-- Dropdown for filter selection -->
-<div class="form-group mt-3">
-  <label for="filterSelect">Filter Todos based on completion status:    </label>
-  <p-dropdown 
-    [(ngModel)]="filterType"
-    placeholder="Select a Status"
-    [options]="availStatus" 
-    optionLabel="name"
-    (onChange)="applyFilter()"
-    dropdownIcon="fas fa-caret-down">
-  </p-dropdown>
-</div>
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <div class="row align-items-end g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label text-uppercase small text-muted fw-semibold mb-1">Filter by status</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="fa fa-filter text-secondary"></i></span>
+            <p-dropdown
+              class="flex-grow-1"
+              [(ngModel)]="filterType"
+              placeholder="Select a status"
+              [options]="availStatus"
+              optionLabel="name"
+              (onChange)="applyFilter()"
+              dropdownIcon="fas fa-caret-down">
+            </p-dropdown>
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end text-muted small">
+          <span class="badge bg-primary-subtle text-primary border border-primary rounded-pill px-3 py-2">
+            <i class="fa fa-list-check me-1"></i>{{ filteredTodos?.length || 0 }} items
+          </span>
+        </div>
+      </div>
 
-<div class="table-responsive">
-  <table class="table table-bordered table-striped mb-0">
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Target Date</th>
-        <th>Is Completed?</th>
-        <th>Update</th>
-        <th>Delete</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let todo of filteredTodos | paginate: { id: 'todoPage', itemsPerPage: itemsPerPage, currentPage: currentPage, totalItems: filteredTodos.length }">
-        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.description}}</td>
-        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.targetDate | date | uppercase}}</td>
-        <td [ngStyle]="{ 'background-color': getRowColor(todo) }">{{todo.done}}</td>
-        <td>
-          <button (click)="updateTodo(todo.id)" class="btn btn-success" [disabled]="isActionsDisabled(todo)">
-            <i class="fa fa-pencil"></i>
-          </button>
-        </td>
-        <td>
-          <button (click)="deleteTodo(todo.id)" class="btn btn-warning" [disabled]="isActionsDisabled(todo)">
-            <i class="fa fa-trash"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr class="text-uppercase small text-muted">
+              <th class="fw-semibold">Description</th>
+              <th class="fw-semibold">Target Date</th>
+              <th class="fw-semibold text-center">Status</th>
+              <th class="fw-semibold text-center">Update</th>
+              <th class="fw-semibold text-center">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let todo of filteredTodos | paginate: { id: 'todoPage', itemsPerPage: itemsPerPage, currentPage: currentPage, totalItems: filteredTodos.length }">
+              <td [ngStyle]="{ 'background-color': getRowColor(todo) }" class="fw-semibold text-break">{{todo.description}}</td>
+              <td [ngStyle]="{ 'background-color': getRowColor(todo) }" class="text-nowrap">{{todo.targetDate | date | uppercase}}</td>
+              <td [ngStyle]="{ 'background-color': getRowColor(todo) }" class="text-center">
+                <span class="badge rounded-pill" [ngClass]="todo.done ? 'bg-success-subtle text-success border border-success' : 'bg-warning-subtle text-warning border border-warning'">
+                  <i class="fa" [ngClass]="todo.done ? 'fa-check-circle' : 'fa-clock'" aria-hidden="true"></i>
+                  <span class="ms-1">{{ todo.done ? 'Completed' : 'Pending' }}</span>
+                </span>
+              </td>
+              <td class="text-center">
+                <button (click)="updateTodo(todo.id)" class="btn btn-outline-success btn-sm shadow-sm" [disabled]="isActionsDisabled(todo)" title="Edit">
+                  <i class="fa fa-pencil"></i>
+                </button>
+              </td>
+              <td class="text-center">
+                <button (click)="deleteTodo(todo.id)" class="btn btn-outline-danger btn-sm shadow-sm" [disabled]="isActionsDisabled(todo)" title="Delete">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-  <pagination-controls id="todoPage"
-                      (pageChange)="pageChanged($event)"
-                      (pageBoundsCorrection)="pageChanged($event)"
-                      previousLabel="Previous"
-                      nextLabel="Next"
-                      screenReaderPaginationLabel="Pagination"
-                      screenReaderPageLabel="page"
-                      screenReaderCurrentLabel="You're on page">
-</pagination-controls>
-  <div class="row">
-    <button (click)="addTodo()" class="btn btn-success">Add</button>
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-3 gap-2">
+        <pagination-controls id="todoPage"
+                             (pageChange)="pageChanged($event)"
+                             (pageBoundsCorrection)="pageChanged($event)"
+                             previousLabel="Previous"
+                             nextLabel="Next"
+                             screenReaderPaginationLabel="Pagination"
+                             screenReaderPageLabel="page"
+                             screenReaderCurrentLabel="You're on page">
+        </pagination-controls>
+        <small class="text-muted">Showing {{itemsPerPage}} per page</small>
+      </div>
+    </div>
   </div>
 </div>

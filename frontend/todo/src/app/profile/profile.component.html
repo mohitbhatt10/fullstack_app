@@ -1,41 +1,76 @@
-<div class="alert alert-warning" *ngIf="message" role="alert">{{message}}</div>
-<div class="profile-container">
-    <h1>User Profile</h1>
-  
-    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-      <div class="form-group">
-        <label for="firstName">First Name:</label>
-        <input type="text" formControlName="firstName" class="form-control">
-      </div>
-  
-      <div class="form-group">
-        <label for="lastName">Last Name:</label>
-        <input type="text" formControlName="lastName" class="form-control">
-      </div>
-  
-      <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" formControlName="username" class="form-control" [readonly]="true">
-      </div>
-  
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="text" formControlName="email" class="form-control" [readonly]="true">
-      </div>
-  
-      <!-- Assuming roles is a multiselect dropdown, use a dropdown component or a library for this -->
-      <div class="form-group">
-        <label for="roles">Roles:</label>
-        <input type="text" formControlName="roles" class="form-control" [readonly]="true">
-      </div>
-  
-      <div class="form-group">
-        <label for="phoneNumber">Phone Number:</label>
-        <input type="text" formControlName="phoneNumber" class="form-control" >
-      </div>
-  
-      <!-- Add similar fields for Password, Enabled, etc., as needed -->
-  
-      <button type="submit" class="btn btn-primary">Update Profile</button>
-    </form>
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h4 fw-bold mb-1">User Profile</h1>
+      <p class="text-muted mb-0">Review and update your details.</p>
+    </div>
   </div>
+
+  <div class="alert alert-warning shadow-sm" *ngIf="message" role="alert">
+    <i class="fa fa-info-circle me-2"></i>{{message}}
+  </div>
+
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.05);">
+    <div class="bg-primary bg-gradient" style="height: 6px;"></div>
+    <div class="card-body">
+      <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="row g-3">
+        <div class="col-md-6">
+          <label for="firstName" class="form-label fw-semibold">First Name</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-user text-secondary"></i></span>
+            <input type="text" formControlName="firstName" class="form-control" placeholder="Enter first name">
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="lastName" class="form-label fw-semibold">Last Name</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-user text-secondary"></i></span>
+            <input type="text" formControlName="lastName" class="form-control" placeholder="Enter last name">
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="username" class="form-label fw-semibold">Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-id-badge text-secondary"></i></span>
+            <input type="text" formControlName="username" class="form-control" [readonly]="true">
+          </div>
+          <small class="text-muted">Username is read-only.</small>
+        </div>
+
+        <div class="col-md-6">
+          <label for="email" class="form-label fw-semibold">Email</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-envelope text-secondary"></i></span>
+            <input type="text" formControlName="email" class="form-control" [readonly]="true">
+          </div>
+          <small class="text-muted">Email is read-only.</small>
+        </div>
+
+        <div class="col-md-6">
+          <label for="roles" class="form-label fw-semibold">Roles</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-shield text-secondary"></i></span>
+            <input type="text" formControlName="roles" class="form-control" [readonly]="true">
+          </div>
+          <small class="text-muted">Assigned roles (read-only).</small>
+        </div>
+
+        <div class="col-md-6">
+          <label for="phoneNumber" class="form-label fw-semibold">Phone Number</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-phone text-secondary"></i></span>
+            <input type="text" formControlName="phoneNumber" class="form-control" placeholder="e.g. +1 555 123 4567">
+          </div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+          <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <i class="fa fa-save me-2"></i>Update Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

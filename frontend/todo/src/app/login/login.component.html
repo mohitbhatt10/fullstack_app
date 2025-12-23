@@ -1,28 +1,44 @@
-<div class="h-100 d-flex align-items-center justify-content-center">
-  <div class="card" style="width: 18rem;">
-    <div class="card-header text-center bg-dark text-white">
-      <div class="d-flex align-items-center">
-           <h5 class="mx-auto w-100">Login</h5>
-           <i class="fa fa-question-circle ml-auto"></i>
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-4 px-2 bg-light">
+  <div class="card shadow-lg border-0 rounded-4" style="max-width: 420px; width: 100%;">
+    <div class="bg-primary bg-gradient text-white p-3 rounded-top-4 position-relative">
+      <div class="d-flex align-items-center gap-2">
+        <div class="p-2 bg-white bg-opacity-25 rounded-circle">
+          <i class="fa fa-lock fa-lg"></i>
+        </div>
+        <div>
+          <h5 class="mb-0 fw-bold">Login</h5>
+          <small class="text-white-50">Access your account to manage todos</small>
+        </div>
+        <i class="fa fa-question-circle ms-auto opacity-75"></i>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
       <div class="alert alert-warning" *ngIf="invalidLogin">{{ errorMessage }}</div>
 
-      <form>
-        <div class="mb-3">
-          <label for="username" class="form-label">Username:</label>
-          <input type="text" id="username" name="username" class="form-control" [(ngModel)]="username">
+      <form class="row g-3">
+        <div class="col-12">
+          <label for="username" class="form-label fw-semibold">Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-user text-secondary"></i></span>
+            <input type="text" id="username" name="username" class="form-control" [(ngModel)]="username" placeholder="Enter your username">
+          </div>
         </div>
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Password:</label>
-          <input type="password" id="password" name="password" class="form-control" [(ngModel)]="password">
+        <div class="col-12">
+          <label for="password" class="form-label fw-semibold">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-key text-secondary"></i></span>
+            <input type="password" id="password" name="password" class="form-control" [(ngModel)]="password" placeholder="Enter your password">
+          </div>
         </div>
 
-        <div class="d-grid gap-2">
-          <button type="button" (click)="handleJWTAuthLogin()" class="btn btn-success">Login</button>
-          <button type="button" (click)="newUserRegistration()" class="btn btn-outline-primary">Register</button>
+        <div class="col-12 d-grid gap-2 mt-2">
+          <button type="button" (click)="handleJWTAuthLogin()" class="btn btn-primary py-2 shadow-sm">
+            <i class="fa fa-sign-in me-2"></i>Login
+          </button>
+          <button type="button" (click)="newUserRegistration()" class="btn btn-outline-primary py-2 shadow-sm">
+            <i class="fa fa-user-plus me-2"></i>Register
+          </button>
         </div>
       </form>
     </div>

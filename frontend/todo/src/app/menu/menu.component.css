@@ -1,3 +1,23 @@
-.logo{
-    color: aliceblue;
+.brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.navbar .nav-link {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.navbar .nav-link.active,
+.navbar .nav-link:hover {
+    color: #e8f1ff;
 }

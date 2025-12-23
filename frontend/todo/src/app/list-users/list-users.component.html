@@ -1,63 +1,78 @@
-<h1>List of Users</h1>
+<div class="container-fluid py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h4 fw-bold mb-1">List of Users</h1>
+      <p class="text-muted mb-0">Manage user access, roles, and status inline.</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" (click)="updateSelectedUsers()" [disabled]="isUpdateButtonDisabled">
+      <i class="fa fa-save me-2"></i>Update Selected Users
+    </button>
+  </div>
 
-<div class="alert alert-warning" *ngIf="messageVisible" role="alert">{{message}}
-  <app-progress-bar [progress]="0" [visible]="messageVisible"></app-progress-bar>
-</div>
+  <div class="alert alert-warning shadow-sm d-flex align-items-center gap-2" *ngIf="messageVisible" role="alert">
+    <i class="fa fa-info-circle"></i>
+    <span class="flex-grow-1">{{message}}</span>
+    <app-progress-bar [progress]="0" [visible]="messageVisible"></app-progress-bar>
+  </div>
 
-
-
-<div class="table-responsive">
-  <table class="table table-bordered table-striped">
-    <thead>
-      <tr>
-        <th>User ID</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Phone Number</th>
-        <th>Enabled</th>
-        <th>Roles</th>
-        <th>Select</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let user of users">
-        <td>{{ user.userId }}</td>
-        <td>{{ user.firstName }}</td>
-        <td>{{ user.lastName }}</td>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.phoneNumber }}</td>
-        <td>
-          <ng-container *ngIf="user.selected; else plainTextEnabled">
-            <!-- Multi-selection dropdown for roles -->
-            <select [(ngModel)]="user.selectedEnabled" class="form-control" >
-              <option [value]="true">true</option>
-              <option [value]="false">false</option>
-            </select>
-          </ng-container>
-          <ng-template #plainTextEnabled>
-              {{ user.enabled }}
-          </ng-template></td>
-        <td>
-            <ng-container *ngIf="user.selected; else plainText">
-              <!-- Multi-selection dropdown for roles -->
-              <select [(ngModel)]="user.selectedRoles" class="form-control" multiple>
-                <option [value]="{roleId: 1, roleName: 'ROLE_USER'}">ROLE_USER</option>
-                <option [value]="{roleId: 2, roleName: 'ROLE_ADMIN'}">ROLE_ADMIN</option>
-                <option [value]="{roleId: 3, roleName: 'ROLE_MODERATOR'}">ROLE_MODERATOR</option>
-              </select>
-            </ng-container>
-            <ng-template #plainText>
-                {{ getRolesAsString(user.roles) }}
-            </ng-template>
-          </td>
-        <td>
-            <input type="checkbox" [(ngModel)]="user.selected" (change)="onUserSelect(user)">
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <button class="btn btn-primary" (click)="updateSelectedUsers()" [disabled]="isUpdateButtonDisabled">Update Selected Users</button>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr>
+              <th class="fw-semibold">User ID</th>
+              <th class="fw-semibold">First Name</th>
+              <th class="fw-semibold">Last Name</th>
+              <th class="fw-semibold">Username</th>
+              <th class="fw-semibold">Email</th>
+              <th class="fw-semibold">Phone</th>
+              <th class="fw-semibold text-center">Enabled</th>
+              <th class="fw-semibold">Roles</th>
+              <th class="fw-semibold text-center">Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="text-muted">{{ user.userId }}</td>
+              <td class="fw-semibold">{{ user.firstName }}</td>
+              <td>{{ user.lastName }}</td>
+              <td class="text-break">{{ user.username }}</td>
+              <td class="text-break">{{ user.email }}</td>
+              <td class="text-nowrap">{{ user.phoneNumber }}</td>
+              <td class="text-center">
+                <ng-container *ngIf="user.selected; else plainTextEnabled">
+                  <select [(ngModel)]="user.selectedEnabled" class="form-select form-select-sm w-auto d-inline-block">
+                    <option [value]="true">true</option>
+                    <option [value]="false">false</option>
+                  </select>
+                </ng-container>
+                <ng-template #plainTextEnabled>
+                  <span class="badge rounded-pill" [ngClass]="user.enabled ? 'bg-success-subtle text-success border border-success' : 'bg-secondary-subtle text-secondary border border-secondary'">
+                    <i class="fa" [ngClass]="user.enabled ? 'fa-check-circle' : 'fa-ban'"></i>
+                    <span class="ms-1">{{ user.enabled ? 'Enabled' : 'Disabled' }}</span>
+                  </span>
+                </ng-template>
+              </td>
+              <td>
+                <ng-container *ngIf="user.selected; else plainText">
+                  <select [(ngModel)]="user.selectedRoles" class="form-select form-select-sm" multiple>
+                    <option [value]="{roleId: 1, roleName: 'ROLE_USER'}">ROLE_USER</option>
+                    <option [value]="{roleId: 2, roleName: 'ROLE_ADMIN'}">ROLE_ADMIN</option>
+                    <option [value]="{roleId: 3, roleName: 'ROLE_MODERATOR'}">ROLE_MODERATOR</option>
+                  </select>
+                </ng-container>
+                <ng-template #plainText>
+                  <span class="badge bg-light text-secondary border" *ngFor="let role of user.roles; let i = index" [class.ms-1]="i > 0">{{ role.roleName }}</span>
+                </ng-template>
+              </td>
+              <td class="text-center">
+                <input type="checkbox" class="form-check-input" [(ngModel)]="user.selected" (change)="onUserSelect(user)">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

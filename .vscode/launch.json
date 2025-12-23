@@ -3,12 +3,33 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [{
-        "name": "Debug App",
-        "request": "launch",
-        "type": "chrome",
-        "url": "http://localhost:4200",
-        "webRoot": "${workspaceFolder}/frontend/todo/"
-    }
+    "configurations": [
+        {
+            "name": "Debug App",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/frontend/todo/"
+        },
+        {
+            "type": "java",
+            "name": "Debug RESTful Web Services",
+            "request": "launch",
+            "mainClass": "com.in28minutes.rest.webservices.restfulwebservices.RestfulWebServicesApplication",
+            "projectName": "restful-web-services",
+            "cwd": "${workspaceFolder}/restful-web-services",
+            "vmArgs": "-Dspring.profiles.active=default",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "default"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Attach to Spring Boot (5005)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
+        }
     ]
 }

@@ -1,15 +1,64 @@
-<H1>Welcome!</H1>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="p-4 p-md-5 rounded-4 shadow-sm bg-primary bg-gradient text-white position-relative overflow-hidden">
+        <div class="position-absolute top-0 end-0 opacity-25" style="font-size: 6rem; line-height: 1;">✔</div>
+        <h1 class="fw-bold mb-2">Welcome, {{name}}!</h1>
+        <p class="mb-4 lead">Stay on top of your tasks, get personalized greetings, and jump back into your todo list.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a routerLink="/todos" class="btn btn-light text-primary fw-semibold shadow-sm">
+            <i class="fa fa-list-check me-2"></i>Manage Todos
+          </a>
+          <button (click)="getWelcomeMessageWithParameter()" class="btn btn-outline-light fw-semibold shadow-sm">
+            <i class="fa fa-comment-dots me-2"></i>Get Welcome Message
+          </button>
+        </div>
+      </div>
+    </div>
 
-<div class="container">
-  Welcome {{name}}. You can manage your todos <a routerLink="/todos">here</a>
-</div>
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="fw-bold">Your Next Actions</h5>
+          <p class="text-muted mb-3">Quick links to keep you productive.</p>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex align-items-center gap-2">
+              <i class="fa fa-plus-circle text-success"></i>
+              <span>Add a new todo to capture what’s next.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-center gap-2">
+              <i class="fa fa-check-circle text-primary"></i>
+              <span>Review completed items and celebrate wins.</span>
+            </li>
+            <li class="list-group-item d-flex align-items-center gap-2">
+              <i class="fa fa-bell text-warning"></i>
+              <span>Check due dates to stay ahead.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
-<div class="container">
-  Click here to get a customized welcome message 
-  <button (click)="getWelcomeMessageWithParameter()" class="btn btn-success">Get Welcome Message</button>
-</div>
-
-<div class="container" *ngIf="welcomeMessageFromService">
-    <H2>Your Customized Welcome Message</H2>
-    {{welcomeMessageFromService}}
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100" *ngIf="welcomeMessageFromService; else noMessage">
+        <div class="card-body">
+          <h5 class="fw-bold d-flex align-items-center gap-2">
+            <i class="fa fa-envelope-open-text text-primary"></i> Your Customized Welcome Message
+          </h5>
+          <p class="mt-3 mb-0 fs-6">{{welcomeMessageFromService}}</p>
+        </div>
+      </div>
+      <ng-template #noMessage>
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body d-flex flex-column justify-content-center text-center text-muted">
+            <i class="fa fa-comment-dots fa-2x mb-3"></i>
+            <p class="mb-3">Click “Get Welcome Message” to fetch your personalized greeting.</p>
+            <button (click)="getWelcomeMessageWithParameter()" class="btn btn-primary align-self-center">
+              Fetch Welcome Message
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </div>
   </div>
+</div>

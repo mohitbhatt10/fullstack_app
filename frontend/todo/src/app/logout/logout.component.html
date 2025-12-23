@@ -1,4 +1,17 @@
-<H1>You are logged out</H1>
-<div class="container">
-  Thank You For Using Our Application.
+<div class="logout-hero min-vh-100 d-flex align-items-center justify-content-center">
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="max-width: 520px; width: 100%;">
+    <div class="logout-accent"></div>
+    <div class="card-body p-4 p-md-5 text-center">
+      <div class="display-6 fw-bold mb-2 text-primary">You’re logged out</div>
+      <p class="text-muted mb-4">Thank you for using our application. Come back soon to stay on top of your tasks.</p>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        <a routerLink="/login" class="btn btn-primary px-4 shadow-sm">
+          <i class="fa fa-sign-in me-2"></i>Login Again
+        </a>
+        <a routerLink="/" class="btn btn-outline-primary px-4 shadow-sm">
+          <i class="fa fa-home me-2"></i>Go Home
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

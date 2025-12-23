@@ -35,7 +35,6 @@ public class User {
     private String username;
 
     @Column(name = "password", nullable = false)
-    @JsonIgnore
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
@@ -48,12 +47,9 @@ public class User {
     private Boolean enabled = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
-    
+
     // Getters and Setters
 
     public Long getUserId() {
@@ -119,42 +115,40 @@ public class User {
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
-    
-	public Set<Role> getRoles() {
-		return roles;
-	}
 
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
+    public Set<Role> getRoles() {
+        return roles;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(email, enabled, firstName, lastName, password, phoneNumber, userId, username);
-	}
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		return Objects.equals(email, other.email) && Objects.equals(enabled, other.enabled)
-				&& Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
-				&& Objects.equals(password, other.password) && Objects.equals(phoneNumber, other.phoneNumber)
-				&& Objects.equals(userId, other.userId) && Objects.equals(username, other.username);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, enabled, firstName, lastName, password, phoneNumber, userId, username);
+    }
 
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", firstName=" + firstName + ", lastName=" + lastName + ", username="
-				+ username + ", password=" + password + ", email=" + email + ", phoneNumber=" + phoneNumber
-				+ ", enabled=" + enabled + "]";
-	}
-    
-    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        return Objects.equals(email, other.email) && Objects.equals(enabled, other.enabled)
+                && Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
+                && Objects.equals(password, other.password) && Objects.equals(phoneNumber, other.phoneNumber)
+                && Objects.equals(userId, other.userId) && Objects.equals(username, other.username);
+    }
+
+    @Override
+    public String toString() {
+        return "User [userId=" + userId + ", firstName=" + firstName + ", lastName=" + lastName + ", username="
+                + username + ", password=" + password + ", email=" + email + ", phoneNumber=" + phoneNumber
+                + ", enabled=" + enabled + "]";
+    }
+
 }
-
