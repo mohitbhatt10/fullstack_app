@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../../../.."
+		},
+		{
+			"path": "../../../../../restful-web-services/src"
+		}
+	],
+	"settings": {}
+}

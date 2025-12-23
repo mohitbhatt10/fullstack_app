@@ -52,8 +52,9 @@ public class CoinChange {
 			return 0;
 		}
 		
-		//This array will store the minimum amount of coins required for 
-		//each amount till target amount (0 to amount)
+		//Create an array minCoinsDp where minCoinsDp[i] will store the minimum coins needed for amount i.
+		//Size is amount + 1 to include 0 to amount. 
+		// Initialize minCoinsDp[0] = 0 as base case. till amount+1 (ammount =11 in example then length will be 12).
 		int[] minCoinsDp = new int[amount+1]; 
 		
 		
@@ -84,3 +85,30 @@ public class CoinChange {
     }
 
 }
+
+/*
+ * Step-by-Step Iterations
+Below, each row shows the state of minCoinsDp after calculating for amount i:
+
+i	minCoinsDp[0..i] after iteration
+0	[0]
+1	[0, 1]
+2	[0, 1, 1]
+3	[0, 1, 1, 2]
+4	[0, 1, 1, 2, 2]
+5	[0, 1, 1, 2, 2, 1]
+6	[0, 1, 1, 2, 2, 1, 2]
+7	[0, 1, 1, 2, 2, 1, 2, 2]
+8	[0, 1, 1, 2, 2, 1, 2, 2, 3]
+9	[0, 1, 1, 2, 2, 1, 2, 2, 3, 3]
+10	[0, 1, 1, 2, 2, 1, 2, 2, 3, 3, 2]
+11	[0, 1, 1, 2, 2, 1, 2, 2, 3, 3, 2, 3]
+
+Explanation for Each Amount
+For each i, you check all coins:
+If coins[j] <= i and [minCoinsDp[i - coins[j]]] is not MAX_VALUE, update minCoinsDp[i].
+The value at each index is the minimum coins needed for that amount.
+Final Answer:
+minCoinsDp[11] = 3 (using coins 5, 5, 1).
+ * 
+ */
