@@ -31,5 +31,16 @@
             "hostName": "localhost",
             "port": 5005
         }
+        ,
+        {
+            "type": "java",
+            "name": "Debug Cafe Management (com.inn.cafe)",
+            "request": "launch",
+            "mainClass": "com.inn.cafe.CafeManagementSystemApplication",
+            "projectName": "com.inn.cafe",
+            "cwd": "${workspaceFolder}/cafe-management/com.inn.cafe",
+            "vmArgs": "-Dspring.profiles.active=default",
+            "console": "integratedTerminal"
+        }
     ]
 }

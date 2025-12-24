@@ -1,10 +1,28 @@
-<mat-nav-list appAccordion>
-    <mat-list-item appAccordionLink *ngFor="let menuitem of menuItems.getMenuitem()" routerLinkActive="selected"
-        group="{{menuitem.state}}">
-        <a class="" appAccordionToggle [routerLink]="['/cafe/', menuitem.state]"
-            *ngIf="menuitem.type === 'link' && (menuitem.role === '' || menuitem.role === userRole)">
-            <mat-icon>{{menuitem.icon}}</mat-icon>
-            <span>{{menuitem.name}}</span>
-        </a>
-    </mat-list-item>
-</mat-nav-list>
+<div class="sidebar-shell">
+    <div class="brand" aria-label="Cafe brand">
+        <div class="brand-icon">CF</div>
+        <div class="brand-text">
+            <span class="brand-title">Cafe Admin</span>
+            <span class="brand-subtitle">Control Center</span>
+        </div>
+    </div>
+
+    <nav aria-label="Sidebar navigation">
+        <mat-nav-list appAccordion>
+            <mat-list-item
+                appAccordionLink
+                *ngFor="let menuitem of menuItems.getMenuitem()"
+                routerLinkActive="selected"
+                group="{{menuitem.state}}">
+                <a
+                    appAccordionToggle
+                    [routerLink]="['/cafe/', menuitem.state]"
+                    class="menu-btn"
+                    *ngIf="menuitem.type === 'link' && (menuitem.role === '' || menuitem.role === userRole)">
+                    <mat-icon>{{ menuitem.icon }}</mat-icon>
+                    <span>{{ menuitem.name }}</span>
+                </a>
+            </mat-list-item>
+        </mat-nav-list>
+    </nav>
+</div>

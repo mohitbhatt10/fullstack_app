@@ -7,7 +7,7 @@ import { ConfirmationComponent } from 'src/app/material-component/dialog/confirm
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: []
+  styleUrls: ['./header.component.scss']
 })
 export class AppHeaderComponent {
 

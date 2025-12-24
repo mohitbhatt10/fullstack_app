@@ -1,39 +1,81 @@
-<body>
-    <mat-card>
-        <span><h1 style="text-align: center;">Dashboard</h1></span>
-    </mat-card>
-    <br>
-    <div class="row">
-
-        <div class="column">
-            <div class="card">
-                <div class="container">
-                    <h2 class="title">Total Category</h2>
-                    <h2 class="title">{{data?.category}}</h2>
-                    <p><button class="button" [routerLink]="['/cafe/category']">View Category</button></p>
-                </div>
+<div class="dashboard-shell">
+    <section class="hero">
+        <div class="hero-text">
+            <p class="eyebrow">Overview</p>
+            <h1>Dashboard</h1>
+            <p class="subtext">Live snapshot of categories, products, and bills to keep your cafe running smoothly.</p>
+            <div class="hero-actions">
+                <button mat-raised-button color="primary" [routerLink]="['/cafe/bill']">Go to Bills</button>
+                <button mat-stroked-button color="primary" [routerLink]="['/cafe/product']">Manage Products</button>
             </div>
         </div>
-
-        <div class="column">
-            <div class="card">
-                <div class="container">
-                    <h2 class="title">Total Product</h2>
-                    <h2 class="title">{{data?.product}}</h2>
-                    <p><button class="button" [routerLink]="['/cafe/product']">View Product</button></p>
-                </div>
+        <mat-card class="hero-card" appearance="outlined">
+            <div class="hero-metric">
+                <span class="label">Total Categories</span>
+                <span class="value">{{ data?.category || 0 }}</span>
             </div>
-        </div>
-
-        <div class="column">
-            <div class="card">
-                <div class="container">
-                    <h2 class="title">Total Bill</h2>
-                    <h2 class="title">{{data?.bill}}</h2>
-                    <p><button class="button" [routerLink]="['/cafe/bill']">View Bill</button></p>
-                </div>
+            <div class="hero-metric">
+                <span class="label">Total Products</span>
+                <span class="value">{{ data?.product || 0 }}</span>
             </div>
-        </div>
+            <div class="hero-metric">
+                <span class="label">Total Bills</span>
+                <span class="value">{{ data?.bill || 0 }}</span>
+            </div>
+            <div class="hero-footer">Updated when the page loads</div>
+        </mat-card>
+    </section>
 
-    </div>
-</body>
+    <section class="stat-grid">
+        <mat-card class="stat-card" appearance="outlined">
+            <div class="stat-icon" aria-hidden="true">
+                <mat-icon>category</mat-icon>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">Categories</p>
+                <p class="stat-value">{{ data?.category || 0 }}</p>
+                <p class="stat-desc">Organize your menu into well-defined sections.</p>
+                <button mat-flat-button color="primary" [routerLink]="['/cafe/category']">View categories</button>
+            </div>
+        </mat-card>
+
+        <mat-card class="stat-card" appearance="outlined">
+            <div class="stat-icon" aria-hidden="true">
+                <mat-icon>inventory_2</mat-icon>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">Products</p>
+                <p class="stat-value">{{ data?.product || 0 }}</p>
+                <p class="stat-desc">Keep products current and highlight best sellers.</p>
+                <button mat-flat-button color="primary" [routerLink]="['/cafe/product']">View products</button>
+            </div>
+        </mat-card>
+
+        <mat-card class="stat-card" appearance="outlined">
+            <div class="stat-icon" aria-hidden="true">
+                <mat-icon>receipt_long</mat-icon>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">Bills</p>
+                <p class="stat-value">{{ data?.bill || 0 }}</p>
+                <p class="stat-desc">Track bills and export details for auditing.</p>
+                <button mat-flat-button color="primary" [routerLink]="['/cafe/bill']">View bills</button>
+            </div>
+        </mat-card>
+    </section>
+
+    <section class="quick-nav" aria-label="Quick navigation">
+        <div class="chip" [routerLink]="['/cafe/category']">
+            <mat-icon>add</mat-icon>
+            <span>Create category</span>
+        </div>
+        <div class="chip" [routerLink]="['/cafe/product']">
+            <mat-icon>add_shopping_cart</mat-icon>
+            <span>Add product</span>
+        </div>
+        <div class="chip" [routerLink]="['/cafe/bill']">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Export bills</span>
+        </div>
+    </section>
+</div>
