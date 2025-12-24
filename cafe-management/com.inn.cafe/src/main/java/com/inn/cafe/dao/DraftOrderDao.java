@@ -8,4 +8,6 @@ import java.util.List;
 public interface DraftOrderDao extends JpaRepository<DraftOrder, Integer> {
 
     List<DraftOrder> getAllDraftOrders();
+
+    List<DraftOrder> findByCreatedByOrderByUpdatedAtDesc(String createdBy);
 }

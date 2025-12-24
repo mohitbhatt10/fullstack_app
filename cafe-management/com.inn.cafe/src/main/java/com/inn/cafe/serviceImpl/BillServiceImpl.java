@@ -263,9 +263,6 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<String> saveDraft(Map<String, Object> requestMap) {
         try {
-            if (!jwtFilter.isAdmin()) {
-                return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
-            }
             if (!validateRequestMap(requestMap)) {
                 return CafeUtils.getResponseEntity("Required data not found", HttpStatus.BAD_REQUEST);
             }
@@ -279,8 +276,18 @@ public class BillServiceImpl implements BillService {
                     return CafeUtils.getResponseEntity("Draft order id does not exist.", HttpStatus.OK);
                 }
                 draftOrder = optionalDraft.get();
+
+                String currentUser = jwtFilter.getCurrentUser();
+                String createdBy = draftOrder.getCreatedBy();
+                if (!jwtFilter.isAdmin() && createdBy != null && !createdBy.equalsIgnoreCase(currentUser)) {
+                    return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
+                }
+                if (!jwtFilter.isAdmin() && createdBy == null) {
+                    draftOrder.setCreatedBy(currentUser);
+                }
             } else {
                 draftOrder = new DraftOrder();
+                draftOrder.setCreatedBy(jwtFilter.getCurrentUser());
             }
 
             applyDraftFields(draftOrder, requestMap);
@@ -295,10 +302,12 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<List<DraftOrder>> getDrafts() {
         try {
-            if (!jwtFilter.isAdmin()) {
-                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+            List<DraftOrder> list;
+            if (jwtFilter.isAdmin()) {
+                list = draftOrderDao.getAllDraftOrders();
+            } else {
+                list = draftOrderDao.findByCreatedByOrderByUpdatedAtDesc(jwtFilter.getCurrentUser());
             }
-            List<DraftOrder> list = draftOrderDao.getAllDraftOrders();
             return new ResponseEntity<>(list, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -309,12 +318,23 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<DraftOrder> getDraftById(Integer id) {
         try {
-            if (!jwtFilter.isAdmin()) {
+            Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
+            if (optionalDraft.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.OK);
+            }
+
+            DraftOrder draftOrder = optionalDraft.get();
+            String createdBy = draftOrder.getCreatedBy();
+            if (!jwtFilter.isAdmin() && createdBy != null && !createdBy.equalsIgnoreCase(jwtFilter.getCurrentUser())) {
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
             }
-            Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
-            return optionalDraft.map(draftOrder -> new ResponseEntity<>(draftOrder, HttpStatus.OK))
-                    .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.OK));
+
+            if (!jwtFilter.isAdmin() && createdBy == null) {
+                draftOrder.setCreatedBy(jwtFilter.getCurrentUser());
+                draftOrderDao.save(draftOrder);
+            }
+
+            return new ResponseEntity<>(draftOrder, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -324,11 +344,15 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<String> deleteDraft(Integer id) {
         try {
-            if (!jwtFilter.isAdmin()) {
-                return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
-            }
             Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
             if (optionalDraft.isPresent()) {
+                DraftOrder draftOrder = optionalDraft.get();
+                String createdBy = draftOrder.getCreatedBy();
+                if (!jwtFilter.isAdmin() && createdBy != null
+                        && !createdBy.equalsIgnoreCase(jwtFilter.getCurrentUser())) {
+                    return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
+                }
+
                 draftOrderDao.deleteById(id);
                 return CafeUtils.getResponseEntity("Draft order deleted Successfully.", HttpStatus.OK);
             }
