@@ -1,14 +1,13 @@
 <div class="main-container">
-    <mat-toolbar color="primary" class="topbar telative">
+    <mat-toolbar color="primary" class="topbar relative">
         <div class="navbar-header">
-            <button mat-icon-button (click)="snav.toggle()" value="sidebarclosed" style="vertical-align: bottom;">
+            <button mat-icon-button class="menu-button" (click)="snav.toggle()" value="sidebarclosed" aria-label="Toggle navigation">
                 <mat-icon>menu</mat-icon>
-            </button><b>
-                <span style="vertical-align: middle;">
-                    <mat-icon>storefront</mat-icon>
-                </span>
-            </b>
-            <span fxShow="false" fxShow.gt-xs>
+            </button>
+            <span class="brand-icon" aria-hidden="true">
+                <mat-icon>storefront</mat-icon>
+            </span>
+            <span class="brand-title" fxShow="false" fxShow.gt-xs>
                 Cafe Management System
             </span>
         </div>

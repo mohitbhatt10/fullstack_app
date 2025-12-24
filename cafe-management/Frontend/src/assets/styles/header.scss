@@ -10,12 +10,35 @@ File: scss
  Topbar
 *******************/
 mat-toolbar{
-    box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     &.topbar{
-        padding: 0px 15px;
+    padding: 0 16px;
     }
     .navbar-header {
-        text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+
+    .menu-button {
+      flex: 0 0 auto;
+    }
+
+    .brand-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
         .navbar-brand {
             display: flex;
             line-height: 18px;
