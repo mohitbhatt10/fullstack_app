@@ -1,5 +1,6 @@
 package com.inn.cafe.dao;
 
+import com.inn.cafe.POJO.Category;
 import com.inn.cafe.POJO.Product;
 import com.inn.cafe.wrapper.ProductWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductDao extends JpaRepository<Product, Integer> {
 
@@ -20,4 +22,6 @@ public interface ProductDao extends JpaRepository<Product, Integer> {
     List<ProductWrapper> getProductByCategory(@Param("id") Integer id);
 
     ProductWrapper getProductById(@Param("id") Integer id);
+
+    Optional<Product> findByNameAndCategory(String name, Category category);
 }
