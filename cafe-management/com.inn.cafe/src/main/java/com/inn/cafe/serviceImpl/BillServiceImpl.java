@@ -2,8 +2,10 @@ package com.inn.cafe.serviceImpl;
 
 import com.inn.cafe.JWT.JwtFilter;
 import com.inn.cafe.POJO.Bill;
+import com.inn.cafe.POJO.DraftOrder;
 import com.inn.cafe.constants.CafeConstants;
 import com.inn.cafe.dao.BillDao;
+import com.inn.cafe.dao.DraftOrderDao;
 import com.inn.cafe.service.BillService;
 import com.inn.cafe.utils.CafeUtils;
 import com.itextpdf.text.*;
@@ -37,23 +39,30 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     BillDao billDao;
+
+    @Autowired
+    DraftOrderDao draftOrderDao;
+
     @Override
     public ResponseEntity<String> generateReport(Map<String, Object> requestMap) {
         log.info("Inside generateReport");
-        try{
+        try {
             String fileName;
-            if(validateRequestMap(requestMap)){
-                if(requestMap.containsKey("isGenerate") && !(Boolean) requestMap.get("isGenerate")){
+            if (validateRequestMap(requestMap)) {
+                if (requestMap.containsKey("isGenerate") && !(Boolean) requestMap.get("isGenerate")) {
                     fileName = (String) requestMap.get("uuid");
-                }else{
+                } else {
                     fileName = CafeUtils.getUUID();
                     requestMap.put("uuid", fileName);
                     insertBill(requestMap);
                 }
-                String data = "Name: "+requestMap.get("name")+"\n"+"Contact Number: "+requestMap.get("contactNumber")+
-                        "\n"+"Email: "+requestMap.get("email")+"\n"+"Payment Method: "+requestMap.get("paymentMethod");
+                String data = "Name: " + requestMap.get("name") + "\n" + "Contact Number: "
+                        + requestMap.get("contactNumber") +
+                        "\n" + "Email: " + requestMap.get("email") + "\n" + "Payment Method: "
+                        + requestMap.get("paymentMethod");
                 Document document = new Document();
-                PdfWriter.getInstance(document, new FileOutputStream(CafeConstants.STORE_LOCATION+"\\"+fileName+".pdf"));
+                PdfWriter.getInstance(document,
+                        new FileOutputStream(CafeConstants.STORE_LOCATION + "\\" + fileName + ".pdf"));
 
                 document.open();
                 setRectangleInPdf(document);
@@ -62,7 +71,7 @@ public class BillServiceImpl implements BillService {
                 chunk.setAlignment(Element.ALIGN_CENTER);
                 document.add(chunk);
 
-                Paragraph paragraph = new Paragraph(data+"\n \n", getFont("Data"));
+                Paragraph paragraph = new Paragraph(data + "\n \n", getFont("Data"));
                 document.add(paragraph);
 
                 PdfPTable table = new PdfPTable(5);
@@ -70,20 +79,31 @@ public class BillServiceImpl implements BillService {
                 addTableHeader(table);
 
                 JSONArray jsonArray = CafeUtils.getJSonArrayFromString((String) requestMap.get("productDetails"));
-                for(int i = 0; i < jsonArray.length(); i++){
+                for (int i = 0; i < jsonArray.length(); i++) {
                     addRows(table, CafeUtils.getMapFromJson(jsonArray.getString(i)));
                 }
                 document.add(table);
 
-                Paragraph footer = new Paragraph("Total : "+requestMap.get("totalAmount")+"\n"
-                        +"Thank you for visiting. Please visit again", getFont("Data"));
+                Paragraph footer = new Paragraph("Total : " + requestMap.get("totalAmount") + "\n"
+                        + "Thank you for visiting. Please visit again", getFont("Data"));
                 document.add(footer);
                 document.close();
-                return new ResponseEntity<>("{\"uuid\":\""+fileName+"\"}", HttpStatus.OK);
+
+                // If this bill was generated from a draft, remove the draft after successful
+                // PDF generation.
+                if (requestMap.containsKey("draftId") && requestMap.get("draftId") != null) {
+                    try {
+                        Integer draftId = Integer.parseInt(String.valueOf(requestMap.get("draftId")));
+                        draftOrderDao.deleteById(draftId);
+                    } catch (Exception ignored) {
+                        // ignore cleanup failures, bill generation already succeeded
+                    }
+                }
+                return new ResponseEntity<>("{\"uuid\":\"" + fileName + "\"}", HttpStatus.OK);
 
             }
             return CafeUtils.getResponseEntity("Required data not found", HttpStatus.BAD_REQUEST);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -91,16 +111,16 @@ public class BillServiceImpl implements BillService {
 
     private void addRows(PdfPTable table, Map<String, Object> data) {
         log.info("Inside addRows");
-        table.addCell((String)data.get("name"));
-        table.addCell((String)data.get("category"));
-        table.addCell((String)data.get("quantity"));
-        table.addCell(Double.toString((Double)data.get("price")));
-        table.addCell(Double.toString((Double)data.get("total")));
+        table.addCell((String) data.get("name"));
+        table.addCell((String) data.get("category"));
+        table.addCell((String) data.get("quantity"));
+        table.addCell(Double.toString((Double) data.get("price")));
+        table.addCell(Double.toString((Double) data.get("total")));
     }
 
     private void addTableHeader(PdfPTable table) {
         log.info("Inside addTableHeader");
-        Stream.of("Name","Category","Quantity","Price","Sub Total")
+        Stream.of("Name", "Category", "Quantity", "Price", "Sub Total")
                 .forEach(columnTitle -> {
                     PdfPCell header = new PdfPCell();
                     header.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -115,7 +135,7 @@ public class BillServiceImpl implements BillService {
 
     private Font getFont(String type) {
         log.info("Inside getFont");
-        switch (type){
+        switch (type) {
             case "Header":
                 Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLDOBLIQUE, 18, BaseColor.BLACK);
                 headerFont.setStyle(Font.BOLD);
@@ -131,7 +151,7 @@ public class BillServiceImpl implements BillService {
 
     private void setRectangleInPdf(Document document) throws DocumentException {
         log.info("Inside setRectangleInPdf");
-        Rectangle rect = new Rectangle(577,825,18,15);
+        Rectangle rect = new Rectangle(577, 825, 18, 15);
         rect.enableBorderSide(1);
         rect.enableBorderSide(2);
         rect.enableBorderSide(4);
@@ -150,8 +170,9 @@ public class BillServiceImpl implements BillService {
                 requestMap.containsKey("productDetails") &&
                 requestMap.containsKey("totalAmount");
     }
+
     private void insertBill(Map<String, Object> requestMap) {
-        try{
+        try {
             Bill bill = new Bill();
             bill.setUuid((String) requestMap.get("uuid"));
             bill.setName((String) requestMap.get("name"));
@@ -163,17 +184,30 @@ public class BillServiceImpl implements BillService {
             bill.setCreatedBy(jwtFilter.getCurrentUser());
             billDao.save(bill);
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void applyDraftFields(DraftOrder draftOrder, Map<String, Object> requestMap) {
+        draftOrder.setName((String) requestMap.get("name"));
+        draftOrder.setEmail((String) requestMap.get("email"));
+        draftOrder.setContactNumber((String) requestMap.get("contactNumber"));
+        draftOrder.setPaymentMethod((String) requestMap.get("paymentMethod"));
+        draftOrder.setTotal(Integer.parseInt(String.valueOf(requestMap.get("totalAmount"))));
+        draftOrder.setProductDetails((String) requestMap.get("productDetails"));
+        draftOrder.setUpdatedBy(jwtFilter.getCurrentUser());
+        if (draftOrder.getCreatedBy() == null) {
+            draftOrder.setCreatedBy(jwtFilter.getCurrentUser());
         }
     }
 
     @Override
     public ResponseEntity<List<Bill>> getBills() {
         List<Bill> list = new ArrayList<>();
-        if(jwtFilter.isAdmin()){
+        if (jwtFilter.isAdmin()) {
             list = billDao.getAllBills();
-        }else{
+        } else {
             list = billDao.getBillByUserName(jwtFilter.getCurrentUser());
         }
         return new ResponseEntity<>(list, HttpStatus.OK);
@@ -182,28 +216,28 @@ public class BillServiceImpl implements BillService {
     @Override
     public ResponseEntity<byte[]> getPdf(Map<String, Object> requestMap) {
         log.info("Inside getPdf : requestMap {}", requestMap);
-        try{
+        try {
             byte[] byteArray = new byte[0];
-            if(!requestMap.containsKey("uuid") && validateRequestMap(requestMap))
+            if (!requestMap.containsKey("uuid") && validateRequestMap(requestMap))
                 return new ResponseEntity<>(byteArray, HttpStatus.BAD_REQUEST);
-            String filePath = CafeConstants.STORE_LOCATION+ "\\" + (String) requestMap.get("uuid") + ".pdf";
-            if(CafeUtils.isFileExist(filePath)){
+            String filePath = CafeConstants.STORE_LOCATION + "\\" + (String) requestMap.get("uuid") + ".pdf";
+            if (CafeUtils.isFileExist(filePath)) {
                 byteArray = getByteArray(filePath);
                 return new ResponseEntity<>(byteArray, HttpStatus.OK);
-            }else{
+            } else {
                 requestMap.put("isGenerate", false);
                 generateReport(requestMap);
                 byteArray = getByteArray(filePath);
                 return new ResponseEntity<>(byteArray, HttpStatus.OK);
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private byte[] getByteArray(String filePath) throws Exception{
+    private byte[] getByteArray(String filePath) throws Exception {
         File initialFile = new File(filePath);
         InputStream targetStream = new FileInputStream(initialFile);
         byte[] byteArray = IOUtils.toByteArray(targetStream);
@@ -213,18 +247,96 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public ResponseEntity<String> deleteBill(Integer id) {
-        try{
+        try {
             Optional optional = billDao.findById(id);
-            if(!optional.isEmpty()){
+            if (!optional.isEmpty()) {
                 billDao.deleteById(id);
                 return CafeUtils.getResponseEntity("Bill deleted Successfully.", HttpStatus.OK);
             }
             return CafeUtils.getResponseEntity("Bill id does not exist.", HttpStatus.OK);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @Override
+    public ResponseEntity<String> saveDraft(Map<String, Object> requestMap) {
+        try {
+            if (!jwtFilter.isAdmin()) {
+                return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
+            if (!validateRequestMap(requestMap)) {
+                return CafeUtils.getResponseEntity("Required data not found", HttpStatus.BAD_REQUEST);
+            }
+
+            DraftOrder draftOrder;
+            if (requestMap.containsKey("id") && requestMap.get("id") != null
+                    && !String.valueOf(requestMap.get("id")).isBlank()) {
+                Integer id = Integer.parseInt(String.valueOf(requestMap.get("id")));
+                Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
+                if (optionalDraft.isEmpty()) {
+                    return CafeUtils.getResponseEntity("Draft order id does not exist.", HttpStatus.OK);
+                }
+                draftOrder = optionalDraft.get();
+            } else {
+                draftOrder = new DraftOrder();
+            }
+
+            applyDraftFields(draftOrder, requestMap);
+            DraftOrder saved = draftOrderDao.save(draftOrder);
+            return new ResponseEntity<>("{\"id\":" + saved.getId() + "}", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<List<DraftOrder>> getDrafts() {
+        try {
+            if (!jwtFilter.isAdmin()) {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+            }
+            List<DraftOrder> list = draftOrderDao.getAllDraftOrders();
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<DraftOrder> getDraftById(Integer id) {
+        try {
+            if (!jwtFilter.isAdmin()) {
+                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            }
+            Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
+            return optionalDraft.map(draftOrder -> new ResponseEntity<>(draftOrder, HttpStatus.OK))
+                    .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.OK));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<String> deleteDraft(Integer id) {
+        try {
+            if (!jwtFilter.isAdmin()) {
+                return CafeUtils.getResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
+            Optional<DraftOrder> optionalDraft = draftOrderDao.findById(id);
+            if (optionalDraft.isPresent()) {
+                draftOrderDao.deleteById(id);
+                return CafeUtils.getResponseEntity("Draft order deleted Successfully.", HttpStatus.OK);
+            }
+            return CafeUtils.getResponseEntity("Draft order id does not exist.", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }

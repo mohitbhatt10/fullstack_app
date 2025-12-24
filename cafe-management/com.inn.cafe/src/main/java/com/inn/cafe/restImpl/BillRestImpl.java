@@ -1,6 +1,7 @@
 package com.inn.cafe.restImpl;
 
 import com.inn.cafe.POJO.Bill;
+import com.inn.cafe.POJO.DraftOrder;
 import com.inn.cafe.constants.CafeConstants;
 import com.inn.cafe.rest.BillRest;
 import com.inn.cafe.service.BillService;
@@ -18,11 +19,12 @@ public class BillRestImpl implements BillRest {
 
     @Autowired
     BillService billService;
+
     @Override
     public ResponseEntity<String> generateReport(Map<String, Object> requestMap) {
-        try{
+        try {
             return billService.generateReport(requestMap);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -30,9 +32,9 @@ public class BillRestImpl implements BillRest {
 
     @Override
     public ResponseEntity<List<Bill>> getBills() {
-        try{
+        try {
             return billService.getBills();
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -40,9 +42,9 @@ public class BillRestImpl implements BillRest {
 
     @Override
     public ResponseEntity<byte[]> getPdf(Map<String, Object> requestMap) {
-        try{
+        try {
             return billService.getPdf(requestMap);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -50,9 +52,49 @@ public class BillRestImpl implements BillRest {
 
     @Override
     public ResponseEntity<String> deleteBill(Integer id) {
-        try{
+        try {
             return billService.deleteBill(id);
-        }catch(Exception e){
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> saveDraft(Map<String, Object> requestMap) {
+        try {
+            return billService.saveDraft(requestMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<List<DraftOrder>> getDrafts() {
+        try {
+            return billService.getDrafts();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<DraftOrder> getDraftById(Integer id) {
+        try {
+            return billService.getDraftById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<String> deleteDraft(Integer id) {
+        try {
+            return billService.deleteDraft(id);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);

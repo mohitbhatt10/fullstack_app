@@ -1,6 +1,7 @@
 package com.inn.cafe.rest;
 
 import com.inn.cafe.POJO.Bill;
+import com.inn.cafe.POJO.DraftOrder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,16 @@ public interface BillRest {
     @PostMapping(path = "/delete/{id}")
     ResponseEntity<String> deleteBill(@PathVariable Integer id);
 
+    @PostMapping(path = "/draft/save")
+    ResponseEntity<String> saveDraft(@RequestBody Map<String, Object> requestMap);
 
+    @GetMapping(path = "/draft/list")
+    ResponseEntity<List<DraftOrder>> getDrafts();
+
+    @GetMapping(path = "/draft/{id}")
+    ResponseEntity<DraftOrder> getDraftById(@PathVariable Integer id);
+
+    @PostMapping(path = "/draft/delete/{id}")
+    ResponseEntity<String> deleteDraft(@PathVariable Integer id);
 
 }

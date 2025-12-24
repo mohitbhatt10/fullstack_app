@@ -16,13 +16,16 @@ import { GlobalConstants } from 'src/app/shared/global-constants';
 export class ManageOrderComponent {
 
   displayedColumns: string[] = ['name', 'category', 'price', 'quantity', 'total', 'edit'];
+  draftDisplayedColumns: string[] = ['id', 'name', 'email', 'total', 'actions'];
   dataSource:any = [];
+  drafts:any = [];
   manageOrderForm:any = FormGroup;
   categories:any = [];
   products:any = [];
   price:any;
   totalAmount:number = 0;
   responseMessage:any;
+  currentDraftId: number | null = null;
 
   constructor(
     private formBuider:FormBuilder,
@@ -36,6 +39,7 @@ export class ManageOrderComponent {
   ngOnInit(): void {
     this.ngxService.start();
     this.getCategories();
+    this.getDrafts();
     this.manageOrderForm = this.formBuider.group({
       name: [null, [Validators.required, Validators.pattern(GlobalConstants.nameRegex)]],
       email: [null, [Validators.required, Validators.pattern(GlobalConstants.emailRegex)]],
@@ -47,6 +51,15 @@ export class ManageOrderComponent {
       price: [null, [Validators.required]],
       total: [0, [Validators.required]]
     });
+  }
+
+  getDrafts(){
+    this.billService.getDrafts().subscribe((response:any)=>{
+      this.drafts = response;
+    },(error:any)=>{
+      // drafts are optional UI, so keep this quiet but still show a toast
+      console.log(error);
+    })
   }
 
   getCategories(){
@@ -141,6 +154,117 @@ export class ManageOrderComponent {
     }
   }
 
+  validateDraftSave(){
+    if(this.totalAmount === 0 || this.manageOrderForm.controls['name'].value === null || this.manageOrderForm.controls['email'].value === null || this.manageOrderForm.controls['contactNumber'].value === null || this.manageOrderForm.controls['paymentMethod'].value === null){
+      return true;
+    }
+    return false;
+  }
+
+  saveDraftAction(){
+    var formData = this.manageOrderForm.value;
+    var data:any = {
+      id: this.currentDraftId,
+      name: formData.name,
+      email: formData.email,
+      contactNumber: formData.contactNumber,
+      paymentMethod: formData.paymentMethod,
+      totalAmount: this.totalAmount.toString(),
+      productDetails: JSON.stringify(this.dataSource)
+    };
+
+    // remove null id so backend treats it as create
+    if(data.id === null){
+      delete data.id;
+    }
+
+    this.ngxService.start();
+    this.billService.saveDraft(data).subscribe((response:any)=>{
+      this.ngxService.stop();
+      this.currentDraftId = response?.id ?? this.currentDraftId;
+      this.snackBarService.openSnackBar("Draft saved successfully.", "success");
+      this.getDrafts();
+    },(error:any)=>{
+      this.ngxService.stop();
+      console.log(error);
+      if (error.error?.message) {
+        this.responseMessage = error.error?.message;
+      } else {
+        this.responseMessage = GlobalConstants.genericError;
+      }
+      this.snackBarService.openSnackBar(this.responseMessage, GlobalConstants.error);
+    })
+  }
+
+  loadDraft(draft:any){
+    if(!draft?.id){
+      return;
+    }
+    this.ngxService.start();
+    this.billService.getDraftById(draft.id).subscribe((response:any)=>{
+      this.ngxService.stop();
+      if(!response){
+        this.snackBarService.openSnackBar("Draft not found.", GlobalConstants.error);
+        return;
+      }
+
+      this.currentDraftId = response.id;
+      this.manageOrderForm.controls['name'].setValue(response.name);
+      this.manageOrderForm.controls['email'].setValue(response.email);
+      this.manageOrderForm.controls['contactNumber'].setValue(response.contactNumber);
+      this.manageOrderForm.controls['paymentMethod'].setValue(response.paymentMethod);
+
+      // reset product selection controls; items come from draft payload
+      this.manageOrderForm.controls['category'].setValue(null);
+      this.manageOrderForm.controls['product'].setValue(null);
+      this.manageOrderForm.controls['price'].setValue('');
+      this.manageOrderForm.controls['quantity'].setValue('');
+      this.manageOrderForm.controls['total'].setValue(0);
+
+      try{
+        this.dataSource = JSON.parse(response.productDetails || '[]');
+      }catch(e){
+        this.dataSource = [];
+      }
+      this.dataSource = [...this.dataSource];
+      this.totalAmount = Number(response.total || 0);
+
+      this.snackBarService.openSnackBar("Draft loaded.", "success");
+    },(error:any)=>{
+      this.ngxService.stop();
+      console.log(error);
+      this.snackBarService.openSnackBar(GlobalConstants.genericError, GlobalConstants.error);
+    })
+  }
+
+  deleteDraft(draft:any){
+    if(!draft?.id){
+      return;
+    }
+    this.ngxService.start();
+    this.billService.deleteDraft(draft.id).subscribe(()=>{
+      this.ngxService.stop();
+      if(this.currentDraftId === draft.id){
+        this.resetOrder();
+      }
+      this.getDrafts();
+      this.snackBarService.openSnackBar("Draft deleted.", "success");
+    },(error:any)=>{
+      this.ngxService.stop();
+      console.log(error);
+      this.snackBarService.openSnackBar(GlobalConstants.genericError, GlobalConstants.error);
+    })
+  }
+
+  resetOrder(){
+    this.currentDraftId = null;
+    this.manageOrderForm.reset();
+    this.dataSource = [];
+    this.totalAmount = 0;
+    this.products = [];
+    this.price = null;
+  }
+
   handleDeleteAction(value:any, element:any){
     this.totalAmount = this.totalAmount - element.total;
     this.dataSource.splice(value, 1)
@@ -155,14 +279,14 @@ export class ManageOrderComponent {
       contactNumber: formData.contactNumber,
       paymentMethod: formData.paymentMethod,
       totalAmount: this.totalAmount.toString(),
-      productDetails: JSON.stringify(this.dataSource)
+      productDetails: JSON.stringify(this.dataSource),
+      draftId: this.currentDraftId
     }
     this.ngxService.start();
     this.billService.generateReport(data).subscribe((response:any)=>{
       this.downloadFile(response?.uuid);
-      this.manageOrderForm.reset();
-      this.dataSource = [];
-      this.totalAmount = 0;
+      this.resetOrder();
+      this.getDrafts();
     },(error:any)=>{
       this.ngxService.stop();
       console.log(error);

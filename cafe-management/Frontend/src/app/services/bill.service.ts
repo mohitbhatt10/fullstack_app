@@ -32,4 +32,24 @@ export class BillService {
     })
   }
 
+  saveDraft(data:any){
+    return this.httpClient.post(this.url+"/bill/draft/save", data, {
+      headers: new HttpHeaders().set('Content-Type', "application/json")
+    })
+  }
+
+  getDrafts(){
+    return this.httpClient.get(this.url+"/bill/draft/list");
+  }
+
+  getDraftById(id:any){
+    return this.httpClient.get(this.url+"/bill/draft/"+id);
+  }
+
+  deleteDraft(id:any){
+    return this.httpClient.post(this.url+"/bill/draft/delete/"+id, {
+      headers: new HttpHeaders().set('Content-Type', "application/json")
+    })
+  }
+
 }
