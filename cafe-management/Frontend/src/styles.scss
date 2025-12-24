@@ -5,6 +5,194 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+/* Shared admin page styling (used by manage-* and bills pages).
+   Scoped behind `.admin-page` so other views are unaffected. */
+.admin-page {
+  display: block;
+  min-height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.12), transparent 25%),
+    radial-gradient(circle at 80% 0%, rgba(45, 212, 191, 0.12), transparent 28%),
+    #0f172a;
+  color: #e2e8f0;
+}
+
+.admin-page .page-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-page .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-page .page-title {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.admin-page .page-title mat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(94, 234, 212, 0.18), rgba(99, 102, 241, 0.18));
+  color: #22d3ee;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.admin-page .page-title h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.admin-page .page-title p {
+  margin: 4px 0 0;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-page mat-card.admin-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  color: #e2e8f0;
+}
+
+/* Angular Material (MDC) form-field color overrides for dark admin pages. */
+.admin-page .mat-mdc-form-field {
+  --mdc-outlined-text-field-input-text-color: #f8fafc;
+  --mdc-outlined-text-field-label-text-color: #cbd5e1;
+  --mdc-outlined-text-field-focus-label-text-color: #f8fafc;
+  --mdc-outlined-text-field-placeholder-text-color: #f8fafc;
+  --mdc-outlined-text-field-helper-text-color: #94a3b8;
+  --mdc-outlined-text-field-focus-outline-color: rgba(94, 234, 212, 0.55);
+  --mdc-outlined-text-field-outline-color: rgba(148, 163, 184, 0.35);
+}
+
+.admin-page .toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 16px 0;
+}
+
+.admin-page .toolbar-row .filter-field {
+  width: min(420px, 100%);
+}
+
+.admin-page .table-wrap {
+  padding: 8px 16px 16px;
+}
+
+.admin-page .mat-mdc-table,
+.admin-page .mat-mdc-paginator {
+  background: transparent;
+}
+
+.admin-page .mat-mdc-header-cell {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.admin-page .mat-mdc-cell {
+  color: #e2e8f0;
+}
+
+.admin-page .mat-mdc-row:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.admin-page .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+/* Ensure input/select text is readable on dark admin pages. */
+.admin-page .mat-mdc-form-field .mdc-text-field__input {
+  color: #f8fafc;
+  caret-color: #f8fafc;
+}
+
+.admin-page .mat-mdc-form-field .mdc-text-field__input::placeholder {
+  color: #f8fafc;
+  opacity: 1;
+}
+
+/* `mat-label` / floating label (the "watermark" text) — fallback for themes overriding vars. */
+.admin-page .mat-mdc-form-field .mdc-floating-label,
+.admin-page .mat-mdc-form-field .mat-mdc-floating-label {
+  color: #cbd5e1 !important;
+}
+
+.admin-page .mat-mdc-form-field .mdc-text-field--focused .mdc-floating-label {
+  color: #f8fafc !important;
+}
+
+/* Hint text under inputs */
+.admin-page .mat-mdc-form-field-hint,
+.admin-page .mat-mdc-form-field-hint-wrapper {
+  color: #94a3b8 !important;
+}
+
+/* Prefix/suffix icons inside form fields */
+.admin-page .mat-mdc-form-field mat-icon {
+  color: #cbd5e1;
+}
+
+/* Buttons: make label text/icons readable on dark admin pages. */
+.admin-page .mat-mdc-button-base {
+  color: #f8fafc;
+}
+
+.admin-page .mat-mdc-button-base .mdc-button__label {
+  color: #f8fafc;
+}
+
+.admin-page .mat-mdc-button-base mat-icon {
+  color: currentColor;
+}
+
+.admin-page .mat-mdc-button-base:disabled,
+.admin-page .mat-mdc-button-base[disabled] {
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.admin-page .mat-mdc-button-base:disabled .mdc-button__label,
+.admin-page .mat-mdc-button-base[disabled] .mdc-button__label {
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.admin-page .mat-mdc-form-field .mat-mdc-select-value-text,
+.admin-page .mat-mdc-form-field .mat-mdc-select-placeholder {
+  color: #f8fafc;
+}
+
+.admin-page .mat-mdc-form-field .mat-mdc-select-placeholder {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .admin-page {
+    padding: 16px;
+  }
+}
+
   //responsibe table
   @media(max-width: 800px) {
     .responsive_table {

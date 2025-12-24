@@ -1,20 +1,31 @@
-<mat-card>
-    <b><span>Manage Category</span></b>
-    <button maat-flat-button color="primary" class="float-right" (click)="handleAddAction()">
-        <mat-icon>add_circle</mat-icon> Add Category
-    </button>
-</mat-card>
-<br>
-<mat-card>
-    <mat-form-field appearance="outline">
-        <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter($event)" #input>
-    </mat-form-field>
-</mat-card>
-<hr>
+<div class="admin-page">
+    <div class="page-inner">
+        <section class="page-header">
+            <div class="page-title">
+                <mat-icon aria-hidden="true">category</mat-icon>
+                <div>
+                    <h1>Manage Categories</h1>
+                    <p>Create and maintain menu categories shown in the cafe app.</p>
+                </div>
+            </div>
 
-<div class="responsive_table">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+            <button mat-flat-button color="primary" (click)="handleAddAction()">
+                <mat-icon>add_circle</mat-icon>
+                <span>Add Category</span>
+            </button>
+        </section>
+
+        <mat-card class="admin-card" appearance="outlined">
+            <div class="toolbar-row">
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Search</mat-label>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput (keyup)="applyFilter($event)" #input placeholder="Type to filter categories">
+                </mat-form-field>
+            </div>
+
+            <div class="table-wrap responsive_table">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
         <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
             <td mat-cell *matCellDef="let element">{{element.name}}</td>
@@ -32,5 +43,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky:true"></tr>
         <tr mat-row *matRowDef="let row;columns:displayedColumns;"></tr>
 
-    </table>
+                </table>
+            </div>
+        </mat-card>
+    </div>
 </div>

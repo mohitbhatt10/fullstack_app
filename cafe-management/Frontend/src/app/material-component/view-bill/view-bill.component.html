@@ -1,17 +1,26 @@
-<mat-card>
-    <b><span>View Bill</span></b>
-</mat-card>
-<hr>
-<mat-card>
-    <mat-form-field appearance="outline">
-        <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter($event)" #input>
-    </mat-form-field>
-</mat-card>
-<hr>
+<div class="admin-page">
+    <div class="page-inner">
+        <section class="page-header">
+            <div class="page-title">
+                <mat-icon aria-hidden="true">receipt_long</mat-icon>
+                <div>
+                    <h1>View Bills</h1>
+                    <p>Search, download, and manage billing history.</p>
+                </div>
+            </div>
+        </section>
 
-<div class="responsive_table">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <mat-card class="admin-card" appearance="outlined">
+            <div class="toolbar-row">
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Search</mat-label>
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput (keyup)="applyFilter($event)" #input placeholder="Search bills">
+                </mat-form-field>
+            </div>
+
+            <div class="table-wrap responsive_table">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
 
         <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -59,7 +68,10 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky:true"></tr>
         <tr mat-row *matRowDef="let row;columns:displayedColumns;"></tr>
 
-    </table>
+                </table>
+            </div>
+        </mat-card>
+    </div>
 </div>
 
 
