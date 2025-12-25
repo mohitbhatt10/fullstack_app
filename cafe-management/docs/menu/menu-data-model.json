@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Restaurant Menu Schema",
+  "definitions": {
+    "MenuCategory": {
+      "type": "object",
+      "required": ["id", "name", "displayOrder"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the category"
+        },
+        "name": {
+          "type": "string",
+          "description": "Category name",
+          "examples": ["Starters (Veg)", "Main Course (Non-Veg)", "Desserts"]
+        },
+        "displayOrder": {
+          "type": "integer",
+          "description": "Order in which category appears on menu"
+        }
+      }
+    },
+    "MenuItem": {
+      "type": "object",
+      "required": ["id", "categoryId", "productName", "description", "price", "isVeg"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the menu item"
+        },
+        "categoryId": {
+          "type": "integer",
+          "description": "Reference to category ID"
+        },
+        "categoryName": {
+          "type": "string",
+          "description": "Category name (for display)"
+        },
+        "productName": {
+          "type": "string",
+          "description": "Product name",
+          "examples": ["Paneer Tikka", "Butter Chicken", "Cold Coffee"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of the dish (1-2 lines)",
+          "maxLength": 150
+        },
+        "price": {
+          "type": "number",
+          "description": "Price in INR (Indian Rupees)",
+          "minimum": 0
+        },
+        "isVeg": {
+          "type": "boolean",
+          "description": "Vegetarian indicator"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether item is currently available",
+          "default": true
+        }
+      }
+    },
+    "MenuResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CategoryWithItems"
+          }
+        },
+        "totalCategories": {
+          "type": "integer"
+        },
+        "totalItems": {
+          "type": "integer"
+        },
+        "pagination": {
+          "$ref": "#/definitions/Pagination"
+        }
+      }
+    },
+    "CategoryWithItems": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "$ref": "#/definitions/MenuCategory"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MenuItem"
+          }
+        }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "totalPages": {
+          "type": "integer"
+        },
+        "totalElements": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
