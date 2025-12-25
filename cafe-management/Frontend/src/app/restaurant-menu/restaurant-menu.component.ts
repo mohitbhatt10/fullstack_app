@@ -20,16 +20,18 @@ export class RestaurantMenuComponent implements OnInit {
 
   // Menu data
   menuResponse: MenuResponse | null = null;
+  allCategories: MenuCategory[] = [];
   displayedCategories: MenuCategory[] = [];
   
   // Pagination
   currentPage: number = 0;
-  pageSize: number = 30;
+  categoriesPerPage: number = 3; // Show 2-3 categories per page
   totalPages: number = 0;
-  isPaginated: boolean = false;
+  isPaginated: boolean = true;
   
   // Filtering
   selectedCategoryId: number | null = null;
+  showVegOnly: boolean = false;
   
   // Loading state
   isLoading: boolean = false;
@@ -58,10 +60,11 @@ export class RestaurantMenuComponent implements OnInit {
     this.menuService.getMenu().subscribe(
       (response: MenuResponse) => {
         this.menuResponse = response;
-        this.displayedCategories = response.categories || [];
+        this.allCategories = response.categories || [];
+        this.applyFiltersAndPagination();
         this.isLoading = false;
         
-        if (this.displayedCategories.length === 0) {
+        if (this.allCategories.length === 0) {
           this.snackbarService.openSnackBar('No menu items available', 'info');
         }
       },
@@ -100,37 +103,48 @@ export class RestaurantMenuComponent implements OnInit {
   }
 
   /**
-   * Load paginated menu
+   * Apply filters and pagination to display categories
    */
-  loadPaginatedMenu(page: number): void {
-    this.isLoading = true;
-    this.currentPage = page;
-    this.isPaginated = true;
+  applyFiltersAndPagination(): void {
+    let filteredCategories = [...this.allCategories];
     
-    this.menuService.getMenuPaginated(page, this.pageSize).subscribe(
-      (response: MenuResponse) => {
-        this.menuResponse = response;
-        this.displayedCategories = response.categories || [];
-        
-        if (response.pagination) {
-          this.totalPages = response.pagination.totalPages;
-        }
-        
-        this.isLoading = false;
-      },
-      (error: any) => {
-        this.isLoading = false;
-        console.error('Error loading paginated menu:', error);
-        this.snackbarService.openSnackBar(GlobalConstants.genericError, 'error');
-      }
-    );
+    // Apply vegetarian filter
+    if (this.showVegOnly) {
+      filteredCategories = filteredCategories.map(category => ({
+        ...category,
+        items: category.items.filter(item => {
+          // Handle different data types for isVeg (boolean, string, number)
+          const vegValue: any = item.isVeg;
+          return vegValue === true || vegValue === 'true' || vegValue === 1;
+        })
+      })).filter(category => category.items.length > 0);
+    }
+    
+    // Calculate pagination
+    this.totalPages = Math.ceil(filteredCategories.length / this.categoriesPerPage);
+    
+    // Get categories for current page
+    const startIndex = this.currentPage * this.categoriesPerPage;
+    const endIndex = startIndex + this.categoriesPerPage;
+    this.displayedCategories = filteredCategories.slice(startIndex, endIndex);
+  }
+
+  /**
+   * Toggle vegetarian filter
+   */
+  toggleVegFilter(): void {
+    this.currentPage = 0; // Reset to first page
+    this.applyFiltersAndPagination();
   }
 
   /**
    * Reset to full menu view
    */
   resetFilter(): void {
-    this.loadMenu();
+    this.showVegOnly = false;
+    this.selectedCategoryId = null;
+    this.currentPage = 0;
+    this.applyFiltersAndPagination();
   }
 
   /**
@@ -138,7 +152,9 @@ export class RestaurantMenuComponent implements OnInit {
    */
   nextPage(): void {
     if (this.currentPage < this.totalPages - 1) {
-      this.loadPaginatedMenu(this.currentPage + 1);
+      this.currentPage++;
+      this.applyFiltersAndPagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -147,7 +163,20 @@ export class RestaurantMenuComponent implements OnInit {
    */
   previousPage(): void {
     if (this.currentPage > 0) {
-      this.loadPaginatedMenu(this.currentPage - 1);
+      this.currentPage--;
+      this.applyFiltersAndPagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Go to specific page
+   */
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.applyFiltersAndPagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 

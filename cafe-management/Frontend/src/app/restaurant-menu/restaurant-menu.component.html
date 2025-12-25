@@ -5,11 +5,20 @@
       <div class="header-content">
         <h1 class="menu-title">Our Menu</h1>
         <div class="action-buttons">
+          <!-- Veg Filter Toggle -->
+          <mat-slide-toggle 
+            [(ngModel)]="showVegOnly" 
+            (change)="toggleVegFilter()"
+            color="primary"
+            class="veg-toggle">
+            <span class="veg-indicator"></span> Vegetarian Only
+          </mat-slide-toggle>
+          
           <button mat-raised-button color="primary" (click)="printMenu()">
             <mat-icon>print</mat-icon>
             Print Menu
           </button>
-          <button mat-raised-button (click)="resetFilter()" *ngIf="selectedCategoryId">
+          <button mat-raised-button (click)="resetFilter()" *ngIf="showVegOnly">
             <mat-icon>refresh</mat-icon>
             Show All
           </button>
@@ -25,6 +34,17 @@
 
   <!-- Menu Content -->
   <div *ngIf="!isLoading && displayedCategories.length > 0" class="menu-content">
+    
+    <!-- Category count info -->
+    <div class="menu-info no-print">
+      <p class="category-count">
+        Showing {{ displayedCategories.length }} 
+        {{ displayedCategories.length === 1 ? 'category' : 'categories' }}
+        <span *ngIf="showVegOnly" class="filter-badge">
+          <span class="veg-indicator"></span> Vegetarian Only
+        </span>
+      </p>
+    </div>
     
     <!-- Restaurant Header for Print -->
     <div class="print-only restaurant-header">
@@ -88,11 +108,22 @@
   </div>
 
   <!-- Pagination (hidden in print) -->
-  <div *ngIf="isPaginated && totalPages > 1" class="pagination-controls no-print">
+  <div *ngIf="totalPages > 1" class="pagination-controls no-print">
     <button mat-raised-button (click)="previousPage()" [disabled]="currentPage === 0">
       <mat-icon>chevron_left</mat-icon>
       Previous
     </button>
+    
+    <div class="page-numbers">
+      <button 
+        *ngFor="let page of [].constructor(totalPages); let i = index"
+        mat-button
+        [class.active]="i === currentPage"
+        (click)="goToPage(i)"
+        class="page-number-btn">
+        {{ i + 1 }}
+      </button>
+    </div>
     
     <span class="page-info">
       Page {{ currentPage + 1 }} of {{ totalPages }}
