@@ -56,37 +56,50 @@ public class BillServiceImpl implements BillService {
                     requestMap.put("uuid", fileName);
                     insertBill(requestMap);
                 }
-                String data = "Name: " + requestMap.get("name") + "\n" + "Contact Number: "
-                        + requestMap.get("contactNumber") +
-                        "\n" + "Email: " + requestMap.get("email") + "\n" + "Payment Method: "
-                        + requestMap.get("paymentMethod");
+
                 Document document = new Document();
                 PdfWriter.getInstance(document,
                         new FileOutputStream(CafeConstants.STORE_LOCATION + "\\" + fileName + ".pdf"));
 
                 document.open();
-                setRectangleInPdf(document);
 
-                Paragraph chunk = new Paragraph("Cafe Management System", getFont("Header"));
-                chunk.setAlignment(Element.ALIGN_CENTER);
-                document.add(chunk);
+                // Add restaurant header with professional styling
+                addRestaurantHeader(document);
 
-                Paragraph paragraph = new Paragraph(data + "\n \n", getFont("Data"));
-                document.add(paragraph);
+                // Add bill number and date section
+                addBillDetails(document, fileName);
 
+                // Add customer information section
+                addCustomerInfo(document, requestMap);
+
+                // Add separator line
+                addSeparator(document);
+
+                // Add itemized product table
                 PdfPTable table = new PdfPTable(5);
                 table.setWidthPercentage(100);
+                table.setSpacingBefore(10f);
+                table.setSpacingAfter(10f);
                 addTableHeader(table);
 
                 JSONArray jsonArray = CafeUtils.getJSonArrayFromString((String) requestMap.get("productDetails"));
+                double subtotal = 0.0;
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    addRows(table, CafeUtils.getMapFromJson(jsonArray.getString(i)));
+                    Map<String, Object> productData = CafeUtils.getMapFromJson(jsonArray.getString(i));
+                    addRows(table, productData);
+                    subtotal += (Double) productData.get("total");
                 }
                 document.add(table);
 
-                Paragraph footer = new Paragraph("Total : " + requestMap.get("totalAmount") + "\n"
-                        + "Thank you for visiting. Please visit again", getFont("Data"));
-                document.add(footer);
+                // Add pricing breakdown (subtotal, tax, total)
+                addPricingSummary(document, requestMap, subtotal);
+
+                // Add payment information
+                addPaymentInfo(document, requestMap);
+
+                // Add footer with thank you message
+                addFooter(document);
+
                 document.close();
 
                 // If this bill was generated from a draft, remove the draft after successful
@@ -111,24 +124,57 @@ public class BillServiceImpl implements BillService {
 
     private void addRows(PdfPTable table, Map<String, Object> data) {
         log.info("Inside addRows");
-        table.addCell((String) data.get("name"));
-        table.addCell((String) data.get("category"));
-        table.addCell((String) data.get("quantity"));
-        table.addCell(Double.toString((Double) data.get("price")));
-        table.addCell(Double.toString((Double) data.get("total")));
+        PdfPCell cell;
+
+        // Name cell (left aligned)
+        cell = new PdfPCell(new Phrase((String) data.get("name"), getFont("Data")));
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
+
+        // Category cell (left aligned)
+        cell = new PdfPCell(new Phrase((String) data.get("category"), getFont("Data")));
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
+
+        // Quantity cell (center aligned)
+        cell = new PdfPCell(new Phrase((String) data.get("quantity"), getFont("Data")));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
+
+        // Price cell (right aligned)
+        cell = new PdfPCell(new Phrase("₹ " + String.format("%.2f", (Double) data.get("price")), getFont("Data")));
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
+
+        // Total cell (right aligned)
+        cell = new PdfPCell(new Phrase("₹ " + String.format("%.2f", (Double) data.get("total")), getFont("Data")));
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setPadding(5);
+        cell.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell);
     }
 
     private void addTableHeader(PdfPTable table) {
         log.info("Inside addTableHeader");
-        Stream.of("Name", "Category", "Quantity", "Price", "Sub Total")
+        Stream.of("Item Name", "Category", "Qty", "Unit Price", "Amount")
                 .forEach(columnTitle -> {
                     PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setBorderWidth(2);
-                    header.setPhrase(new Phrase(columnTitle));
-                    header.setBackgroundColor(BaseColor.YELLOW);
+                    header.setBackgroundColor(new BaseColor(70, 130, 180)); // Steel Blue
+                    header.setBorderWidth(1);
+                    header.setBorderColor(BaseColor.WHITE);
+                    header.setPhrase(new Phrase(columnTitle,
+                            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)));
                     header.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    header.setVerticalAlignment(Element.ALIGN_CENTER);
+                    header.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                    header.setPadding(8);
                     table.addCell(header);
                 });
     }
@@ -140,26 +186,22 @@ public class BillServiceImpl implements BillService {
                 Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLDOBLIQUE, 18, BaseColor.BLACK);
                 headerFont.setStyle(Font.BOLD);
                 return headerFont;
+            case "SubHeader":
+                Font subHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new BaseColor(70, 130, 180));
+                return subHeaderFont;
             case "Data":
                 Font dataFont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 11, BaseColor.BLACK);
                 dataFont.setStyle(Font.BOLD);
                 return dataFont;
+            case "Small":
+                Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.DARK_GRAY);
+                return smallFont;
+            case "Bold":
+                Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, BaseColor.BLACK);
+                return boldFont;
             default:
                 return new Font();
         }
-    }
-
-    private void setRectangleInPdf(Document document) throws DocumentException {
-        log.info("Inside setRectangleInPdf");
-        Rectangle rect = new Rectangle(577, 825, 18, 15);
-        rect.enableBorderSide(1);
-        rect.enableBorderSide(2);
-        rect.enableBorderSide(4);
-        rect.enableBorderSide(8);
-        rect.setBorderColor(BaseColor.BLACK);
-        rect.setBorderWidth(1);
-        document.add(rect);
-
     }
 
     private boolean validateRequestMap(Map<String, Object> requestMap) {
@@ -361,6 +403,192 @@ public class BillServiceImpl implements BillService {
             e.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // ========== New Helper Methods for Enhanced Bill Template ==========
+
+    private void addRestaurantHeader(Document document) throws DocumentException {
+        // Restaurant name with large, bold font
+        Paragraph restaurantName = new Paragraph("Cafe Management System",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, new BaseColor(70, 130, 180)));
+        restaurantName.setAlignment(Element.ALIGN_CENTER);
+        restaurantName.setSpacingAfter(5f);
+        document.add(restaurantName);
+
+        // Restaurant address and contact details
+        Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.DARK_GRAY);
+        Paragraph address = new Paragraph("123 Main Street, City Center, State - 123456", smallFont);
+        address.setAlignment(Element.ALIGN_CENTER);
+        document.add(address);
+
+        Paragraph contact = new Paragraph("Phone: +91-1234567890 | Email: info@cafemanagement.com", smallFont);
+        contact.setAlignment(Element.ALIGN_CENTER);
+        contact.setSpacingAfter(5f);
+        document.add(contact);
+
+        Paragraph gst = new Paragraph("GSTIN: 22AAAAA0000A1Z5 | FSSAI Lic No: 12345678901234", smallFont);
+        gst.setAlignment(Element.ALIGN_CENTER);
+        gst.setSpacingAfter(10f);
+        document.add(gst);
+    }
+
+    private void addBillDetails(Document document, String billNumber) throws DocumentException {
+        PdfPTable billInfoTable = new PdfPTable(2);
+        billInfoTable.setWidthPercentage(100);
+        billInfoTable.setSpacingAfter(5f);
+
+        // Bill number (left)
+        PdfPCell billNoCell = new PdfPCell(new Phrase("Bill No: " + billNumber, getFont("Bold")));
+        billNoCell.setBorder(Rectangle.NO_BORDER);
+        billNoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        billInfoTable.addCell(billNoCell);
+
+        // Date (right)
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+        String currentDate = sdf.format(new java.util.Date());
+        PdfPCell dateCell = new PdfPCell(new Phrase("Date: " + currentDate, getFont("Bold")));
+        dateCell.setBorder(Rectangle.NO_BORDER);
+        dateCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        billInfoTable.addCell(dateCell);
+
+        document.add(billInfoTable);
+    }
+
+    private void addCustomerInfo(Document document, Map<String, Object> requestMap) throws DocumentException {
+        Paragraph customerHeader = new Paragraph("CUSTOMER DETAILS", getFont("SubHeader"));
+        customerHeader.setSpacingBefore(10f);
+        customerHeader.setSpacingAfter(5f);
+        document.add(customerHeader);
+
+        Font dataFont = getFont("Data");
+
+        PdfPTable customerTable = new PdfPTable(2);
+        customerTable.setWidthPercentage(100);
+        customerTable.setWidths(new float[] { 1, 2 });
+
+        // Customer Name
+        addCustomerInfoRow(customerTable, "Customer Name:", (String) requestMap.get("name"));
+
+        // Contact Number
+        addCustomerInfoRow(customerTable, "Contact Number:", (String) requestMap.get("contactNumber"));
+
+        // Email
+        addCustomerInfoRow(customerTable, "Email:", (String) requestMap.get("email"));
+
+        document.add(customerTable);
+    }
+
+    private void addCustomerInfoRow(PdfPTable table, String label, String value) {
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, getFont("Bold")));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPadding(3);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, getFont("Data")));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPadding(3);
+        table.addCell(valueCell);
+    }
+
+    private void addSeparator(Document document) throws DocumentException {
+        Paragraph separator = new Paragraph("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
+        separator.setAlignment(Element.ALIGN_CENTER);
+        separator.setSpacingBefore(10f);
+        separator.setSpacingAfter(5f);
+        document.add(separator);
+    }
+
+    private void addPricingSummary(Document document, Map<String, Object> requestMap, double subtotal)
+            throws DocumentException {
+        PdfPTable summaryTable = new PdfPTable(2);
+        summaryTable.setWidthPercentage(100);
+        summaryTable.setWidths(new float[] { 3, 1 });
+        summaryTable.setSpacingBefore(10f);
+
+        // Subtotal
+        addSummaryRow(summaryTable, "Subtotal:", String.format("₹ %.2f", subtotal), false);
+
+        // Calculate tax (5% GST as default)
+        double taxRate = 0.05;
+        double taxAmount = subtotal * taxRate;
+        addSummaryRow(summaryTable, "GST (5%):", String.format("₹ %.2f", taxAmount), false);
+
+        // Discount (if any) - default to 0
+        double discount = 0.0;
+        if (requestMap.containsKey("discount")) {
+            try {
+                discount = Double.parseDouble(String.valueOf(requestMap.get("discount")));
+                addSummaryRow(summaryTable, "Discount:", String.format("- ₹ %.2f", discount), false);
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Add separator line
+        PdfPCell separatorCell = new PdfPCell(new Phrase(""));
+        separatorCell.setColspan(2);
+        separatorCell.setBorder(Rectangle.TOP);
+        separatorCell.setBorderWidth(1);
+        separatorCell.setPadding(5);
+        summaryTable.addCell(separatorCell);
+
+        // Total amount (bold and larger)
+        double totalAmount = Double.parseDouble((String) requestMap.get("totalAmount"));
+        addSummaryRow(summaryTable, "TOTAL AMOUNT:", String.format("₹ %.2f", totalAmount), true);
+
+        document.add(summaryTable);
+    }
+
+    private void addSummaryRow(PdfPTable table, String label, String value, boolean isBold) {
+        Font font = isBold ? FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13, BaseColor.BLACK) : getFont("Data");
+
+        PdfPCell labelCell = new PdfPCell(new Phrase(label, font));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        labelCell.setPadding(5);
+        table.addCell(labelCell);
+
+        PdfPCell valueCell = new PdfPCell(new Phrase(value, font));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        valueCell.setPadding(5);
+        table.addCell(valueCell);
+    }
+
+    private void addPaymentInfo(Document document, Map<String, Object> requestMap) throws DocumentException {
+        Paragraph paymentHeader = new Paragraph("PAYMENT INFORMATION", getFont("SubHeader"));
+        paymentHeader.setSpacingBefore(15f);
+        paymentHeader.setSpacingAfter(5f);
+        document.add(paymentHeader);
+
+        String paymentMethod = (String) requestMap.get("paymentMethod");
+        Paragraph paymentDetails = new Paragraph("Payment Method: " + paymentMethod, getFont("Bold"));
+        paymentDetails.setSpacingAfter(5f);
+        document.add(paymentDetails);
+
+        Paragraph paymentStatus = new Paragraph("Payment Status: PAID", getFont("Data"));
+        document.add(paymentStatus);
+    }
+
+    private void addFooter(Document document) throws DocumentException {
+        addSeparator(document);
+
+        Paragraph thankYou = new Paragraph("Thank You for Your Visit!",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new BaseColor(70, 130, 180)));
+        thankYou.setAlignment(Element.ALIGN_CENTER);
+        thankYou.setSpacingBefore(15f);
+        thankYou.setSpacingAfter(5f);
+        document.add(thankYou);
+
+        Paragraph visitAgain = new Paragraph("We hope to serve you again soon!", getFont("Data"));
+        visitAgain.setAlignment(Element.ALIGN_CENTER);
+        document.add(visitAgain);
+
+        Paragraph termsNote = new Paragraph(
+                "\nNote: This is a computer-generated bill and does not require a signature.",
+                getFont("Small"));
+        termsNote.setAlignment(Element.ALIGN_CENTER);
+        termsNote.setSpacingBefore(10f);
+        document.add(termsNote);
     }
 
 }
