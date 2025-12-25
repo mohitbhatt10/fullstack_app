@@ -107,16 +107,23 @@ body {
 }
 
 .wrapper {
-  height: 65px;
+  min-height: 65px;
   display: flex;
   align-items: center;
-  justify-content:center;
+  justify-content: center;
   background-color: #7b1fa2;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
 }
 
 nav {
   display: flex;
-  width: 90%;
+  width: 100%;
+  max-width: 1400px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 20px;
 }
 
 ul li a {
@@ -125,6 +132,11 @@ ul li a {
 
 a.logo {
   margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 ul {
@@ -142,49 +154,218 @@ a {
   cursor: pointer;
 }
 
-@media (max-width: 1024px) {
+/* Navigation Actions Container */
+.nav-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Navigation Buttons */
+.nav-button {
+  min-width: 140px;
+  height: 42px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  
+  mat-icon {
+    margin-right: 6px;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    vertical-align: middle;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Large Screens */
+@media (min-width: 1200px) {
+  .nav-button {
+    min-width: 160px;
+    font-size: 15px;
+  }
+  
+  .nav-actions {
+    gap: 16px;
+  }
+}
+
+/* Medium Desktop */
+@media (max-width: 1199px) and (min-width: 992px) {
+  nav {
+    padding: 0 15px;
+  }
+  
+  .nav-button {
+    min-width: 130px;
+    font-size: 13px;
+  }
+  
+  a.logo {
+    font-size: 1.1em;
+  }
+}
+
+/* Tablet & Small Desktop */
+@media (max-width: 991px) {
   .wrapper {
-    height: auto;
+    min-height: auto;
+    padding: 12px 10px;
+  }
+  
+  nav {
+    padding: 0 10px;
+    gap: 15px;
+  }
+  
+  a.logo {
+    font-size: 1em;
+    
+    mat-icon {
+      font-size: 22px;
+    }
+  }
+  
+  .nav-actions {
+    gap: 10px;
+  }
+  
+  .nav-button {
+    min-width: 110px;
+    height: 38px;
+    font-size: 12px;
+    
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+      margin-right: 4px;
+    }
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 10px 8px;
   }
   
   nav {
     flex-direction: column;
     align-items: center;
+    gap: 16px;
+    padding: 0;
   }
   
   a.logo {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    margin-right: 0px;
+    margin: 8px 0;
+    margin-right: 0;
+    font-size: 1.1em;
   }
   
-  ul {
+  .nav-actions {
     width: 100%;
-    margin-bottom: 1em;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 15px;
   }
   
-  ul li a {
-    margin-left: 0px;
+  .nav-button {
+    min-width: 100px;
+    flex: 1;
+    max-width: 150px;
   }
 }
 
-@media (max-width: 768px) {
+/* Mobile Landscape */
+@media (max-width: 640px) {
+  .wrapper {
+    padding: 12px 8px;
+  }
+  
+  nav {
+    gap: 12px;
+  }
+  
   a.logo {
-    margin: 1.5em;
+    font-size: 1em;
+    margin: 6px 0;
   }
   
-  ul {
+  .nav-actions {
     flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    padding: 0 10px;
   }
   
-  ul li {
-    margin: 0.3em;
-    text-align: center;
+  .nav-button {
+    width: 100%;
+    min-width: unset;
+    max-width: 320px;
+    height: 44px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 10px 5px;
   }
   
-  ul li a {
-    margin-left: 0px;
+  a.logo {
+    font-size: 0.9em;
+    
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+  
+  .nav-actions {
+    padding: 0 8px;
+  }
+  
+  .nav-button {
+    height: 42px;
+    font-size: 12px;
+    max-width: 280px;
+    
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+  }
+}
+
+/* Extra Small Screens */
+@media (max-width: 360px) {
+  a.logo {
+    font-size: 0.85em;
+    gap: 4px;
+    
+    mat-icon {
+      font-size: 18px;
+    }
+  }
+  
+  .nav-button {
+    font-size: 11px;
+    padding: 0 12px;
+    
+    mat-icon {
+      display: none; // Hide icons on very small screens to save space
+    }
   }
 }
 

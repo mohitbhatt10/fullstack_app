@@ -6,13 +6,20 @@
     <a href="#" class="logo">
       <mat-icon>storefront</mat-icon> Cafe Management System
     </a>
-    <ul>
-      <li>
-        <a (click)="handleLoginAction()">Login</a>
-        <a (click)="handleSignupAction()">Signup</a>
-        <a (click)="handleForgotPasswordAction()">Forgot Password</a>
-      </li>
-    </ul>
+    <div class="nav-actions">
+      <button mat-raised-button class="nav-button" (click)="handleLoginAction()">
+        <mat-icon>login</mat-icon>
+        Login
+      </button>
+      <button mat-raised-button class="nav-button" color="primary" (click)="handleSignupAction()">
+        <mat-icon>person_add</mat-icon>
+        Signup
+      </button>
+      <button mat-stroked-button class="nav-button" (click)="handleForgotPasswordAction()">
+        <mat-icon>lock_reset</mat-icon>
+        Forgot Password
+      </button>
+    </div>
   </nav>
 </div>
 <div class="footer" id="signup">
