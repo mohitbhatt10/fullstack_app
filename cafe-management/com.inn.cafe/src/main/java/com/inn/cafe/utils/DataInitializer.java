@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +45,9 @@ public class DataInitializer implements CommandLineRunner {
             // Map to store category name -> Category object
             Map<String, Category> categoryMap = new HashMap<>();
 
+            // Counter for category display order
+            int categoryDisplayOrder = 1;
+
             // Skip header line
             String line = reader.readLine();
 
@@ -61,8 +63,8 @@ public class DataInitializer implements CommandLineRunner {
 
                 String[] data = parseCsvLine(line);
 
-                if (data.length < 4) {
-                    log.warn("Skipping invalid line: {}", line);
+                if (data.length < 5) {
+                    log.warn("Skipping invalid line (expected 5 columns): {}", line);
                     continue;
                 }
 
@@ -70,6 +72,7 @@ public class DataInitializer implements CommandLineRunner {
                 String productName = data[1].trim();
                 String priceStr = data[2].trim();
                 String description = data[3].trim();
+                String isVegStr = data[4].trim();
 
                 // Process category
                 Category category;
@@ -82,12 +85,14 @@ public class DataInitializer implements CommandLineRunner {
                         category = existingCategory.get();
                         log.info("Category '{}' already exists with ID: {}", categoryName, category.getId());
                     } else {
-                        // Create new category
+                        // Create new category with display order
                         category = new Category();
                         category.setName(categoryName);
+                        category.setDisplayOrder(categoryDisplayOrder++);
                         category = categoryDao.save(category);
                         categoriesAdded++;
-                        log.info("Added new category: {} with ID: {}", categoryName, category.getId());
+                        log.info("Added new category: {} with ID: {} and display order: {}",
+                                categoryName, category.getId(), category.getDisplayOrder());
                     }
                     categoryMap.put(categoryName, category);
                 }
@@ -111,12 +116,20 @@ public class DataInitializer implements CommandLineRunner {
                         product.setPrice(0);
                     }
 
+                    // Parse and set isVeg field
+                    try {
+                        product.setIsVeg(Boolean.parseBoolean(isVegStr));
+                    } catch (Exception e) {
+                        log.warn("Invalid isVeg value for product '{}': {}, setting to false", productName, isVegStr);
+                        product.setIsVeg(false);
+                    }
+
                     product.setStatus("true"); // Set as active by default
 
                     productDao.save(product);
                     productsAdded++;
-                    log.info("Added new product: {} in category: {} with price: {}",
-                            productName, categoryName, priceStr);
+                    log.info("Added new product: {} in category: {} with price: {} and isVeg: {}",
+                            productName, categoryName, priceStr, product.getIsVeg());
                 }
             }
 
@@ -135,12 +148,12 @@ public class DataInitializer implements CommandLineRunner {
      */
     private String[] parseCsvLine(String line) {
         // Simple CSV parser that handles quoted fields
-        String[] result = new String[4];
+        String[] result = new String[5];
         int fieldIndex = 0;
         StringBuilder currentField = new StringBuilder();
         boolean inQuotes = false;
 
-        for (int i = 0; i < line.length() && fieldIndex < 4; i++) {
+        for (int i = 0; i < line.length() && fieldIndex < 5; i++) {
             char c = line.charAt(i);
 
             if (c == '"') {
@@ -154,7 +167,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Add the last field
-        if (fieldIndex < 4) {
+        if (fieldIndex < 5) {
             result[fieldIndex] = currentField.toString().trim();
         }
 
