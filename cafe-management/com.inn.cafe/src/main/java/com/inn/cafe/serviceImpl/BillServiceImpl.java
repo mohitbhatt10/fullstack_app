@@ -13,17 +13,12 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.io.IOUtils;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +49,12 @@ public class BillServiceImpl implements BillService {
                 } else {
                     fileName = CafeUtils.getUUID();
                     requestMap.put("uuid", fileName);
-                    insertBill(requestMap);
                 }
 
+                // Generate PDF in memory using ByteArrayOutputStream
                 Document document = new Document();
-                PdfWriter.getInstance(document,
-                        new FileOutputStream(CafeConstants.STORE_LOCATION + "\\" + fileName + ".pdf"));
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                PdfWriter.getInstance(document, baos);
 
                 document.open();
 
@@ -101,6 +96,14 @@ public class BillServiceImpl implements BillService {
                 addFooter(document);
 
                 document.close();
+
+                // Get PDF bytes from ByteArrayOutputStream
+                byte[] pdfBytes = baos.toByteArray();
+                baos.close();
+
+                // Save bill with PDF data to database
+                requestMap.put("pdfData", pdfBytes);
+                insertBill(requestMap);
 
                 // If this bill was generated from a draft, remove the draft after successful
                 // PDF generation.
@@ -224,6 +227,12 @@ public class BillServiceImpl implements BillService {
             bill.setTotal(Integer.parseInt((String) requestMap.get("totalAmount")));
             bill.setProductDetails((String) requestMap.get("productDetails"));
             bill.setCreatedBy(jwtFilter.getCurrentUser());
+
+            // Set PDF data if available
+            if (requestMap.containsKey("pdfData")) {
+                bill.setPdfData((byte[]) requestMap.get("pdfData"));
+            }
+
             billDao.save(bill);
 
         } catch (Exception e) {
@@ -260,31 +269,48 @@ public class BillServiceImpl implements BillService {
         log.info("Inside getPdf : requestMap {}", requestMap);
         try {
             byte[] byteArray = new byte[0];
-            if (!requestMap.containsKey("uuid") && validateRequestMap(requestMap))
+            if (!requestMap.containsKey("uuid"))
                 return new ResponseEntity<>(byteArray, HttpStatus.BAD_REQUEST);
-            String filePath = CafeConstants.STORE_LOCATION + "\\" + (String) requestMap.get("uuid") + ".pdf";
-            if (CafeUtils.isFileExist(filePath)) {
-                byteArray = getByteArray(filePath);
-                return new ResponseEntity<>(byteArray, HttpStatus.OK);
+
+            String uuid = (String) requestMap.get("uuid");
+
+            // Try to get bill from database by UUID
+            Optional<Bill> billOptional = billDao.findByUuid(uuid);
+
+            if (billOptional.isPresent()) {
+                Bill bill = billOptional.get();
+
+                // Check if PDF data exists in database
+                if (bill.getPdfData() != null && bill.getPdfData().length > 0) {
+                    byteArray = bill.getPdfData();
+                    return new ResponseEntity<>(byteArray, HttpStatus.OK);
+                } else {
+                    // If PDF data doesn't exist, regenerate it
+                    requestMap.put("isGenerate", false);
+                    requestMap.put("name", bill.getName());
+                    requestMap.put("email", bill.getEmail());
+                    requestMap.put("contactNumber", bill.getContactNumber());
+                    requestMap.put("paymentMethod", bill.getPaymentMethod());
+                    requestMap.put("totalAmount", String.valueOf(bill.getTotal()));
+                    requestMap.put("productDetails", bill.getProductDetails());
+
+                    generateReport(requestMap);
+
+                    // Retrieve the updated bill with PDF data
+                    billOptional = billDao.findByUuid(uuid);
+                    if (billOptional.isPresent() && billOptional.get().getPdfData() != null) {
+                        byteArray = billOptional.get().getPdfData();
+                        return new ResponseEntity<>(byteArray, HttpStatus.OK);
+                    }
+                }
             } else {
-                requestMap.put("isGenerate", false);
-                generateReport(requestMap);
-                byteArray = getByteArray(filePath);
-                return new ResponseEntity<>(byteArray, HttpStatus.OK);
+                return new ResponseEntity<>(byteArray, HttpStatus.NOT_FOUND);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private byte[] getByteArray(String filePath) throws Exception {
-        File initialFile = new File(filePath);
-        InputStream targetStream = new FileInputStream(initialFile);
-        byte[] byteArray = IOUtils.toByteArray(targetStream);
-        targetStream.close();
-        return byteArray;
     }
 
     @Override

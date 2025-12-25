@@ -7,6 +7,8 @@ import com.inn.cafe.dao.ProductDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(value = "startup.entities.insert", havingValue = "true")
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired

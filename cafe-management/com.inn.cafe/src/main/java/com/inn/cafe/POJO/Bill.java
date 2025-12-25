@@ -11,7 +11,6 @@ import java.io.Serializable;
 
 @NamedQuery(name = "Bill.getBillByUserName", query = "select b from Bill b where b.createdBy=:username order by b.id desc")
 
-
 @Data
 @Entity
 @DynamicUpdate
@@ -39,5 +38,8 @@ public class Bill implements Serializable {
     private String productDetails;
     @Column(name = "createdby")
     private String createdBy;
+    @Lob
+    @Column(name = "pdfdata", columnDefinition = "LONGBLOB")
+    private byte[] pdfData;
 
 }
