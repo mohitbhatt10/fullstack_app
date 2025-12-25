@@ -9,9 +9,11 @@ import { ProductComponent } from '../product/product.component';
 })
 export class ViewBillProductsComponent implements OnInit {
 
-  displayedColumns: string[] = ['name', 'category', 'price', 'quntity', 'total'];
+  displayedColumns: string[] = ['name', 'category', 'price', 'quantity', 'total'];
   dataSource:any;
   data:any;
+  subtotal: number = 0;
+  tax: number = 0;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public dialogData:any,
@@ -20,8 +22,28 @@ export class ViewBillProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.data = this.dialogData.data;
-    this.dataSource = JSON.parse(this.dialogData.data.productDetail);
+    this.dataSource = JSON.parse(this.dialogData.data.productDetails);
     console.log(this.dialogData.data);
+    
+    // Calculate subtotal from product details
+    this.calculateSummary();
+  }
+  
+  calculateSummary(): void {
+    this.subtotal = 0;
+    
+    // Calculate subtotal by summing all product totals
+    if (this.dataSource && this.dataSource.length > 0) {
+      this.dataSource.forEach((item: any) => {
+        this.subtotal += parseFloat(item.total || 0);
+      });
+    }
+    
+    // Calculate tax (5% GST)
+    this.tax = parseFloat((this.subtotal * 0.05).toFixed(2));
+    
+    // Round values for display
+    this.subtotal = parseFloat(this.subtotal.toFixed(2));
   }
   
 }
