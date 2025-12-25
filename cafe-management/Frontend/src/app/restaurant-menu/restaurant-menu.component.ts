@@ -195,10 +195,43 @@ export class RestaurantMenuComponent implements OnInit {
   }
 
   /**
-   * Print menu
+   * Print menu using backend PDF generation
    */
   printMenu(): void {
-    window.print();
+    this.isLoading = true;
+    
+    this.menuService.generateMenuPdf(this.showVegOnly).subscribe(
+      (blob: Blob) => {
+        this.isLoading = false;
+        
+        // Create a blob URL and open in new window for printing
+        const blobUrl = window.URL.createObjectURL(blob);
+        const printWindow = window.open(blobUrl, '_blank');
+        
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        } else {
+          // If popup blocked, download the PDF instead
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = 'menu.pdf';
+          link.click();
+          window.URL.revokeObjectURL(blobUrl);
+        }
+      },
+      (error: any) => {
+        this.isLoading = false;
+        console.error('Error generating menu PDF:', error);
+        
+        if (error.error?.message) {
+          this.snackbarService.openSnackBar(error.error.message, 'error');
+        } else {
+          this.snackbarService.openSnackBar('Failed to generate menu PDF', 'error');
+        }
+      }
+    );
   }
 
   /**

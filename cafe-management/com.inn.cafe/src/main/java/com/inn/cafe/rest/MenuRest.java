@@ -41,4 +41,13 @@ public interface MenuRest {
     ResponseEntity<MenuResponseWrapper> getMenuPaginated(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "20") Integer size);
+
+    /**
+     * Generate menu PDF
+     * 
+     * @param showVegOnly Filter to show only vegetarian items
+     * @return ResponseEntity containing PDF as byte array
+     */
+    @GetMapping(path = "/generatePdf")
+    ResponseEntity<byte[]> generateMenuPdf(@RequestParam(defaultValue = "false") Boolean showVegOnly);
 }

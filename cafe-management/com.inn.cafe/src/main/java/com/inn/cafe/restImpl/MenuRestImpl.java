@@ -43,4 +43,13 @@ public class MenuRestImpl implements MenuRest {
     public ResponseEntity<MenuResponseWrapper> getMenuPaginated(Integer page, Integer size) {
         return menuService.getMenuPaginated(page, size);
     }
+
+    /**
+     * GET /menu/generatePdf?showVegOnly={true|false}
+     * Generates and returns menu as PDF
+     */
+    @Override
+    public ResponseEntity<byte[]> generateMenuPdf(Boolean showVegOnly) {
+        return menuService.generateMenuPdf(showVegOnly);
+    }
 }

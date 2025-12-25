@@ -33,4 +33,12 @@ public interface MenuService {
      * @return ResponseEntity with paginated menu data
      */
     ResponseEntity<MenuResponseWrapper> getMenuPaginated(Integer page, Integer size);
+
+    /**
+     * Generate menu PDF
+     * 
+     * @param showVegOnly Filter to show only vegetarian items
+     * @return ResponseEntity containing PDF as byte array
+     */
+    ResponseEntity<byte[]> generateMenuPdf(Boolean showVegOnly);
 }

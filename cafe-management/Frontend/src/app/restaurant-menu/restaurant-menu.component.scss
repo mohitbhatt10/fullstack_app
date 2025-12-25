@@ -418,9 +418,21 @@
     background: white;
   }
 
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .menu-container {
     padding: 0;
     max-width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .menu-content {
+    height: auto !important;
+    overflow: visible !important;
   }
 
   /* Category Cards */
@@ -429,6 +441,8 @@
     box-shadow: none;
     border: none;
     page-break-inside: avoid;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .category-title {

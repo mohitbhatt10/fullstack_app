@@ -46,4 +46,17 @@ export class MenuService {
       .set('size', size.toString());
     return this.httpClient.get(this.url + "/menu/getPaginated", { params });
   }
+
+  /**
+   * Generate menu PDF
+   * @param showVegOnly Filter to show only vegetarian items
+   * @returns Observable with PDF as blob
+   */
+  generateMenuPdf(showVegOnly: boolean = false): Observable<Blob> {
+    const params = new HttpParams().set('showVegOnly', showVegOnly.toString());
+    return this.httpClient.get(this.url + "/menu/generatePdf", { 
+      params,
+      responseType: 'blob'
+    });
+  }
 }

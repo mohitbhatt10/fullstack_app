@@ -2,12 +2,15 @@ package com.inn.cafe.serviceImpl;
 
 import com.inn.cafe.dao.ProductDao;
 import com.inn.cafe.service.MenuService;
+import com.inn.cafe.utils.MenuPdfGenerator;
 import com.inn.cafe.wrapper.MenuCategoryWrapper;
 import com.inn.cafe.wrapper.MenuItemWrapper;
 import com.inn.cafe.wrapper.MenuResponseWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -198,6 +201,59 @@ public class MenuServiceImpl implements MenuService {
         } catch (Exception ex) {
             log.error("Error fetching paginated menu", ex);
             return new ResponseEntity<>(new MenuResponseWrapper(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Generate menu PDF
+     */
+    @Override
+    public ResponseEntity<byte[]> generateMenuPdf(Boolean showVegOnly) {
+        try {
+            log.info("Generating menu PDF, showVegOnly: {}", showVegOnly);
+
+            // Fetch all active menu items
+            List<MenuItemWrapper> allItems = productDao.getMenuItems();
+
+            if (allItems == null || allItems.isEmpty()) {
+                log.warn("No menu items found for PDF generation");
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            // Group items by category
+            Map<Integer, MenuCategoryWrapper> categoryMap = new LinkedHashMap<>();
+
+            for (MenuItemWrapper item : allItems) {
+                Integer categoryId = item.getCategoryId();
+
+                if (!categoryMap.containsKey(categoryId)) {
+                    MenuCategoryWrapper category = new MenuCategoryWrapper();
+                    category.setCategoryId(categoryId);
+                    category.setCategoryName(item.getCategoryName());
+                    category.setItems(new ArrayList<>());
+                    categoryMap.put(categoryId, category);
+                }
+
+                categoryMap.get(categoryId).getItems().add(item);
+            }
+
+            List<MenuCategoryWrapper> categories = new ArrayList<>(categoryMap.values());
+
+            // Generate PDF
+            byte[] pdfBytes = MenuPdfGenerator.generateMenuPdf(categories, showVegOnly);
+
+            // Set headers for PDF response
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "menu.pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            log.info("Menu PDF generated successfully");
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+
+        } catch (Exception ex) {
+            log.error("Error generating menu PDF", ex);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

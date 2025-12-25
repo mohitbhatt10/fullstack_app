@@ -108,7 +108,7 @@
   </div>
 
   <!-- Pagination (hidden in print) -->
-  <div *ngIf="totalPages > 1" class="pagination-controls no-print">
+  <div *ngIf="totalPages > 1 && !isPrintMode" class="pagination-controls no-print">
     <button mat-raised-button (click)="previousPage()" [disabled]="currentPage === 0">
       <mat-icon>chevron_left</mat-icon>
       Previous
