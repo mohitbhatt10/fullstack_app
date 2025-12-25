@@ -7,3 +7,25 @@
 mat-form-field{
     padding: 5px;
 }
+
+.veg-indicator {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #10b981;
+    background-color: #d1fae5;
+    border-radius: 2px;
+    position: relative;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}

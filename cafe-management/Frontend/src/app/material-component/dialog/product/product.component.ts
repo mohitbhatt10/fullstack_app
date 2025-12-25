@@ -36,7 +36,8 @@ export class ProductComponent implements OnInit{
       name: [null, [Validators.required, Validators.pattern(GlobalConstants.nameRegex)]],
       categoryId: [null, [Validators.required]],
       price: [null, [Validators.required]],
-      description: [null, [Validators.required]]
+      description: [null, [Validators.required]],
+      isVeg: [false]
     });
 
     if(this.dialogData.action === 'Edit'){
@@ -76,7 +77,8 @@ export class ProductComponent implements OnInit{
       name: formData.name,
       categoryId: formData.categoryId,
       price: formData.price,
-      description: formData.description
+      description: formData.description,
+      isVeg: String(formData.isVeg)
     }
 
     this.productService.add(data).subscribe((response:any)=>{
@@ -104,7 +106,8 @@ export class ProductComponent implements OnInit{
       name: formData.name,
       categoryId: formData.categoryId,
       price: formData.price,
-      description: formData.description
+      description: formData.description,
+      isVeg: String(formData.isVeg)
     }
 
     this.productService.update(data).subscribe((response:any)=>{
