@@ -9,7 +9,6 @@ import java.io.Serializable;
 
 @NamedQuery(name = "Category.getAllCategory", query = "select c from Category c where c.id in (select p.category from Product p where p.status='true')")
 
-
 @Data
 @Entity
 @DynamicUpdate
@@ -23,4 +22,6 @@ public class Category implements Serializable {
     private Integer id;
     @Column(name = "name")
     private String name;
+    @Column(name = "display_order")
+    private Integer displayOrder;
 }

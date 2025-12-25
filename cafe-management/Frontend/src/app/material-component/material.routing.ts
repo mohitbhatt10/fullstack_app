@@ -6,9 +6,17 @@ import { ManageProductComponent } from './manage-product/manage-product.componen
 import { ManageOrderComponent } from './manage-order/manage-order.component';
 import { ViewBillComponent } from './view-bill/view-bill.component';
 import { ManageUserComponent } from './manage-user/manage-user.component';
+import { RestaurantMenuComponent } from '../restaurant-menu/restaurant-menu.component';
 
 
 export const MaterialRoutes: Routes = [
+    {
+        path: 'menu', component:RestaurantMenuComponent,
+        canActivate:[RouteGuardService],
+        data:{
+            expectedRole: ['admin', 'user']
+        }
+    },
     {
         path: 'category', component:ManageCategoryComponent,
         canActivate:[RouteGuardService],

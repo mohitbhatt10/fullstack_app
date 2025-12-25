@@ -1,0 +1,185 @@
+{
+  "info": {
+    "name": "Restaurant Menu API",
+    "description": "API endpoints for restaurant menu feature",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Complete Menu",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/get",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "get"]
+        },
+        "description": "Fetch complete menu with all categories and items"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Menu by Category - Starters (Veg)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getByCategory?categoryId=1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getByCategory"],
+          "query": [
+            {
+              "key": "categoryId",
+              "value": "1",
+              "description": "Category ID (1=Starters Veg, 2=Starters Non-Veg, etc.)"
+            }
+          ]
+        },
+        "description": "Fetch menu items for Starters (Veg) category"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Menu by Category - Pizza",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getByCategory?categoryId=5",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getByCategory"],
+          "query": [
+            {
+              "key": "categoryId",
+              "value": "5",
+              "description": "Category ID for Pizza"
+            }
+          ]
+        },
+        "description": "Fetch menu items for Pizza category"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Menu by Category - Beverages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getByCategory?categoryId=12",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getByCategory"],
+          "query": [
+            {
+              "key": "categoryId",
+              "value": "12",
+              "description": "Category ID for Beverages"
+            }
+          ]
+        },
+        "description": "Fetch menu items for Beverages category"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Paginated Menu - Page 1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getPaginated?page=0&size=20",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getPaginated"],
+          "query": [
+            {
+              "key": "page",
+              "value": "0",
+              "description": "Page number (0-indexed)"
+            },
+            {
+              "key": "size",
+              "value": "20",
+              "description": "Number of items per page"
+            }
+          ]
+        },
+        "description": "Fetch first page of menu with 20 items"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Paginated Menu - Page 2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getPaginated?page=1&size=20",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getPaginated"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number (0-indexed)"
+            },
+            {
+              "key": "size",
+              "value": "20",
+              "description": "Number of items per page"
+            }
+          ]
+        },
+        "description": "Fetch second page of menu"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Paginated Menu - Large Page Size",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/menu/getPaginated?page=0&size=50",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["menu", "getPaginated"],
+          "query": [
+            {
+              "key": "page",
+              "value": "0",
+              "description": "Page number"
+            },
+            {
+              "key": "size",
+              "value": "50",
+              "description": "50 items per page"
+            }
+          ]
+        },
+        "description": "Fetch menu with larger page size"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

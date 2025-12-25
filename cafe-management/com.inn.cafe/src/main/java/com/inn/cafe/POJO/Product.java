@@ -15,6 +15,9 @@ import java.io.Serializable;
 
 @NamedQuery(name = "Product.getProductById", query = "select new com.inn.cafe.wrapper.ProductWrapper(p.id, p.name, p.description, p.price) from Product p where p.id=:id")
 
+@NamedQuery(name = "Product.getMenuItems", query = "select new com.inn.cafe.wrapper.MenuItemWrapper(p.id, p.category.id, p.category.name, p.name, p.description, p.price, p.isVeg) from Product p where p.status='true' order by p.category.id, p.name")
+
+@NamedQuery(name = "Product.getMenuItemsByCategory", query = "select new com.inn.cafe.wrapper.MenuItemWrapper(p.id, p.category.id, p.category.name, p.name, p.description, p.price, p.isVeg) from Product p where p.category.id=:categoryId and p.status='true' order by p.name")
 
 @Data
 @Entity
@@ -38,4 +41,6 @@ public class Product implements Serializable {
     private Integer price;
     @Column(name = "status")
     private String status;
+    @Column(name = "is_veg")
+    private Boolean isVeg;
 }

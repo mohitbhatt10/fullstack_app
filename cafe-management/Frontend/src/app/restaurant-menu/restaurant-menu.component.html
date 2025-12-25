@@ -1,0 +1,113 @@
+<div class="menu-container">
+  <!-- Header Section (hidden in print) -->
+  <mat-card class="menu-header no-print">
+    <mat-card-content>
+      <div class="header-content">
+        <h1 class="menu-title">Our Menu</h1>
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="printMenu()">
+            <mat-icon>print</mat-icon>
+            Print Menu
+          </button>
+          <button mat-raised-button (click)="resetFilter()" *ngIf="selectedCategoryId">
+            <mat-icon>refresh</mat-icon>
+            Show All
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Menu Content -->
+  <div *ngIf="!isLoading && displayedCategories.length > 0" class="menu-content">
+    
+    <!-- Restaurant Header for Print -->
+    <div class="print-only restaurant-header">
+      <h1>Café Menu</h1>
+      <p class="subtitle">Mid-Range Indian Café & Restaurant</p>
+      <div class="legend">
+        <span class="legend-item">
+          <span class="veg-indicator"></span>
+          <span>Vegetarian</span>
+        </span>
+        <span class="legend-item">
+          <span class="non-veg-indicator"></span>
+          <span>Non-Vegetarian</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Categories and Items -->
+    <div *ngFor="let category of displayedCategories; let i = index">
+      
+      <!-- Page Break (for print) -->
+      <div *ngIf="shouldAddPageBreak(i)" class="page-break"></div>
+      
+      <!-- Category Section -->
+      <mat-card class="category-card" [class.page-break-before]="shouldAddPageBreak(i)">
+        <mat-card-header>
+          <mat-card-title class="category-title">
+            {{ category.categoryName }}
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="items-grid">
+            <div *ngFor="let item of category.items" class="menu-item">
+              
+              <!-- Item Header -->
+              <div class="item-header">
+                <div class="item-name-section">
+                  <span [ngClass]="getVegIndicatorClass(item.isVeg)" class="veg-badge"></span>
+                  <h3 class="item-name">{{ item.productName }}</h3>
+                </div>
+                <span class="item-price">{{ formatPrice(item.price) }}</span>
+              </div>
+              
+              <!-- Item Description -->
+              <p class="item-description">{{ item.description }}</p>
+              
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && displayedCategories.length === 0" class="empty-state">
+    <mat-icon>restaurant_menu</mat-icon>
+    <h2>No Menu Items Available</h2>
+    <p>Please check back later or contact the restaurant.</p>
+  </div>
+
+  <!-- Pagination (hidden in print) -->
+  <div *ngIf="isPaginated && totalPages > 1" class="pagination-controls no-print">
+    <button mat-raised-button (click)="previousPage()" [disabled]="currentPage === 0">
+      <mat-icon>chevron_left</mat-icon>
+      Previous
+    </button>
+    
+    <span class="page-info">
+      Page {{ currentPage + 1 }} of {{ totalPages }}
+    </span>
+    
+    <button mat-raised-button (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+      Next
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <!-- Footer for Print -->
+  <div class="print-only footer">
+    <p>Thank you for dining with us!</p>
+    <p class="small-text">Prices are inclusive of applicable taxes</p>
+  </div>
+
+</div>

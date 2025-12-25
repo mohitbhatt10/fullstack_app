@@ -1,0 +1,754 @@
+{
+  "categories": [
+    {
+      "category": {
+        "id": 1,
+        "name": "Starters (Veg)",
+        "displayOrder": 1
+      },
+      "items": [
+        {
+          "id": 101,
+          "categoryId": 1,
+          "categoryName": "Starters (Veg)",
+          "productName": "Paneer Tikka",
+          "description": "Cottage cheese cubes marinated in spices, grilled to perfection",
+          "price": 280,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 102,
+          "categoryId": 1,
+          "categoryName": "Starters (Veg)",
+          "productName": "Hara Bhara Kabab",
+          "description": "Spinach and green peas patties with Indian spices",
+          "price": 240,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 103,
+          "categoryId": 1,
+          "categoryName": "Starters (Veg)",
+          "productName": "Veg Spring Rolls",
+          "description": "Crispy rolls filled with seasoned vegetables",
+          "price": 220,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 104,
+          "categoryId": 1,
+          "categoryName": "Starters (Veg)",
+          "productName": "Mushroom Tikka",
+          "description": "Fresh mushrooms marinated in yogurt and spices",
+          "price": 260,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 105,
+          "categoryId": 1,
+          "categoryName": "Starters (Veg)",
+          "productName": "Crispy Corn",
+          "description": "Golden fried corn kernels tossed in tangy spices",
+          "price": 200,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 2,
+        "name": "Starters (Non-Veg)",
+        "displayOrder": 2
+      },
+      "items": [
+        {
+          "id": 201,
+          "categoryId": 2,
+          "categoryName": "Starters (Non-Veg)",
+          "productName": "Chicken Tikka",
+          "description": "Boneless chicken marinated in yogurt and spices, charcoal grilled",
+          "price": 320,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 202,
+          "categoryId": 2,
+          "categoryName": "Starters (Non-Veg)",
+          "productName": "Fish Amritsari",
+          "description": "Crispy fried fish fillets with authentic Punjabi flavors",
+          "price": 360,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 203,
+          "categoryId": 2,
+          "categoryName": "Starters (Non-Veg)",
+          "productName": "Chicken 65",
+          "description": "Spicy deep fried chicken with curry leaves and chilies",
+          "price": 300,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 204,
+          "categoryId": 2,
+          "categoryName": "Starters (Non-Veg)",
+          "productName": "Tandoori Chicken",
+          "description": "Classic chicken marinated in tandoori masala and grilled",
+          "price": 340,
+          "isVeg": false,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 3,
+        "name": "Quick Bites",
+        "displayOrder": 3
+      },
+      "items": [
+        {
+          "id": 301,
+          "categoryId": 3,
+          "categoryName": "Quick Bites",
+          "productName": "Pav Bhaji",
+          "description": "Mumbai style spiced vegetable curry served with buttered buns",
+          "price": 180,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 302,
+          "categoryId": 3,
+          "categoryName": "Quick Bites",
+          "productName": "Vada Pav",
+          "description": "Spicy potato fritter in a bun with chutneys",
+          "price": 60,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 303,
+          "categoryId": 3,
+          "categoryName": "Quick Bites",
+          "productName": "Samosa Chaat",
+          "description": "Crispy samosas topped with yogurt, chutneys, and sev",
+          "price": 120,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 304,
+          "categoryId": 3,
+          "categoryName": "Quick Bites",
+          "productName": "Papdi Chaat",
+          "description": "Crispy flour crackers with potatoes, chickpeas, and tangy sauces",
+          "price": 100,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 305,
+          "categoryId": 3,
+          "categoryName": "Quick Bites",
+          "productName": "Dahi Puri",
+          "description": "Crispy puris filled with potatoes, yogurt, and sweet chutney",
+          "price": 110,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 4,
+        "name": "Burgers & Sandwiches",
+        "displayOrder": 4
+      },
+      "items": [
+        {
+          "id": 401,
+          "categoryId": 4,
+          "categoryName": "Burgers & Sandwiches",
+          "productName": "Classic Veg Burger",
+          "description": "Spiced potato and peas patty with lettuce and sauces",
+          "price": 150,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 402,
+          "categoryId": 4,
+          "categoryName": "Burgers & Sandwiches",
+          "productName": "Paneer Tikka Burger",
+          "description": "Grilled paneer tikka patty with mint chutney",
+          "price": 180,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 403,
+          "categoryId": 4,
+          "categoryName": "Burgers & Sandwiches",
+          "productName": "Chicken Burger",
+          "description": "Juicy chicken patty with cheese and special sauce",
+          "price": 200,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 404,
+          "categoryId": 4,
+          "categoryName": "Burgers & Sandwiches",
+          "productName": "Grilled Sandwich",
+          "description": "Toasted sandwich with vegetables and cheese",
+          "price": 140,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 405,
+          "categoryId": 4,
+          "categoryName": "Burgers & Sandwiches",
+          "productName": "Club Sandwich",
+          "description": "Triple decker with chicken, cheese, lettuce, and tomato",
+          "price": 220,
+          "isVeg": false,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 5,
+        "name": "Pizza",
+        "displayOrder": 5
+      },
+      "items": [
+        {
+          "id": 501,
+          "categoryId": 5,
+          "categoryName": "Pizza",
+          "productName": "Margherita Pizza",
+          "description": "Classic pizza with fresh mozzarella, tomato sauce, and basil",
+          "price": 280,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 502,
+          "categoryId": 5,
+          "categoryName": "Pizza",
+          "productName": "Farmhouse Pizza",
+          "description": "Loaded with mushrooms, capsicum, onions, and tomatoes",
+          "price": 320,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 503,
+          "categoryId": 5,
+          "categoryName": "Pizza",
+          "productName": "Paneer Tikka Pizza",
+          "description": "Indian fusion with paneer tikka and masala sauce",
+          "price": 360,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 504,
+          "categoryId": 5,
+          "categoryName": "Pizza",
+          "productName": "Chicken BBQ Pizza",
+          "description": "BBQ chicken with onions and bell peppers",
+          "price": 380,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 505,
+          "categoryId": 5,
+          "categoryName": "Pizza",
+          "productName": "Mexican Wave Pizza",
+          "description": "Spicy pizza with jalapeños, beans, and paprika",
+          "price": 340,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 6,
+        "name": "Pasta & Noodles",
+        "displayOrder": 6
+      },
+      "items": [
+        {
+          "id": 601,
+          "categoryId": 6,
+          "categoryName": "Pasta & Noodles",
+          "productName": "Penne Arrabbiata",
+          "description": "Penne pasta in spicy tomato sauce with garlic",
+          "price": 240,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 602,
+          "categoryId": 6,
+          "categoryName": "Pasta & Noodles",
+          "productName": "Alfredo Pasta",
+          "description": "Creamy white sauce pasta with herbs",
+          "price": 260,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 603,
+          "categoryId": 6,
+          "categoryName": "Pasta & Noodles",
+          "productName": "Hakka Noodles",
+          "description": "Indo-Chinese style stir-fried noodles with vegetables",
+          "price": 200,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 604,
+          "categoryId": 6,
+          "categoryName": "Pasta & Noodles",
+          "productName": "Chicken Hakka Noodles",
+          "description": "Hakka noodles tossed with chicken and sauces",
+          "price": 240,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 605,
+          "categoryId": 6,
+          "categoryName": "Pasta & Noodles",
+          "productName": "Schezwan Noodles",
+          "description": "Spicy Schezwan sauce noodles with vegetables",
+          "price": 220,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 7,
+        "name": "Main Course (Veg)",
+        "displayOrder": 7
+      },
+      "items": [
+        {
+          "id": 701,
+          "categoryId": 7,
+          "categoryName": "Main Course (Veg)",
+          "productName": "Paneer Butter Masala",
+          "description": "Cottage cheese in rich tomato and butter gravy",
+          "price": 300,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 702,
+          "categoryId": 7,
+          "categoryName": "Main Course (Veg)",
+          "productName": "Dal Makhani",
+          "description": "Slow cooked black lentils with butter and cream",
+          "price": 240,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 703,
+          "categoryId": 7,
+          "categoryName": "Main Course (Veg)",
+          "productName": "Kadai Paneer",
+          "description": "Paneer cooked with bell peppers and onions in kadai masala",
+          "price": 290,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 704,
+          "categoryId": 7,
+          "categoryName": "Main Course (Veg)",
+          "productName": "Malai Kofta",
+          "description": "Vegetable dumplings in creamy cashew gravy",
+          "price": 280,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 705,
+          "categoryId": 7,
+          "categoryName": "Main Course (Veg)",
+          "productName": "Mix Veg Curry",
+          "description": "Assorted vegetables in flavorful curry",
+          "price": 220,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 8,
+        "name": "Main Course (Non-Veg)",
+        "displayOrder": 8
+      },
+      "items": [
+        {
+          "id": 801,
+          "categoryId": 8,
+          "categoryName": "Main Course (Non-Veg)",
+          "productName": "Butter Chicken",
+          "description": "Tender chicken in creamy tomato butter gravy",
+          "price": 340,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 802,
+          "categoryId": 8,
+          "categoryName": "Main Course (Non-Veg)",
+          "productName": "Chicken Tikka Masala",
+          "description": "Grilled chicken tikka in spiced tomato curry",
+          "price": 360,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 803,
+          "categoryId": 8,
+          "categoryName": "Main Course (Non-Veg)",
+          "productName": "Kadai Chicken",
+          "description": "Chicken cooked with bell peppers in kadai spices",
+          "price": 330,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 804,
+          "categoryId": 8,
+          "categoryName": "Main Course (Non-Veg)",
+          "productName": "Rogan Josh",
+          "description": "Aromatic mutton curry with Kashmiri spices",
+          "price": 420,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 805,
+          "categoryId": 8,
+          "categoryName": "Main Course (Non-Veg)",
+          "productName": "Fish Curry",
+          "description": "Fresh fish in traditional coastal curry",
+          "price": 380,
+          "isVeg": false,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 9,
+        "name": "Rice & Biryani",
+        "displayOrder": 9
+      },
+      "items": [
+        {
+          "id": 901,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Veg Biryani",
+          "description": "Fragrant basmati rice layered with mixed vegetables and spices",
+          "price": 260,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 902,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Chicken Biryani",
+          "description": "Aromatic rice cooked with chicken in traditional dum style",
+          "price": 320,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 903,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Mutton Biryani",
+          "description": "Premium biryani with tender mutton pieces",
+          "price": 400,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 904,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Egg Biryani",
+          "description": "Flavorful biryani with boiled eggs",
+          "price": 240,
+          "isVeg": false,
+          "isActive": true
+        },
+        {
+          "id": 905,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Jeera Rice",
+          "description": "Steamed basmati rice tempered with cumin",
+          "price": 140,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 906,
+          "categoryId": 9,
+          "categoryName": "Rice & Biryani",
+          "productName": "Veg Fried Rice",
+          "description": "Chinese style fried rice with vegetables",
+          "price": 180,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 10,
+        "name": "Indian Breads",
+        "displayOrder": 10
+      },
+      "items": [
+        {
+          "id": 1001,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Plain Naan",
+          "description": "Soft leavened bread baked in tandoor",
+          "price": 50,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1002,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Butter Naan",
+          "description": "Naan brushed with butter",
+          "price": 60,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1003,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Garlic Naan",
+          "description": "Naan topped with fresh garlic and coriander",
+          "price": 70,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1004,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Tandoori Roti",
+          "description": "Whole wheat bread baked in tandoor",
+          "price": 40,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1005,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Laccha Paratha",
+          "description": "Multi-layered whole wheat bread",
+          "price": 60,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1006,
+          "categoryId": 10,
+          "categoryName": "Indian Breads",
+          "productName": "Kulcha",
+          "description": "Stuffed bread with spiced filling",
+          "price": 80,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 11,
+        "name": "Desserts",
+        "displayOrder": 11
+      },
+      "items": [
+        {
+          "id": 1101,
+          "categoryId": 11,
+          "categoryName": "Desserts",
+          "productName": "Gulab Jamun",
+          "description": "Soft milk dumplings soaked in cardamom syrup",
+          "price": 80,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1102,
+          "categoryId": 11,
+          "categoryName": "Desserts",
+          "productName": "Rasmalai",
+          "description": "Cottage cheese patties in sweetened milk",
+          "price": 100,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1103,
+          "categoryId": 11,
+          "categoryName": "Desserts",
+          "productName": "Ice Cream (Per Scoop)",
+          "description": "Choose from vanilla, chocolate, or strawberry",
+          "price": 60,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1104,
+          "categoryId": 11,
+          "categoryName": "Desserts",
+          "productName": "Brownie with Ice Cream",
+          "description": "Warm chocolate brownie topped with vanilla ice cream",
+          "price": 140,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1105,
+          "categoryId": 11,
+          "categoryName": "Desserts",
+          "productName": "Gajar Halwa",
+          "description": "Traditional carrot dessert with nuts",
+          "price": 90,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": 12,
+        "name": "Beverages (Hot & Cold)",
+        "displayOrder": 12
+      },
+      "items": [
+        {
+          "id": 1201,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Masala Chai",
+          "description": "Traditional Indian spiced tea",
+          "price": 40,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1202,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Filter Coffee",
+          "description": "South Indian style filter coffee",
+          "price": 50,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1203,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Cold Coffee",
+          "description": "Chilled coffee with ice cream and milk",
+          "price": 120,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1204,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Fresh Lime Soda",
+          "description": "Refreshing lime juice with soda",
+          "price": 60,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1205,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Mango Lassi",
+          "description": "Creamy yogurt drink with mango pulp",
+          "price": 100,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1206,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Fresh Juice",
+          "description": "Choose from orange, watermelon, or pineapple",
+          "price": 80,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1207,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Soft Drinks",
+          "description": "Coke, Sprite, Fanta, Thumbs Up",
+          "price": 40,
+          "isVeg": true,
+          "isActive": true
+        },
+        {
+          "id": 1208,
+          "categoryId": 12,
+          "categoryName": "Beverages (Hot & Cold)",
+          "productName": "Mineral Water",
+          "description": "Packaged drinking water (1L)",
+          "price": 20,
+          "isVeg": true,
+          "isActive": true
+        }
+      ]
+    }
+  ],
+  "totalCategories": 12,
+  "totalItems": 95
+}
